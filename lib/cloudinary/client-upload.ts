@@ -1,12 +1,17 @@
 'use client'
 
+interface UploadResult {
+  url: string
+  publicId: string
+}
+
 /**
  * Upload un fichier depuis le client vers Cloudinary
  */
 export async function uploadFileToCloudinary(
   file: File,
   folder: string
-): Promise<string> {
+): Promise<UploadResult> {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', 'opti-troc')
@@ -27,7 +32,11 @@ export async function uploadFileToCloudinary(
   }
 
   const data = await response.json()
-  return data.secure_url
+  
+  return {
+    url: data.secure_url,
+    publicId: data.public_id,
+  }
 }
 
 /**
@@ -36,7 +45,7 @@ export async function uploadFileToCloudinary(
 export async function uploadMultipleFiles(
   files: File[],
   folder: string
-): Promise<string[]> {
+): Promise<UploadResult[]> {
   const uploadPromises = files.map((file) => uploadFileToCloudinary(file, folder))
   return Promise.all(uploadPromises)
 }

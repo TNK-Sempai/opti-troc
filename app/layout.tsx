@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Opti-troc - Marketplace B2B pour opticiens',
-  description: 'Achetez et vendez du stock entre opticiens professionnels',
+  title: 'Opti-Troc',
+  description: 'Marketplace B2B pour professionnels de l\'optique',
 }
 
 export default function RootLayout({
@@ -16,9 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={inter.className}>
-        {children}
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }

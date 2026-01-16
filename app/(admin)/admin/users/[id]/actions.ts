@@ -1,6 +1,7 @@
 'use server'
 
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-helpers'
 import { Resend } from 'resend'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -8,6 +9,12 @@ import { revalidatePath } from 'next/cache'
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function validateUser(formData: FormData) {
+  // Vérification d'autorisation admin
+  const auth = await requireAdmin()
+  if (!auth.success) {
+    return { success: false, error: auth.error }
+  }
+
   const userId = formData.get('userId') as string
 
   try {
@@ -16,7 +23,7 @@ export async function validateUser(formData: FormData) {
       .from('user_profiles')
       .update({
         status: 'validated',
-        validated_by: (await supabaseAdmin.auth.getUser()).data.user?.id,
+        validated_by: auth.userId,
         validation_date: new Date().toISOString(),
       })
       .eq('id', userId)
@@ -97,7 +104,51 @@ export async function validateUser(formData: FormData) {
   }
 }
 
+
+export async function updateAccountType(formData: FormData) {
+  // Vérification d'autorisation admin
+  const auth = await requireAdmin()
+  if (!auth.success) {
+    return { success: false, error: auth.error }
+  }
+
+  const userId = formData.get('userId') as string
+  const accountType = formData.get('accountType') as 'shop' | 'supplier'
+
+  // Validation des paramètres
+  if (!userId || !accountType) {
+    return { success: false, error: 'Missing required parameters' }
+  }
+
+  if (!['shop', 'supplier'].includes(accountType)) {
+    return { success: false, error: 'Invalid account type' }
+  }
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('user_profiles')
+      .update({
+        account_type: accountType,
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+
+    revalidatePath(`/admin/users/${userId}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Update account type error:', error)
+    return { success: false, error: 'Erreur lors de la mise à jour' }
+  }
+}
+
 export async function rejectUser(formData: FormData) {
+  // Vérification d'autorisation admin
+  const auth = await requireAdmin()
+  if (!auth.success) {
+    return { success: false, error: auth.error }
+  }
+
   const userId = formData.get('userId') as string
 
   try {
@@ -164,6 +215,12 @@ export async function rejectUser(formData: FormData) {
 }
 
 export async function requestMoreInfo(formData: FormData) {
+  // Vérification d'autorisation admin
+  const auth = await requireAdmin()
+  if (!auth.success) {
+    return { success: false, error: auth.error }
+  }
+
   const userId = formData.get('userId') as string
 
   try {

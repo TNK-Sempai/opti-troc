@@ -34,8 +34,23 @@ export default function LoginPage() {
         throw new Error(result.error)
       }
 
-      // Redirection gérée par le middleware
-      router.push('/dashboard')
+      // Rediriger selon le rôle et le statut
+      if (result.role === 'admin') {
+        router.push('/admin')
+      } else if (result.status === 'incomplete') {
+        router.push('/onboarding')
+      } else if (result.status === 'pending') {
+        router.push('/dashboard/pending')
+      } else if (result.status === 'validated') {
+        router.push('/dashboard')
+      } else if (result.status === 'rejected') {
+        router.push('/dashboard/rejected')
+      } else if (result.status === 'suspended') {
+        router.push('/dashboard/suspended')
+      } else {
+        router.push('/dashboard')
+      }
+      
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')

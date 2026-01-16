@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,15 +27,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // IMPORTANT: Ne pas utiliser auth.getUser() dans le middleware pour éviter les redirections infinies
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  // Protéger les routes /dashboard et /admin
-  if (!user && (request.nextUrl.pathname.startsWith('/dashboard') || 
-                request.nextUrl.pathname.startsWith('/admin'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
 
   return supabaseResponse
 }

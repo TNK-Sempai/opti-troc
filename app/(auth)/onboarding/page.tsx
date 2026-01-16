@@ -84,10 +84,11 @@ export default function OnboardingPage() {
       let shopPhotosUrls: string[] = []
       if (data.shopPhotos && data.shopPhotos.length > 0) {
         setError(`Upload des photos (${data.shopPhotos.length})...`)
-        shopPhotosUrls = await uploadMultipleFiles(
+        const uploadResults = await uploadMultipleFiles(
           data.shopPhotos,
           'opti-troc/pending-validation/shop'
         )
+        shopPhotosUrls = uploadResults.map(result => result.url)
       }
 
       // 4. Préparer les données
@@ -98,12 +99,12 @@ export default function OnboardingPage() {
         companyNumber: formData.step1.companyNumber,
         vatNumber: formData.step1.vatNumber,
         phone: formData.step1.phone,
-        officialDocumentUrl: officialDocUrl,
+        officialDocumentUrl: officialDocUrl.url,
         shopAddress: data.shopAddress,
         city: data.city,
         postalCode: data.postalCode,
         openingHours: data.openingHours,
-        logoUrl: logoUrl,
+        logoUrl: logoUrl.url,
         shopPhotosUrls: shopPhotosUrls,
       }
 

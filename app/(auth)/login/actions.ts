@@ -1,48 +1,59 @@
-'use server'
+"use server";
 
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { redirect } from "next/navigation";
 
 export async function login(email: string, password: string) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    })
+    });
 
     if (error) {
       return {
         success: false,
-        error: error.message === 'Invalid login credentials' 
-          ? 'Email ou mot de passe incorrect'
-          : error.message,
-      }
+        error:
+          error.message === "Invalid login credentials"
+            ? "Email ou mot de passe incorrect"
+            : error.message,
+      };
     }
 
     if (!data.user) {
       return {
         success: false,
-        error: 'Erreur de connexion',
-      }
+        error: "Erreur de connexion",
+      };
     }
+
+    // Récupérer le profil pour savoir où rediriger
+    const { data: profile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("role, status")
+      .eq("id", data.user.id)
+      .single();
 
     return {
       success: true,
       userId: data.user.id,
-    }
+      role: profile?.role,
+      status: profile?.status,
+    };
   } catch (error) {
-    console.error('Login error:', error)
+    console.error("Login error:", error);
     return {
       success: false,
-      error: 'Une erreur est survenue',
-    }
+      error: "Une erreur est survenue",
+    };
   }
 }
 
 export async function logout() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  redirect('/login')
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }

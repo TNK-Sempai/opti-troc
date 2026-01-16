@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      listings: {
+        Row: {
+          brand: string | null
+          category: string
+          condition: string | null
+          created_at: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          listing_type: string
+          location_city: string | null
+          location_country: string | null
+          model: string | null
+          photos: string[] | null
+          price: number | null
+          quantity: number | null
+          reference: string | null
+          status: string | null
+          title: string
+          unit: string | null
+          updated_at: string | null
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          listing_type: string
+          location_city?: string | null
+          location_country?: string | null
+          model?: string | null
+          photos?: string[] | null
+          price?: number | null
+          quantity?: number | null
+          reference?: string | null
+          status?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string | null
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          listing_type?: string
+          location_city?: string | null
+          location_country?: string | null
+          model?: string | null
+          photos?: string[] | null
+          price?: number | null
+          quantity?: number | null
+          reference?: string | null
+          status?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string | null
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       promo_counter: {
         Row: {
           early_adopters_count: number | null
@@ -35,25 +107,68 @@ export type Database = {
         }
         Relationships: []
       }
+      user_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          document_url: string
+          id: string
+          rejection_reason: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          document_url: string
+          id?: string
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          document_url?: string
+          id?: string
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           account_type: string
           average_rating: number | null
           badges: Json | null
-          city: string
-          company_name: string
-          company_number: string
-          contact_name: string
-          country: string
+          city: string | null
+          civility: string | null
+          company_name: string | null
+          company_number: string | null
+          contact_name: string | null
+          country: string | null
           created_at: string | null
+          first_name: string | null
           id: string
           is_early_adopter: boolean | null
+          last_name: string | null
           opening_hours: Json | null
-          phone: string
-          postal_code: string
+          phone: string | null
+          postal_code: string | null
           profile_photo_url: string | null
           promo_end_date: string | null
-          shop_address: string
+          role: string | null
+          shop_address: string | null
           shop_photos: Json | null
           status: string
           stripe_customer_id: string | null
@@ -64,26 +179,30 @@ export type Database = {
           updated_at: string | null
           validated_by: string | null
           validation_date: string | null
-          vat_number: string
+          vat_number: string | null
         }
         Insert: {
           account_type: string
           average_rating?: number | null
           badges?: Json | null
-          city: string
-          company_name: string
-          company_number: string
-          contact_name: string
-          country: string
+          city?: string | null
+          civility?: string | null
+          company_name?: string | null
+          company_number?: string | null
+          contact_name?: string | null
+          country?: string | null
           created_at?: string | null
+          first_name?: string | null
           id: string
           is_early_adopter?: boolean | null
+          last_name?: string | null
           opening_hours?: Json | null
-          phone: string
-          postal_code: string
+          phone?: string | null
+          postal_code?: string | null
           profile_photo_url?: string | null
           promo_end_date?: string | null
-          shop_address: string
+          role?: string | null
+          shop_address?: string | null
           shop_photos?: Json | null
           status?: string
           stripe_customer_id?: string | null
@@ -94,26 +213,30 @@ export type Database = {
           updated_at?: string | null
           validated_by?: string | null
           validation_date?: string | null
-          vat_number: string
+          vat_number?: string | null
         }
         Update: {
           account_type?: string
           average_rating?: number | null
           badges?: Json | null
-          city?: string
-          company_name?: string
-          company_number?: string
-          contact_name?: string
-          country?: string
+          city?: string | null
+          civility?: string | null
+          company_name?: string | null
+          company_number?: string | null
+          contact_name?: string | null
+          country?: string | null
           created_at?: string | null
+          first_name?: string | null
           id?: string
           is_early_adopter?: boolean | null
+          last_name?: string | null
           opening_hours?: Json | null
-          phone?: string
-          postal_code?: string
+          phone?: string | null
+          postal_code?: string | null
           profile_photo_url?: string | null
           promo_end_date?: string | null
-          shop_address?: string
+          role?: string | null
+          shop_address?: string | null
           shop_photos?: Json | null
           status?: string
           stripe_customer_id?: string | null
@@ -124,7 +247,7 @@ export type Database = {
           updated_at?: string | null
           validated_by?: string | null
           validation_date?: string | null
-          vat_number?: string
+          vat_number?: string | null
         }
         Relationships: []
       }
