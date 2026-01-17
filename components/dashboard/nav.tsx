@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,16 +11,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 interface DashboardNavProps {
-  isAdmin?: boolean  // Nouveau prop
+  isAdmin?: boolean
+  userProfile?: {
+    company_name?: string
+    first_name?: string
+    last_name?: string
+  }
+  userEmail?: string
 }
 
-export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
+export function DashboardNav({ isAdmin = false, userProfile, userEmail }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -41,6 +48,11 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
       label: 'Mes annonces',
       icon: Package,
     },
+    {
+      href: '/dashboard/wanted-items',
+      label: 'Mes recherches',
+      icon: Search,
+    },
   ]
 
   return (
@@ -48,10 +60,26 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-xl font-bold text-primary">
-              Opti-Troc
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                <Image
+                  src="/opti-troc-logo.png"
+                  alt="Opti-Troc Logo"
+                  fill
+                  sizes="40px"
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gradient-primary">
+                  Opti-Troc
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Dashboard
+                </p>
+              </div>
             </Link>
-            
+
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon
@@ -75,7 +103,7 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
 
           <div className="flex items-center gap-2">
             {isAdmin && (
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="hidden lg:flex">
                 <Link href="/admin">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   <span className="hidden md:inline">Panel Admin</span>
@@ -87,11 +115,69 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
               <Link href="/shop">Marketplace</Link>
             </Button>
 
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              <span className="hidden md:inline">Déconnexion</span>
-            </Button>
+            {/* Menu utilisateur Desktop */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="hidden md:flex">
+                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mr-2">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  {userProfile && (
+                    <span>
+                      {userProfile.first_name} {userProfile.last_name}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {userProfile && (
+                  <>
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-semibold">
+                        {userProfile.company_name}
+                      </p>
+                      {userEmail && (
+                        <p className="text-xs text-muted-foreground">
+                          {userEmail}
+                        </p>
+                      )}
+                    </div>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Tableau de bord
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/listings">
+                    <Package className="w-4 h-4 mr-2" />
+                    Mes annonces
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/wanted-items">
+                    <Search className="w-4 h-4 mr-2" />
+                    Mes recherches
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/messages">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Messagerie
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
+            {/* Menu burger Mobile */}
             <Button
               variant="ghost"
               size="sm"

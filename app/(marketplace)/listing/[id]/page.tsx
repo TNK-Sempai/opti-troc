@@ -6,12 +6,13 @@ import { Separator } from '@/components/ui/separator'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { 
-  Eye, 
-  MapPin, 
-  Package, 
-  Calendar, 
-  ShieldCheck, 
+import { ContactSellerButton } from '@/components/messages/ContactSellerButton'
+import {
+  Eye,
+  MapPin,
+  Package,
+  Calendar,
+  ShieldCheck,
   MessageCircle,
   Building2,
   ArrowLeft,
@@ -19,7 +20,8 @@ import {
   Ruler,
   Palette,
   Tag,
-  Gem
+  Gem,
+  Lock
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -31,6 +33,23 @@ interface PageProps {
 export default async function ListingDetailPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
+
+  // Vérifier si l'utilisateur est connecté et son statut
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let isValidated = false
+  let userStatus = null
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('status, role')
+      .eq('id', user.id)
+      .single()
+
+    isValidated = profile?.status === 'validated' || profile?.role === 'admin'
+    userStatus = profile?.status
+  }
 
   const { data: listing, error } = await supabase
     .from('listings')
@@ -59,6 +78,15 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const details = isUnit ? listing.unit_listings : listing.lot_listings
   const photos = listing.listing_photos?.sort((a: any, b: any) => a.display_order - b.display_order) || []
   const primaryPhoto = photos.find((p: any) => p.is_primary) || photos[0]
+
+  // Vérifier si l'utilisateur peut contacter (pas son propre listing ET validé)
+  const canContact = user && user.id !== listing.user_id && isValidated
+  const isOwnListing = user && user.id === listing.user_id
+
+  // Titre pour le bouton de contact
+  const listingTitle = isUnit && details
+    ? `${details.brand} ${details.model}`
+    : details?.description?.substring(0, 50) || 'Lot'
 
   // Récupérer les items du lot
   let lotItems: any[] = []
@@ -184,7 +212,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 {details.reference && (
                   <p className="text-[10px] font-mono text-muted-foreground mb-2">Réf: {details.reference}</p>
                 )}
-                <span className="text-2xl font-bold text-primary">{parseFloat(details.price).toFixed(0)}€</span>
+                {isValidated ? (
+                  <span className="text-2xl font-bold text-primary">{parseFloat(details.price).toFixed(0)}€</span>
+                ) : (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span className="text-sm font-medium">Compte validé requis pour voir le prix</span>
+                  </div>
+                )}
               </div>
             )}
   
@@ -314,20 +349,69 @@ export default async function ListingDetailPage({ params }: PageProps) {
   
               {/* Prix et Actions */}
               <Card className="shadow-md border-primary/20 overflow-hidden">
-                <div className="bg-gradient-to-br from-primary to-primary-dark p-4 text-white">
-                  <span className="text-3xl font-bold">
-                    {isUnit && details 
-                      ? `${parseFloat(details.price).toFixed(0)}€`
-                      : `${parseFloat(details?.total_price || 0).toFixed(0)}€`
-                    }
-                  </span>
-                </div>
-  
+                {isValidated ? (
+                  <div className="bg-gradient-to-br from-primary to-primary-dark p-4 text-white">
+                    <span className="text-3xl font-bold">
+                      {isUnit && details
+                        ? `${parseFloat(details.price).toFixed(0)}€`
+                        : `${parseFloat(details?.total_price || 0).toFixed(0)}€`
+                      }
+                    </span>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-neutral-400 to-neutral-500 p-4 text-white">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-6 h-6" />
+                      <div>
+                        <p className="text-sm font-medium">Prix masqué</p>
+                        <p className="text-xs opacity-90">Compte validé requis</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <CardContent className="p-3 space-y-2">
-                  <Button className="w-full h-9 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800">
-                    <MessageCircle className="w-4 h-4 mr-1.5" />
-                    Contacter
-                  </Button>
+                  {canContact ? (
+                    <ContactSellerButton
+                      listingId={listing.id}
+                      sellerName={seller?.company_name || 'le vendeur'}
+                      listingTitle={listingTitle}
+                    />
+                  ) : isOwnListing ? (
+                    <Button disabled className="w-full h-9 text-sm font-semibold">
+                      <MessageCircle className="w-4 h-4 mr-1.5" />
+                      Votre annonce
+                    </Button>
+                  ) : user && !isValidated ? (
+                    <div className="space-y-2">
+                      <Button disabled className="w-full h-9 text-sm font-semibold">
+                        <Lock className="w-4 h-4 mr-1.5" />
+                        Contacter le vendeur
+                      </Button>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <p className="text-xs text-amber-800 font-medium mb-1">
+                          {userStatus === 'pending' ? '⏳ Compte en attente de validation' : '🔒 Compte non validé'}
+                        </p>
+                        <p className="text-xs text-amber-700">
+                          {userStatus === 'pending'
+                            ? 'Votre compte est en cours de validation par un administrateur. Vous pourrez voir les prix et contacter les vendeurs une fois validé.'
+                            : 'Votre compte doit être validé pour voir les prix et contacter les vendeurs.'}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button asChild className="w-full h-9 text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800">
+                        <Link href="/login">
+                          <MessageCircle className="w-4 h-4 mr-1.5" />
+                          Connectez-vous pour contacter
+                        </Link>
+                      </Button>
+                      <p className="text-xs text-center text-muted-foreground">
+                        Ou <Link href="/register" className="text-primary hover:underline font-medium">créez un compte</Link> pour accéder aux prix
+                      </p>
+                    </div>
+                  )}
                   <Button variant="outline" className="w-full h-8 text-sm">
                     <Share2 className="w-3 h-3 mr-1.5" />
                     Partager

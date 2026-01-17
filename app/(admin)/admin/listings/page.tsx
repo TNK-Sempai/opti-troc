@@ -47,10 +47,11 @@ export default async function AdminListingsPage({
   }
 
   let enrichedListings = allListings.map(listing => {
-    const details = listing.listing_type === 'unit' 
-      ? listing.unit_listings 
-      : listing.lot_listings
-    const photo = listing.listing_photos?.find((p: any) => p.is_primary)
+    // IMPORTANT: unit_listings et lot_listings sont des TABLEAUX
+    const details = listing.listing_type === 'unit'
+      ? (Array.isArray(listing.unit_listings) ? listing.unit_listings[0] : listing.unit_listings)
+      : (Array.isArray(listing.lot_listings) ? listing.lot_listings[0] : listing.lot_listings)
+    const photo = listing.listing_photos?.find((p: any) => p.is_primary) || listing.listing_photos?.[0]
     const seller = listing.user_profiles
     return { ...listing, details, photo, seller }
   })

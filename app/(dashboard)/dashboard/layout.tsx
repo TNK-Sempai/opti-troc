@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardNav } from '@/components/dashboard/nav'
+import Footer from '@/components/layout/Footer'
 
 export default async function DashboardLayout({
   children,
@@ -17,7 +18,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('status, role')
+    .select('status, role, company_name, first_name, last_name')
     .eq('id', user.id)
     .single()
 
@@ -32,9 +33,18 @@ export default async function DashboardLayout({
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <DashboardNav isAdmin={isAdmin} />
-      <main>{children}</main>
+    <div className="min-h-screen bg-neutral-50 flex flex-col">
+      <DashboardNav
+        isAdmin={isAdmin}
+        userProfile={{
+          company_name: profile?.company_name,
+          first_name: profile?.first_name,
+          last_name: profile?.last_name,
+        }}
+        userEmail={user.email}
+      />
+      <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   )
 }

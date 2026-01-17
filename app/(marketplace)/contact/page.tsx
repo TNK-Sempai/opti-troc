@@ -221,10 +221,10 @@ export default function ContactPage() {
                         Email
                       </div>
                       <a
-                        href="mailto:contact@opti-troc.fr"
+                        href="mailto:tanuki.corporation@gmail.com"
                         className="text-primary hover:underline"
                       >
-                        contact@opti-troc.fr
+                        tanuki.corporation@gmail.com
                       </a>
                     </div>
                   </div>
@@ -236,10 +236,10 @@ export default function ContactPage() {
                         Téléphone
                       </div>
                       <a
-                        href="tel:+33123456789"
+                        href="tel:+32465186866"
                         className="text-primary hover:underline"
                       >
-                        01 23 45 67 89
+                        0465 18 68 66
                       </a>
                     </div>
                   </div>
@@ -251,9 +251,9 @@ export default function ContactPage() {
                         Adresse
                       </div>
                       <p className="text-sm">
-                        123 Rue de l'Optique
+                        Avenue de l'indépendance belge 131 (APT 4.02)
                         <br />
-                        75001 Paris, France
+                        1081 Bruxelles, Belgique
                       </p>
                     </div>
                   </div>

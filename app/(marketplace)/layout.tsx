@@ -1,4 +1,5 @@
 import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 
 export default function MarketplaceLayout({
   children,
@@ -11,6 +12,7 @@ export default function MarketplaceLayout({
       <main className="flex-1">
         {children}
       </main>
+      <Footer />
     </div>
   )
 }

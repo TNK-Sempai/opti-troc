@@ -144,7 +144,7 @@ export default async function AdminPage() {
 
         <Card className="border-primary/20 hover:border-primary/50 transition-colors cursor-pointer">
           <CardContent className="p-6">
-            <Link href="/dashboard/messages?status=new" className="block">
+            <Link href="/admin/messages?status=new" className="block">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Mail className="w-6 h-6 text-blue-600" />

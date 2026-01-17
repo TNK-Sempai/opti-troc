@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LayoutDashboard, Package, LogOut } from "lucide-react";
+import { User, LayoutDashboard, Package, LogOut, Search, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
@@ -56,10 +56,22 @@ export default async function Header() {
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
+              href="/"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Accueil
+            </Link>
+            <Link
               href="/shop"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Marketplace
+            </Link>
+            <Link
+              href="/want-to-buy"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Want to Buy
             </Link>
             <Link
               href="/about"
@@ -111,7 +123,18 @@ export default async function Header() {
                       Mes annonces
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/wanted-items">
+                      <Search className="w-4 h-4 mr-2" />
+                      Mes recherches
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/messages">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Messagerie
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <LogoutButton />

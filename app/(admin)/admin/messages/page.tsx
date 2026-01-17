@@ -223,7 +223,15 @@ export default async function AdminMessagesPage({
                         </div>
                         
                         {/* Boutons d'action */}
-                        <MessageQuickActions message={message} />
+                        <MessageQuickActions
+                          message={{
+                            id: message.id,
+                            name: message.name,
+                            email: message.email,
+                            subject: message.subject,
+                            status: message.status,
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

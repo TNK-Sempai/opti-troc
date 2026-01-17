@@ -4,8 +4,9 @@ import { redirect, notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { UserActionButtons } from '@/components/admin/user-action-buttons'
 import Link from 'next/link'
-import { ArrowLeft, User, Building2, MapPin, Mail, Phone, FileText, Calendar, CheckCircle, XCircle, Ban } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,16 +134,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <CardTitle className="text-sm">Actions de validation</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-2">
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Valider
-                  </Button>
-                  <Button variant="outline" className="text-red-600">
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Rejeter
-                  </Button>
-                </div>
+                <UserActionButtons userId={userProfile.id} status={userProfile.status} />
               </CardContent>
             </Card>
           )}
@@ -184,18 +176,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
               <CardTitle className="text-sm">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {userProfile.status === 'validated' && (
-                <Button variant="outline" size="sm" className="w-full text-orange-600">
-                  <Ban className="w-4 h-4 mr-2" />
-                  Suspendre
-                </Button>
-              )}
-              {userProfile.status === 'suspended' && (
-                <Button variant="outline" size="sm" className="w-full text-green-600">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Réactiver
-                </Button>
-              )}
+              <UserActionButtons userId={userProfile.id} status={userProfile.status} />
             </CardContent>
           </Card>
         </div>

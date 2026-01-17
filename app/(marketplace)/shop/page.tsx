@@ -1,39 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Search,
-  Package,
-  Layers,
-  Eye,
-  X,
-  SlidersHorizontal,
-} from "lucide-react";
+import { X, Package } from "lucide-react";
+import { MarketplaceFilters } from "@/components/shop/MarketplaceFilters";
+import { ViewControls } from "@/components/shop/ViewControls";
+import { ListingCard } from "@/components/shop/ListingCard";
 
 export const dynamic = "force-dynamic";
 
 interface SearchParams {
   search?: string;
   type?: string;
+  brand?: string;
+  model?: string;
   gender?: string;
   category?: string;
   state?: string;
   sort?: string;
   minPrice?: string;
   maxPrice?: string;
+  view?: string;
   page?: string;
 }
 
@@ -44,6 +32,20 @@ export default async function ShopPage({
 }) {
   const params = await searchParams;
   const supabase = await createClient();
+
+  // Vérifier le statut de l'utilisateur
+  const { data: { user } } = await supabase.auth.getUser();
+  let isValidated = false;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('status, role')
+      .eq('id', user.id)
+      .single();
+
+    isValidated = profile?.status === 'validated' || profile?.role === 'admin';
+  }
 
   const page = parseInt(params.page || "1");
   const pageSize = 40;
@@ -73,12 +75,40 @@ export default async function ShopPage({
 
   // Enrichir les données
   let enrichedListings = allListings.map((listing) => {
+    // IMPORTANT: unit_listings et lot_listings sont des TABLEAUX
     const details =
       listing.listing_type === "unit"
-        ? listing.unit_listings?.[0]
-        : listing.lot_listings?.[0];
-    const photo = listing.listing_photos?.find((p: any) => p.is_primary);
+        ? (Array.isArray(listing.unit_listings) ? listing.unit_listings[0] : listing.unit_listings)
+        : (Array.isArray(listing.lot_listings) ? listing.lot_listings[0] : listing.lot_listings);
+    const photo = listing.listing_photos?.find((p: any) => p.is_primary) || listing.listing_photos?.[0];
     return { ...listing, details, photo };
+  });
+
+  // Extraire marques et modèles uniques pour les filtres dynamiques
+  const brandsSet = new Set<string>();
+  const modelsMap: Record<string, Set<string>> = {};
+
+  enrichedListings.forEach((listing) => {
+    if (listing.listing_type === "unit" && listing.details) {
+      const brand = listing.details.brand;
+      const model = listing.details.model;
+
+      if (brand) {
+        brandsSet.add(brand);
+        if (model) {
+          if (!modelsMap[brand]) {
+            modelsMap[brand] = new Set();
+          }
+          modelsMap[brand].add(model);
+        }
+      }
+    }
+  });
+
+  const brands = Array.from(brandsSet).sort();
+  const models: Record<string, string[]> = {};
+  Object.keys(modelsMap).forEach((brand) => {
+    models[brand] = Array.from(modelsMap[brand]).sort();
   });
 
   // Filtres
@@ -98,7 +128,22 @@ export default async function ShopPage({
     });
   }
 
-  // ⚠️ CORRECTION : Ces filtres s'appliquent UNIQUEMENT aux unitaires
+  if (params.brand && params.brand !== "all") {
+    enrichedListings = enrichedListings.filter(
+      (listing) =>
+        listing.listing_type === "unit" &&
+        listing.details?.brand === params.brand
+    );
+  }
+
+  if (params.model && params.model !== "all") {
+    enrichedListings = enrichedListings.filter(
+      (listing) =>
+        listing.listing_type === "unit" &&
+        listing.details?.model === params.model
+    );
+  }
+
   if (params.gender && params.gender !== "all") {
     enrichedListings = enrichedListings.filter(
       (listing) =>
@@ -115,7 +160,6 @@ export default async function ShopPage({
     );
   }
 
-  // État s'applique aux deux types
   if (params.state && params.state !== "all") {
     enrichedListings = enrichedListings.filter(
       (listing) => listing.details?.state === params.state
@@ -194,6 +238,10 @@ export default async function ShopPage({
         key: "type",
         label: params.type === "unit" ? "Unitaire" : "Lot",
       },
+    params.brand &&
+      params.brand !== "all" && { key: "brand", label: params.brand },
+    params.model &&
+      params.model !== "all" && { key: "model", label: params.model },
     params.gender &&
       params.gender !== "all" && { key: "gender", label: params.gender },
     params.category &&
@@ -209,6 +257,8 @@ export default async function ShopPage({
     },
   ].filter(Boolean) as { key: string; label: string }[];
 
+  const viewMode = (params.view || "grid") as "grid" | "list";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-blue-50/30">
       <div className="container mx-auto px-4 py-8">
@@ -217,190 +267,25 @@ export default async function ShopPage({
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent mb-2">
             Marketplace
           </h1>
-          <p className="text-muted-foreground">
-            {totalResults} annonce{totalResults > 1 ? "s" : ""} disponible
-            {totalResults > 1 ? "s" : ""}
-          </p>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Sidebar filtres */}
           <aside className="lg:col-span-1">
             <div className="sticky top-20">
-              <Card className="border-primary/20 shadow-lg overflow-hidden">
-                {/* Header sidebar */}
-                <div className="bg-gradient-to-r from-primary to-primary-dark p-4">
-                  <div className="flex items-center gap-2 text-white">
-                    <SlidersHorizontal className="w-5 h-5" />
-                    <h2 className="font-semibold">Filtres</h2>
-                  </div>
-                </div>
-
-                <CardContent className="p-5">
-                  <form method="GET" className="space-y-5">
-                    {/* Recherche */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Recherche
-                      </Label>
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          name="search"
-                          placeholder="Marque, modèle..."
-                          defaultValue={params.search}
-                          className="pl-9 h-10"
-                        />
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Type */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Type
-                      </Label>
-                      <Select name="type" defaultValue={params.type || "all"}>
-                        <SelectTrigger className="h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous types</SelectItem>
-                          <SelectItem value="unit">📦 Unitaire</SelectItem>
-                          <SelectItem value="lot">📚 Lot</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Genre */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Genre
-                      </Label>
-                      <Select
-                        name="gender"
-                        defaultValue={params.gender || "all"}
-                      >
-                        <SelectTrigger className="h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous</SelectItem>
-                          <SelectItem value="homme">Homme</SelectItem>
-                          <SelectItem value="femme">Femme</SelectItem>
-                          <SelectItem value="mixte">Mixte</SelectItem>
-                          <SelectItem value="enfant">Enfant</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Catégorie */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Catégorie
-                      </Label>
-                      <Select
-                        name="category"
-                        defaultValue={params.category || "all"}
-                      >
-                        <SelectTrigger className="h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Toutes</SelectItem>
-                          <SelectItem value="vue">Vue</SelectItem>
-                          <SelectItem value="solaires">Solaires</SelectItem>
-                          <SelectItem value="sport">Sport</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* État */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        État
-                      </Label>
-                      <Select name="state" defaultValue={params.state || "all"}>
-                        <SelectTrigger className="h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous</SelectItem>
-                          <SelectItem value="neuf_etiquette">
-                            Neuf étiquette
-                          </SelectItem>
-                          <SelectItem value="neuf_sans_etiquette">
-                            Neuf
-                          </SelectItem>
-                          <SelectItem value="tres_bon">Très bon</SelectItem>
-                          <SelectItem value="bon">Bon</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Separator />
-
-                    {/* Prix */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Prix (€)
-                      </Label>
-                      <div className="space-y-2">
-                        <Input
-                          name="minPrice"
-                          type="number"
-                          placeholder="Min"
-                          defaultValue={params.minPrice}
-                          className="h-10"
-                        />
-                        <Input
-                          name="maxPrice"
-                          type="number"
-                          placeholder="Max"
-                          defaultValue={params.maxPrice}
-                          className="h-10"
-                        />
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Tri */}
-                    <div>
-                      <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                        Trier par
-                      </Label>
-                      <Select name="sort" defaultValue={sortBy}>
-                        <SelectTrigger className="h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="recent">Plus récent</SelectItem>
-                          <SelectItem value="views">Plus consultés</SelectItem>
-                          <SelectItem value="price_asc">Prix ↑</SelectItem>
-                          <SelectItem value="price_desc">Prix ↓</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Boutons */}
-                    <div className="space-y-2 pt-2">
-                      <Button type="submit" className="w-full h-10 shadow-md">
-                        Appliquer
-                      </Button>
-                      <Button asChild variant="outline" className="w-full h-10">
-                        <Link href="/shop">Réinitialiser</Link>
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
+              <MarketplaceFilters brands={brands} models={models} />
             </div>
           </aside>
 
           {/* Contenu principal */}
           <div className="lg:col-span-4 space-y-6">
+            {/* Contrôles de vue et tri */}
+            <Card className="border-primary/10">
+              <CardContent className="p-4">
+                <ViewControls totalResults={totalResults} />
+              </CardContent>
+            </Card>
+
             {/* Filtres actifs */}
             {activeFilters.length > 0 && (
               <Card className="border-primary/10">
@@ -446,7 +331,7 @@ export default async function ShopPage({
               </Card>
             )}
 
-            {/* Grille annonces */}
+            {/* Grille/Liste annonces */}
             {paginatedListings.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-20">
@@ -466,11 +351,19 @@ export default async function ShopPage({
               </Card>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {paginatedListings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
-                  ))}
-                </div>
+                {viewMode === "grid" ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {paginatedListings.map((listing) => (
+                      <ListingCard key={listing.id} listing={listing} isValidated={isValidated} variant="grid" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {paginatedListings.map((listing) => (
+                      <ListingCard key={listing.id} listing={listing} isValidated={isValidated} variant="list" />
+                    ))}
+                  </div>
+                )}
 
                 {/* Pagination */}
                 {totalPages > 1 && (
@@ -553,77 +446,4 @@ export default async function ShopPage({
       </div>
     </div>
   );
-}
-
-// Composant Card
-function ListingCard({ listing }: { listing: any }) {
-  const isUnit = listing.listing_type === 'unit'
-  const details = listing.details
-
-  return (
-    <Link href={`/listing/${listing.id}`}>  {/* ✅ CHANGÉ ICI */}
-      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-neutral-200 h-full hover:border-primary/50 hover:-translate-y-1">
-        <div className="relative h-32 bg-gradient-to-br from-neutral-100 to-neutral-50">
-          {listing.photo ? (
-            <Image
-              src={listing.photo.photo_url}
-              alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
-              fill
-              className="object-cover group-hover:scale-110 transition-transform duration-500"
-              sizes="25vw"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              {isUnit ? (
-                <Package className="w-8 h-8 text-neutral-300" />
-              ) : (
-                <Layers className="w-8 h-8 text-neutral-300" />
-              )}
-            </div>
-          )}
-
-          <div className="absolute top-1.5 left-1.5">
-            <Badge className={`text-xs h-5 ${isUnit ? 'bg-primary' : 'bg-green-600'} shadow-lg`}>
-              {isUnit ? 'Unit' : 'Lot'}
-            </Badge>
-          </div>
-
-          <div className="absolute bottom-1.5 right-1.5 bg-black/70 backdrop-blur-sm text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
-            <Eye className="w-2.5 h-2.5" />
-            {listing.views_count || 0}
-          </div>
-        </div>
-
-        <CardContent className="p-2.5">
-          {isUnit && details ? (
-            <>
-              <h3 className="font-semibold text-xs line-clamp-1 mb-0.5 group-hover:text-primary transition-colors">
-                {details.brand} {details.model}
-              </h3>
-              {details.reference && (
-                <p className="text-[10px] font-mono text-muted-foreground mb-1.5 line-clamp-1">
-                  {details.reference}
-                </p>
-              )}
-              <p className="text-base font-bold text-primary">
-                {parseFloat(details.price).toFixed(0)}€
-              </p>
-            </>
-          ) : details ? (
-            <>
-              <h3 className="font-semibold text-xs mb-0.5 group-hover:text-green-600 transition-colors">
-                Lot
-              </h3>
-              <p className="text-[10px] text-muted-foreground line-clamp-2 mb-1.5">
-                {details.description}
-              </p>
-              <p className="text-base font-bold text-green-600">
-                {parseFloat(details.total_price).toFixed(0)}€
-              </p>
-            </>
-          ) : null}
-        </CardContent>
-      </Card>
-    </Link>
-  )
 }
