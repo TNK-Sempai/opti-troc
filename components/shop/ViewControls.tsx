@@ -38,17 +38,28 @@ export function ViewControls({ totalResults }: ViewControlsProps) {
 
   return (
     <div className="flex items-center justify-between gap-4 flex-wrap">
-      <p className="text-sm text-muted-foreground">
-        {totalResults} annonce{totalResults > 1 ? 's' : ''} trouvée{totalResults > 1 ? 's' : ''}
-      </p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-sm">{totalResults}</span>
+        </div>
+        <div>
+          <p className="text-sm font-bold text-neutral-900">
+            {totalResults} annonce{totalResults > 1 ? 's' : ''}
+          </p>
+          <p className="text-xs text-muted-foreground">trouvée{totalResults > 1 ? 's' : ''}</p>
+        </div>
+      </div>
 
       <div className="flex items-center gap-3">
         {/* Vue Toggle */}
-        <div className="flex items-center gap-1 border rounded-lg p-1">
+        <div className="flex items-center gap-1 border-2 border-blue-200 rounded-xl p-1 bg-blue-50/50 shadow-sm">
           <Button
             variant={view === 'grid' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 px-3"
+            className={view === 'grid'
+              ? "h-9 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md"
+              : "h-9 px-4 hover:bg-blue-100 hover:text-blue-700 transition-all duration-300"
+            }
             onClick={() => handleViewChange('grid')}
           >
             <Grid3x3 className="w-4 h-4" />
@@ -56,7 +67,10 @@ export function ViewControls({ totalResults }: ViewControlsProps) {
           <Button
             variant={view === 'list' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 px-3"
+            className={view === 'list'
+              ? "h-9 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md"
+              : "h-9 px-4 hover:bg-blue-100 hover:text-blue-700 transition-all duration-300"
+            }
             onClick={() => handleViewChange('list')}
           >
             <List className="w-4 h-4" />
@@ -64,13 +78,13 @@ export function ViewControls({ totalResults }: ViewControlsProps) {
         </div>
 
         {/* Tri */}
-        <div className="flex items-center gap-2">
-          <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 bg-gradient-to-r from-orange-50 to-orange-100/50 border-2 border-orange-200 rounded-xl px-3 py-1.5 shadow-sm">
+          <ArrowUpDown className="w-4 h-4 text-orange-600" />
           <Select
             defaultValue={searchParams.get('sort') || 'recent'}
             onValueChange={handleSortChange}
           >
-            <SelectTrigger className="h-9 w-[160px]">
+            <SelectTrigger className="h-9 w-[160px] border-0 bg-transparent font-semibold text-orange-900 focus:ring-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

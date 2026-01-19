@@ -6,7 +6,7 @@ interface StatCardProps {
   icon: LucideIcon
   label: string
   value: string | number
-  gradient?: 'primary' | 'secondary' | 'success' | 'purple' | 'pink'
+  gradient?: 'primary' | 'secondary' | 'success' | 'purple' | 'pink' | 'danger'
   trend?: {
     value: string
     isPositive: boolean
@@ -19,6 +19,7 @@ const gradientClasses = {
   success: 'from-emerald-500 to-emerald-600',
   purple: 'from-purple-500 to-purple-600',
   pink: 'from-pink-500 to-pink-600',
+  danger: 'from-red-500 to-red-600',
 }
 
 export function StatCard({ icon: Icon, label, value, gradient = 'primary', trend }: StatCardProps) {

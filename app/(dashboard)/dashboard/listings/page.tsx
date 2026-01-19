@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PremiumButton } from '@/components/ui/premium-button'
+import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
-import Image from 'next/image'
-import { PlusCircle, Package, Eye, Calendar, Grid3x3, List, Search, Filter } from 'lucide-react'
+import { PlusCircle, Package, Eye, Grid3x3, List, Search, Filter, CheckCircle, Pause, ShoppingBag, Layers } from 'lucide-react'
 import ListingsGrid from './listings-grid'
 import ListingsList from './listings-list'
 
@@ -78,7 +78,7 @@ export default async function MyListingsPage({
   // Combiner les données
   let enrichedListings = listings.map(listing => {
     const photo = photos?.find(p => p.listing_id === listing.id)
-    
+
     if (listing.listing_type === 'unit') {
       const details = unitListings?.find(u => u.listing_id === listing.id)
       return { ...listing, details, photo }
@@ -105,60 +105,83 @@ export default async function MyListingsPage({
     })
   }
 
-  const activeCount = listings.filter(l => l.status === 'active').length
-  const totalCount = listings.length
+  const stats = {
+    total: listings.length,
+    active: listings.filter(l => l.status === 'active').length,
+    sold: listings.filter(l => l.status === 'sold').length,
+    paused: listings.filter(l => l.status === 'paused').length,
+  }
   const viewMode = params.view || 'grid'
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-orange-50/10 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-primary-dark">Mes annonces</h1>
-            <p className="text-sm text-neutral-600 mt-1">
-              {activeCount} active(s) • {totalCount} au total
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+              <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
+                <Package className="w-10 h-10 text-blue-600" />
+                Mes annonces
+              </span>
+            </h1>
+            <p className="text-lg text-muted-foreground font-medium">
+              {stats.active} active{stats.active > 1 ? 's' : ''} sur {stats.total} au total
             </p>
           </div>
-          <Button asChild>
-            <Link href="/dashboard/listings/new">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Nouvelle annonce
+          <PremiumButton asChild size="lg" gradient="secondary" glow className="text-base h-14 px-8 shadow-xl">
+            <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
+              <PlusCircle className="w-5 h-5" />
+              <span>Nouvelle annonce</span>
             </Link>
-          </Button>
+          </PremiumButton>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatCard icon={Package} label="Total" value={stats.total} gradient="primary" />
+          <StatCard icon={CheckCircle} label="Actives" value={stats.active} gradient="success" />
+          <StatCard icon={ShoppingBag} label="Vendues" value={stats.sold} gradient="purple" />
+          <StatCard icon={Pause} label="En pause" value={stats.paused} gradient="secondary" />
         </div>
 
         {/* Barre de recherche et filtres */}
-        <Card className="border-neutral-200">
-          <CardContent className="p-4">
-            <form method="GET" className="flex flex-col md:flex-row gap-3">
+        <Card className="mb-8 shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95">
+          <CardContent className="p-6">
+            <form method="GET" className="flex flex-col md:flex-row gap-4">
               {/* Recherche */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
                 <Input
                   name="search"
                   placeholder="Rechercher par marque, modèle, référence..."
                   defaultValue={params.search}
-                  className="pl-10"
+                  className="pl-11 h-12 shadow-sm border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium"
                 />
               </div>
 
               {/* Filtre Statut */}
               <Select name="status" defaultValue={params.status || 'all'}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-blue-200 focus:border-blue-500 font-medium">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les statuts</SelectItem>
                   <SelectItem value="active">Actif</SelectItem>
                   <SelectItem value="sold">Vendu</SelectItem>
-                  <SelectItem value="paused">Pausé</SelectItem>
+                  <SelectItem value="paused">En pause</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Filtre Type */}
               <Select name="type" defaultValue={params.type || 'all'}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-blue-200 focus:border-blue-500 font-medium">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -169,67 +192,74 @@ export default async function MyListingsPage({
               </Select>
 
               {/* Toggle Vue */}
-              <div className="flex gap-1 border rounded-md p-1">
-                <Button
-                  asChild
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="px-3"
+              <div className="flex gap-1 border-2 border-blue-200 rounded-xl p-1.5 bg-white">
+                <Link
+                  href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'grid' } as Record<string, string>).toString()}`}
+                  className={`px-4 py-2 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                    viewMode === 'grid'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                      : 'hover:bg-blue-50 text-muted-foreground'
+                  }`}
                 >
-                  <Link href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'grid' }).toString()}`}>
-                    <Grid3x3 className="w-4 h-4" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="px-3"
+                  <Grid3x3 className="w-5 h-5" />
+                </Link>
+                <Link
+                  href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'list' } as Record<string, string>).toString()}`}
+                  className={`px-4 py-2 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                    viewMode === 'list'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                      : 'hover:bg-blue-50 text-muted-foreground'
+                  }`}
                 >
-                  <Link href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'list' }).toString()}`}>
-                    <List className="w-4 h-4" />
-                  </Link>
-                </Button>
+                  <List className="w-5 h-5" />
+                </Link>
               </div>
 
               {/* Bouton recherche */}
-              <Button type="submit" className="md:w-auto">
-                <Filter className="w-4 h-4 mr-2" />
-                Filtrer
-              </Button>
+              <PremiumButton type="submit" gradient="primary" className="h-12">
+                <span className="flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  Filtrer
+                </span>
+              </PremiumButton>
             </form>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Liste des annonces */}
-      {enrichedListings.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-16">
-            <Package className="w-16 h-16 mx-auto mb-4 text-neutral-300" />
-            <h3 className="text-lg font-semibold mb-2">
-              {params.search || params.status || params.type ? 'Aucun résultat' : 'Aucune annonce'}
-            </h3>
-            <p className="text-neutral-500 mb-6">
-              {params.search || params.status || params.type
-                ? 'Essayez de modifier vos filtres'
-                : 'Créez votre première annonce pour commencer'}
-            </p>
-            {!params.search && !params.status && !params.type && (
-              <Button asChild>
-                <Link href="/dashboard/listings/new">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Créer une annonce
-                </Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : viewMode === 'grid' ? (
-        <ListingsGrid listings={enrichedListings} />
-      ) : (
-        <ListingsList listings={enrichedListings} />
-      )}
+        {/* Liste des annonces */}
+        {enrichedListings.length === 0 ? (
+          <Card className="shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95">
+            <CardContent className="text-center py-24 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
+              <div className="relative z-10">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
+                  <Package className="w-12 h-12 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                  {params.search || params.status || params.type ? 'Aucun résultat' : 'Aucune annonce'}
+                </h3>
+                <p className="text-muted-foreground mb-8 text-lg font-medium">
+                  {params.search || params.status || params.type
+                    ? 'Essayez de modifier vos filtres'
+                    : 'Créez votre première annonce pour commencer'}
+                </p>
+                {!params.search && !params.status && !params.type && (
+                  <PremiumButton asChild gradient="primary" glow size="lg" className="shadow-xl">
+                    <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
+                      <PlusCircle className="w-5 h-5" />
+                      <span>Créer une annonce</span>
+                    </Link>
+                  </PremiumButton>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : viewMode === 'grid' ? (
+          <ListingsGrid listings={enrichedListings} />
+        ) : (
+          <ListingsList listings={enrichedListings} />
+        )}
+      </div>
     </div>
   )
 }

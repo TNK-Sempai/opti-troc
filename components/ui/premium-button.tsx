@@ -31,22 +31,35 @@ export function PremiumButton({
   gradient = 'primary',
   glow = false,
   className,
+  asChild,
   ...props
 }: PremiumButtonProps) {
+  const baseClasses = cn(
+    'relative overflow-hidden transition-all duration-300 font-semibold',
+    'hover:scale-105 hover:-translate-y-0.5',
+    gradient && gradientClasses[gradient],
+    glow && glowClasses[gradient],
+    className
+  )
+
+  // Quand asChild est utilisé, on ne wrap pas le contenu
+  if (asChild) {
+    return (
+      <Button
+        asChild
+        className={baseClasses}
+        {...props}
+      >
+        {children}
+      </Button>
+    )
+  }
+
   return (
     <Button
-      className={cn(
-        'relative overflow-hidden transition-all duration-300 font-semibold',
-        'hover:scale-105 hover:-translate-y-0.5',
-        gradient && gradientClasses[gradient],
-        glow && glowClasses[gradient],
-        className
-      )}
+      className={baseClasses}
       {...props}
     >
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
       <span className="relative flex items-center gap-2">
         {Icon && <Icon className="w-4 h-4" />}
         {children}

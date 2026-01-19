@@ -52,37 +52,46 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
   }
 
   return (
-    <Card className="border-primary/20 shadow-lg overflow-hidden">
-      <div className="bg-gradient-to-r from-primary to-primary-dark p-4">
-        <div className="flex items-center gap-2 text-white">
-          <SlidersHorizontal className="w-5 h-5" />
-          <h2 className="font-semibold">Filtres</h2>
+    <Card className="border-blue-200/60 shadow-xl overflow-hidden backdrop-blur-sm bg-white/95 sticky top-20">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-5 relative overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
+        </div>
+
+        <div className="flex items-center gap-3 text-white relative z-10">
+          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+            <SlidersHorizontal className="w-5 h-5" />
+          </div>
+          <h2 className="font-bold text-lg">Filtres</h2>
         </div>
       </div>
 
-      <CardContent className="p-5">
+      <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Recherche */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Recherche
             </Label>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
               <Input
                 name="search"
-                placeholder="Rechercher..."
+                placeholder="Marque, modèle..."
                 defaultValue={searchParams.get('search') || ''}
-                className="pl-9 h-10"
+                className="pl-10 h-11 border-neutral-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-sm"
               />
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
 
           {/* Type */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Type
             </Label>
             <Select name="type" defaultValue={searchParams.get('type') || 'all'}>
@@ -99,7 +108,8 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
 
           {/* Marque - Dynamique */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Marque
             </Label>
             <Select
@@ -124,7 +134,8 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
           {/* Modèle - Dynamique basé sur la marque */}
           {availableModels.length > 0 && (
             <div>
-              <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+              <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+                <div className="w-1 h-4 bg-blue-600 rounded-full" />
                 Modèle
               </Label>
               <Select name="model" defaultValue={searchParams.get('model') || 'all'}>
@@ -143,11 +154,12 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
             </div>
           )}
 
-          <Separator />
+          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
 
           {/* Genre */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Genre
             </Label>
             <Select name="gender" defaultValue={searchParams.get('gender') || 'all'}>
@@ -166,7 +178,8 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
 
           {/* Catégorie */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Catégorie
             </Label>
             <Select name="category" defaultValue={searchParams.get('category') || 'all'}>
@@ -184,7 +197,8 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
 
           {/* État */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               État
             </Label>
             <Select name="state" defaultValue={searchParams.get('state') || 'all'}>
@@ -201,11 +215,12 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
             </Select>
           </div>
 
-          <Separator />
+          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
 
           {/* Prix */}
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full" />
               Prix (€)
             </Label>
             <div className="space-y-2">
@@ -227,17 +242,17 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
           </div>
 
           {/* Boutons */}
-          <div className="space-y-2 pt-2">
-            <Button type="submit" className="w-full h-10 shadow-md">
-              Appliquer
+          <div className="space-y-3 pt-4">
+            <Button type="submit" className="w-full h-12 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-bold text-base">
+              Appliquer les filtres
             </Button>
             <Button
               type="button"
               variant="outline"
-              className="w-full h-10"
+              className="w-full h-11 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
               onClick={() => router.push('/shop')}
             >
-              Réinitialiser
+              Réinitialiser tout
             </Button>
           </div>
         </form>

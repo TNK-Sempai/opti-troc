@@ -313,9 +313,9 @@ export default async function MarketplacePage() {
 
           <div className="flex gap-6 justify-center flex-wrap">
             <PremiumButton asChild gradient="secondary" glow size="lg" className="text-lg h-14 px-10">
-              <Link href="/signup">
+              <Link href="/signup" className="inline-flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Créer un compte
+                <span>Créer un compte</span>
               </Link>
             </PremiumButton>
 

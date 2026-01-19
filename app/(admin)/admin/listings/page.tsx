@@ -1,11 +1,12 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PremiumButton } from '@/components/ui/premium-button'
+import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, Layers, Eye, Search, Building2 } from 'lucide-react'
+import { Package, Layers, Eye, Search, Building2, CheckCircle, ShoppingBag } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,13 +41,16 @@ export default async function AdminListingsPage({
     query = query.eq('listing_type', params.type)
   }
 
-  const { data: allListings, count } = await query.order('created_at', { ascending: false })
+  const { data: allListings, count, error } = await query.order('created_at', { ascending: false })
 
-  if (!allListings) {
-    return <div className="container mx-auto px-4 py-8">Erreur de chargement</div>
+  if (error) {
+    console.error('Error fetching listings:', error)
   }
 
-  let enrichedListings = allListings.map(listing => {
+  // Utiliser un tableau vide si pas de données
+  const listings = allListings || []
+
+  let enrichedListings = listings.map(listing => {
     // IMPORTANT: unit_listings et lot_listings sont des TABLEAUX
     const details = listing.listing_type === 'unit'
       ? (Array.isArray(listing.unit_listings) ? listing.unit_listings[0] : listing.unit_listings)
@@ -81,179 +85,240 @@ export default async function AdminListingsPage({
   const totalPages = Math.ceil(totalResults / pageSize)
 
   const stats = {
-    total: allListings.length,
-    active: allListings.filter(l => l.status === 'active').length,
-    unit: allListings.filter(l => l.listing_type === 'unit').length,
-    lot: allListings.filter(l => l.listing_type === 'lot').length,
+    total: listings.length,
+    active: listings.filter(l => l.status === 'active').length,
+    unit: listings.filter(l => l.listing_type === 'unit').length,
+    lot: listings.filter(l => l.listing_type === 'lot').length,
   }
 
+  const currentType = params.type || 'all'
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Toutes les annonces</h1>
-        <p className="text-sm text-muted-foreground">Vue d'ensemble de la marketplace</p>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-purple-50/20 to-blue-50/10 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-green-600">{stats.active}</p>
-            <p className="text-xs text-muted-foreground">Actives</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-blue-600">{stats.unit}</p>
-            <p className="text-xs text-muted-foreground">Unitaires</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-purple-600">{stats.lot}</p>
-            <p className="text-xs text-muted-foreground">Lots</p>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+            <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-blue-700 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
+              <Package className="w-10 h-10 text-purple-600" />
+              Toutes les annonces
+            </span>
+          </h1>
+          <p className="text-lg text-muted-foreground font-medium">Vue d'ensemble de la marketplace</p>
+        </div>
 
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <form method="GET" className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  name="search"
-                  placeholder="Rechercher..."
-                  defaultValue={params.search}
-                  className="pl-10"
-                />
-              </form>
-            </div>
-            <div className="flex gap-2">
-              <Button asChild variant={!params.type || params.type === 'all' ? 'default' : 'outline'} size="sm">
-                <Link href="/admin/listings?type=all">Tous</Link>
-              </Button>
-              <Button asChild variant={params.type === 'unit' ? 'default' : 'outline'} size="sm">
-                <Link href="/admin/listings?type=unit">Unitaires</Link>
-              </Button>
-              <Button asChild variant={params.type === 'lot' ? 'default' : 'outline'} size="sm">
-                <Link href="/admin/listings?type=lot">Lots</Link>
-              </Button>
-            </div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatCard icon={Package} label="Total" value={stats.total} gradient="primary" />
+          <StatCard icon={CheckCircle} label="Actives" value={stats.active} gradient="success" />
+          <StatCard icon={ShoppingBag} label="Unitaires" value={stats.unit} gradient="purple" />
+          <StatCard icon={Layers} label="Lots" value={stats.lot} gradient="secondary" />
+        </div>
+
+        {/* Filtres */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="flex-1">
+            <form method="GET" className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-purple-600 transition-colors" />
+              <Input
+                name="search"
+                placeholder="Rechercher par marque, modèle, vendeur..."
+                defaultValue={params.search}
+                className="pl-11 h-12 shadow-lg border-2 border-purple-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 font-medium"
+              />
+            </form>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-        {paginatedListings.map((listing) => {
-          const isUnit = listing.listing_type === 'unit'
-          const details = listing.details
+          <div className="flex gap-3 flex-wrap">
+            <Link
+              href="/admin/listings?type=all"
+              className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
+                currentType === 'all'
+                  ? 'bg-gradient-to-r from-neutral-700 to-neutral-800 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-neutral-200 hover:border-neutral-400 hover:shadow-lg hover:scale-105'
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              <span>Tous</span>
+              <Badge className={`h-5 px-2.5 text-xs font-bold ${
+                currentType === 'all' ? 'bg-white/20 text-white border-0' : 'bg-neutral-100 text-neutral-700'
+              }`}>
+                {stats.total}
+              </Badge>
+            </Link>
 
-          return (
-            <Card key={listing.id} className="group overflow-hidden hover:shadow-lg transition-all">
-              <div className="relative h-40 bg-gradient-to-br from-neutral-100 to-neutral-50">
-                {listing.photo ? (
-                  <Image
-                    src={listing.photo.photo_url}
-                    alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform"
-                    sizes="25vw"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isUnit ? <Package className="w-10 h-10 text-neutral-300" /> : <Layers className="w-10 h-10 text-neutral-300" />}
-                  </div>
-                )}
+            <Link
+              href="/admin/listings?type=unit"
+              className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
+                currentType === 'unit'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg hover:scale-105'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Unitaires</span>
+              <Badge className={`h-5 px-2.5 text-xs font-bold ${
+                currentType === 'unit' ? 'bg-white/20 text-white border-0' : 'bg-blue-100 text-blue-700'
+              }`}>
+                {stats.unit}
+              </Badge>
+            </Link>
 
-                <div className="absolute top-2 left-2">
-                  <Badge className={`${isUnit ? 'bg-primary' : 'bg-green-600'} text-white text-xs`}>
-                    {isUnit ? 'Unit' : 'Lot'}
-                  </Badge>
+            <Link
+              href="/admin/listings?type=lot"
+              className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
+                currentType === 'lot'
+                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg hover:scale-105'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Lots</span>
+              <Badge className={`h-5 px-2.5 text-xs font-bold ${
+                currentType === 'lot' ? 'bg-white/20 text-white border-0' : 'bg-emerald-100 text-emerald-700'
+              }`}>
+                {stats.lot}
+              </Badge>
+            </Link>
+          </div>
+        </div>
+
+        {/* Grille des annonces */}
+        {paginatedListings.length === 0 ? (
+          <Card className="shadow-xl border-purple-200/60 backdrop-blur-sm bg-white/95">
+            <CardContent className="text-center py-24 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-neutral-50 opacity-50 rounded-xl" />
+              <div className="relative z-10">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center shadow-lg">
+                  <Package className="w-12 h-12 text-purple-600" />
                 </div>
+                <p className="text-neutral-700 font-bold mb-2 text-xl">Aucune annonce</p>
+                <p className="text-base text-muted-foreground font-medium">
+                  {params.search || params.type !== 'all'
+                    ? 'Essayez de modifier vos critères de recherche'
+                    : 'Aucune annonce sur la plateforme'
+                  }
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-8">
+            {paginatedListings.map((listing) => {
+              const isUnit = listing.listing_type === 'unit'
+              const details = listing.details
 
-                <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                  <Eye className="w-3 h-3" />
-                  {listing.views_count || 0}
-                </div>
+              return (
+                <Link key={listing.id} href={`/listing/${listing.id}`} className="block group">
+                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-neutral-200 hover:border-purple-400 h-full">
+                    <div className="relative h-44 bg-gradient-to-br from-neutral-100 to-neutral-50">
+                      {listing.photo ? (
+                        <Image
+                          src={listing.photo.photo_url}
+                          alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="25vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          {isUnit ? <Package className="w-12 h-12 text-neutral-300" /> : <Layers className="w-12 h-12 text-neutral-300" />}
+                        </div>
+                      )}
 
-                <div className="absolute bottom-2 left-2 right-2">
-                  <div className="bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded flex items-center gap-1 truncate">
-                    <Building2 className="w-3 h-3 flex-shrink-0" />
-                    <span className="truncate">{listing.seller?.company_name}</span>
-                  </div>
+                      <div className="absolute top-3 left-3">
+                        <Badge className={`${isUnit ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gradient-to-r from-emerald-600 to-emerald-700'} text-white text-xs border-0 shadow-lg font-bold`}>
+                          {isUnit ? 'Unitaire' : 'Lot'}
+                        </Badge>
+                      </div>
+
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 font-semibold">
+                        <Eye className="w-3.5 h-3.5" />
+                        {listing.views_count || 0}
+                      </div>
+
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2 font-medium">
+                          <Building2 className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{listing.seller?.company_name || 'Vendeur'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <CardContent className="p-4">
+                      {isUnit && details ? (
+                        <>
+                          <h3 className="font-bold text-base line-clamp-1 mb-1.5 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                            {details.brand} {details.model}
+                          </h3>
+                          {details.reference && (
+                            <p className="text-xs font-mono text-purple-700 bg-purple-100 px-2 py-1 rounded-lg inline-block mb-3 font-semibold">
+                              {details.reference}
+                            </p>
+                          )}
+                          <p className="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                            {parseFloat(details.price).toFixed(0)}€
+                          </p>
+                        </>
+                      ) : details ? (
+                        <>
+                          <h3 className="font-bold text-base mb-1.5 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">Lot de lunettes</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3 font-medium">
+                            {details.description}
+                          </p>
+                          <p className="text-xl font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+                            {parseFloat(details.total_price).toFixed(0)}€
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-muted-foreground font-medium">Détails non disponibles</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Card className="shadow-xl border-purple-200/60 backdrop-blur-sm bg-white/95">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground font-semibold">
+                  {offset + 1}-{Math.min(offset + pageSize, totalResults)} sur {totalResults} annonces
+                </p>
+                <div className="flex items-center gap-3">
+                  {page > 1 && (
+                    <PremiumButton asChild variant="outline" size="sm" className="border-2">
+                      <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}>
+                        <span>← Précédent</span>
+                      </Link>
+                    </PremiumButton>
+                  )}
+                  <span className="text-sm font-bold bg-purple-100 text-purple-700 px-4 py-2 rounded-lg">
+                    Page {page} / {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <PremiumButton asChild gradient="primary" size="sm">
+                      <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}>
+                        <span>Suivant →</span>
+                      </Link>
+                    </PremiumButton>
+                  )}
                 </div>
               </div>
-
-              <CardContent className="p-3">
-                {isUnit && details ? (
-                  <>
-                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">
-                      {details.brand} {details.model}
-                    </h3>
-                    {details.reference && (
-                      <p className="text-xs font-mono text-muted-foreground mb-2 line-clamp-1">
-                        {details.reference}
-                      </p>
-                    )}
-                    <p className="text-lg font-bold text-primary">
-                      {parseFloat(details.price).toFixed(0)}€
-                    </p>
-                  </>
-                ) : details ? (
-                  <>
-                    <h3 className="font-semibold text-sm mb-1">Lot</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                      {details.description}
-                    </p>
-                    <p className="text-lg font-bold text-green-600">
-                      {parseFloat(details.total_price).toFixed(0)}€
-                    </p>
-                  </>
-                ) : null}
-
-                <Button asChild size="sm" className="w-full h-8 text-xs mt-3">
-                  <Link href={`/admin/listings/${listing.id}`}>Gérer</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )
-        })}
+            </CardContent>
+          </Card>
+        )}
       </div>
-
-      {totalPages > 1 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {offset + 1}-{Math.min(offset + pageSize, totalResults)} sur {totalResults}
-              </p>
-              <div className="flex items-center gap-1">
-                {page > 1 && (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`}>
-                      ← Préc.
-                    </Link>
-                  </Button>
-                )}
-                {page < totalPages && (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page + 1) }).toString()}`}>
-                      Suiv. →
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

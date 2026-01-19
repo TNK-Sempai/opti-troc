@@ -29,59 +29,59 @@ export default async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-blue-200/60 shadow-lg">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
               <Image
                 src="/opti-troc-logo.png"
                 alt="Opti-Troc Logo"
                 fill
-                sizes="40px"
+                sizes="48px"
                 className="object-contain"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gradient-primary">
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent">
                 Opti-Troc
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground font-semibold">
                 Marketplace B2B Optique
               </p>
             </div>
           </Link>
 
           {/* Navigation Desktop */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-2">
             <Link
               href="/"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:scale-105"
             >
               Accueil
             </Link>
             <Link
               href="/shop"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:scale-105"
             >
               Marketplace
             </Link>
             <Link
               href="/want-to-buy"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-300 hover:scale-105"
             >
               Want to Buy
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:scale-105"
             >
               À propos
             </Link>
             <Link
               href="/contact"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 hover:scale-105"
             >
               Contact
             </Link>
@@ -92,58 +92,58 @@ export default async function Header() {
             {user && profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mr-2">
-                      <User className="w-4 h-4 text-primary" />
+                  <Button variant="outline" size="sm" className="h-11 px-4 border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 hover:shadow-lg hover:scale-105 transition-all duration-300 font-bold">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-2.5 shadow-md">
+                      <User className="w-4 h-4 text-white" />
                     </div>
                     <span className="hidden md:inline">
                       {profile.first_name} {profile.last_name}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-semibold">
+                <DropdownMenuContent align="end" className="w-64 p-2 shadow-xl border-2 border-blue-200/60">
+                  <div className="px-3 py-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl mb-2">
+                    <p className="text-sm font-bold text-blue-900">
                       {profile.company_name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-blue-700 font-medium">
                       {user.email}
                     </p>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuSeparator className="my-2" />
+                  <DropdownMenuItem asChild className="rounded-lg hover:bg-blue-50 cursor-pointer py-2.5">
                     <Link href="/dashboard">
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      Tableau de bord
+                      <LayoutDashboard className="w-4 h-4 mr-3 text-blue-600" />
+                      <span className="font-semibold">Tableau de bord</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="rounded-lg hover:bg-blue-50 cursor-pointer py-2.5">
                     <Link href="/dashboard/listings">
-                      <Package className="w-4 h-4 mr-2" />
-                      Mes annonces
+                      <Package className="w-4 h-4 mr-3 text-blue-600" />
+                      <span className="font-semibold">Mes annonces</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="rounded-lg hover:bg-emerald-50 cursor-pointer py-2.5">
                     <Link href="/dashboard/wanted-items">
-                      <Search className="w-4 h-4 mr-2" />
-                      Mes recherches
+                      <Search className="w-4 h-4 mr-3 text-emerald-600" />
+                      <span className="font-semibold">Mes recherches</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="rounded-lg hover:bg-blue-50 cursor-pointer py-2.5">
                     <Link href="/dashboard/messages">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Messagerie
+                      <Mail className="w-4 h-4 mr-3 text-blue-600" />
+                      <span className="font-semibold">Messagerie</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuSeparator className="my-2" />
+                  <DropdownMenuItem asChild className="rounded-lg hover:bg-red-50 cursor-pointer py-2.5">
                     <LogoutButton />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <>
-                <Button asChild variant="ghost" size="sm">
+                <Button asChild variant="ghost" size="sm" className="h-11 px-5 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md hover:scale-105 transition-all duration-300 font-bold border border-transparent hover:border-blue-200">
                   <Link href="/login">
                     <User className="w-4 h-4 mr-2" />
                     Connexion
@@ -152,7 +152,7 @@ export default async function Header() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-gradient-primary hover:opacity-90"
+                  className="h-11 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 font-bold text-base"
                 >
                   <Link href="/register">S'inscrire</Link>
                 </Button>

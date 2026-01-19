@@ -1,9 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCard } from '@/components/ui/stat-card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { PremiumButton } from '@/components/ui/premium-button'
 import Link from 'next/link'
-import { FileText, User, Building2, MapPin, Calendar, Users, Package, Mail, TrendingUp } from 'lucide-react'
+import { FileText, User, Building2, MapPin, Calendar, Users, Package, Mail, TrendingUp, Shield } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,200 +43,186 @@ export default async function AdminPage() {
     .limit(5)
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Stats principales */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-1">Vue d'ensemble</h2>
-        <p className="text-sm text-muted-foreground">Statistiques de la plateforme</p>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-purple-50/20 to-blue-50/10 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-neutral-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{totalUsers || 0}</p>
-                <p className="text-xs text-muted-foreground">Utilisateurs</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+        {/* Stats principales */}
+        <div className="mb-8">
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-3">
+            <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-blue-700 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
+              <Shield className="w-10 h-10 text-purple-600" />
+              Administration
+            </span>
+          </h2>
+          <p className="text-lg text-muted-foreground font-medium">Statistiques de la plateforme</p>
+        </div>
 
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-600">{validatedUsers || 0}</p>
-                <p className="text-xs text-muted-foreground">Validés</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <StatCard
+            icon={Users}
+            label="Utilisateurs"
+            value={totalUsers || 0}
+            gradient="primary"
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="Validés"
+            value={validatedUsers || 0}
+            gradient="success"
+          />
+          <StatCard
+            icon={User}
+            label="En attente"
+            value={pendingCount || 0}
+            gradient="secondary"
+          />
+          <StatCard
+            icon={Mail}
+            label="Messages"
+            value={unreadMessages || 0}
+            gradient="primary"
+          />
+          <StatCard
+            icon={Package}
+            label="Annonces"
+            value={totalListings || 0}
+            gradient="purple"
+          />
+        </div>
 
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-yellow-600">{pendingCount || 0}</p>
-                <p className="text-xs text-muted-foreground">En attente</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Mail className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-blue-600">{unreadMessages || 0}</p>
-                <p className="text-xs text-muted-foreground">Messages</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-purple-600">{totalListings || 0}</p>
-                <p className="text-xs text-muted-foreground">Annonces</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Actions rapides */}
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <Card className="border-primary/20 hover:border-primary/50 transition-colors cursor-pointer">
-          <CardContent className="p-6">
-            <Link href="/admin/users?status=pending" className="block">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <User className="w-6 h-6 text-yellow-600" />
+        {/* Actions rapides */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <Link href="/admin/users?status=pending" className="block group">
+            <Card className="border-amber-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-amber-400">
+              <CardContent className="p-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <User className="w-7 h-7 text-white" />
+                    </div>
+                    {pendingCount && pendingCount > 0 && (
+                      <Badge className="bg-gradient-to-r from-amber-600 to-orange-600 text-white border-0 shadow-lg font-bold">{pendingCount}</Badge>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-lg mb-2 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">Validations en attente</h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    Gérer les nouvelles inscriptions
+                  </p>
                 </div>
-                {pendingCount && pendingCount > 0 && (
-                  <Badge className="bg-yellow-600 text-white">{pendingCount}</Badge>
-                )}
-              </div>
-              <h3 className="font-semibold mb-1">Validations en attente</h3>
-              <p className="text-sm text-muted-foreground">
-                Gérer les nouvelles inscriptions
-              </p>
-            </Link>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
-        <Card className="border-primary/20 hover:border-primary/50 transition-colors cursor-pointer">
-          <CardContent className="p-6">
-            <Link href="/admin/messages?status=new" className="block">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Mail className="w-6 h-6 text-blue-600" />
+          <Link href="/admin/messages?status=new" className="block group">
+            <Card className="border-blue-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-blue-400">
+              <CardContent className="p-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Mail className="w-7 h-7 text-white" />
+                    </div>
+                    {unreadMessages && unreadMessages > 0 && (
+                      <Badge className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 shadow-lg font-bold">{unreadMessages}</Badge>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-lg mb-2 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">Nouveaux messages</h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    Répondre aux demandes de contact
+                  </p>
                 </div>
-                {unreadMessages && unreadMessages > 0 && (
-                  <Badge className="bg-blue-600 text-white">{unreadMessages}</Badge>
-                )}
-              </div>
-              <h3 className="font-semibold mb-1">Nouveaux messages</h3>
-              <p className="text-sm text-muted-foreground">
-                Répondre aux demandes de contact
-              </p>
-            </Link>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
-        <Card className="border-primary/20 hover:border-primary/50 transition-colors cursor-pointer">
-          <CardContent className="p-6">
-            <Link href="/dashboard/listings" className="block">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-6 h-6 text-purple-600" />
+          <Link href="/admin/listings" className="block group">
+            <Card className="border-purple-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-purple-400">
+              <CardContent className="p-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Package className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg mb-2 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">Toutes les annonces</h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    Consulter le marketplace complet
+                  </p>
                 </div>
-              </div>
-              <h3 className="font-semibold mb-1">Toutes les annonces</h3>
-              <p className="text-sm text-muted-foreground">
-                Consulter le marketplace complet
-              </p>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
 
-      {/* Liste des comptes en attente */}
-      {pendingUsers && pendingUsers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Dernières demandes</CardTitle>
-                <CardDescription>
-                  {pendingCount ?? 0} compte{(pendingCount ?? 0) > 1 ? 's' : ''} en attente de validation
-                </CardDescription>
+        {/* Liste des comptes en attente */}
+        {pendingUsers && pendingUsers.length > 0 && (
+          <Card className="shadow-xl border-amber-200/60 backdrop-blur-sm bg-white/95 overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-orange-700 p-6 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
               </div>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/admin/users?status=pending">Voir tout</Link>
-              </Button>
+              <div className="flex items-center justify-between relative z-10">
+                <div>
+                  <CardTitle className="text-white text-2xl font-bold mb-2">Dernières demandes</CardTitle>
+                  <CardDescription className="text-amber-100 text-base font-medium">
+                    {pendingCount ?? 0} compte{(pendingCount ?? 0) > 1 ? 's' : ''} en attente de validation
+                  </CardDescription>
+                </div>
+                <PremiumButton asChild variant="outline" size="sm" className="bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm">
+                  <Link href="/admin/users?status=pending"><span>Voir tout</span></Link>
+                </PremiumButton>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {pendingUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="p-4 border rounded-lg hover:border-primary/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm">
-                          {user.first_name} {user.last_name}
-                        </h4>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1">
-                            <Building2 className="w-3 h-3" />
-                            {user.company_name}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {user.city}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(user.created_at).toLocaleDateString('fr-FR')}
-                          </span>
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                {pendingUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="p-5 border-2 border-amber-200/60 rounded-2xl hover:border-amber-400 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-amber-50/30"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+                          <User className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-base mb-1">
+                            {user.first_name} {user.last_name}
+                          </h4>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium">
+                            <span className="flex items-center gap-1.5">
+                              <Building2 className="w-3.5 h-3.5" />
+                              {user.company_name}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5" />
+                              {user.city}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <PremiumButton asChild size="sm" gradient="primary">
+                        <Link href={`/admin/users/${user.id}`}><span>Examiner</span></Link>
+                      </PremiumButton>
                     </div>
-                    <Button asChild size="sm">
-                      <Link href={`/admin/users/${user.id}`}>Examiner</Link>
-                    </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

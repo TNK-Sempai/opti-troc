@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
+import { StatCard } from '@/components/ui/stat-card'
+import { PremiumButton } from '@/components/ui/premium-button'
 import Link from 'next/link'
-import { PlusCircle, Package, Eye, TrendingUp } from 'lucide-react'
+import { PlusCircle, Package, Eye, TrendingUp, Sparkles } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,129 +82,146 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary-dark mb-2">
-          Bienvenue, {profile?.first_name} !
-        </h1>
-        <p className="text-neutral-600">
-          {profile?.company_name} - {profile?.city}
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-orange-50/10 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
       </div>
 
-      {/* Action rapide */}
-      <div className="mb-8">
-        <Button asChild size="lg" className="gap-2">
-          <Link href="/dashboard/listings/new">
-            <PlusCircle className="w-5 h-5" />
-            Créer une nouvelle annonce
-          </Link>
-        </Button>
-      </div>
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent drop-shadow-sm">
+              Bienvenue, {profile?.first_name} !
+            </span>
+          </h1>
+          <p className="text-lg text-muted-foreground font-medium">
+            {profile?.company_name} • {profile?.city}
+          </p>
+        </div>
 
-      {/* Statistiques */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardDescription>Annonces actives</CardDescription>
-              <Package className="w-5 h-5 text-primary" />
-            </div>
-            <CardTitle className="text-3xl">{activeListings || 0}</CardTitle>
-          </CardHeader>
-        </Card>
+        {/* Action rapide */}
+        <div className="mb-8">
+          <PremiumButton asChild size="lg" gradient="secondary" glow className="text-base h-14 px-8 shadow-xl">
+            <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
+              <PlusCircle className="w-5 h-5" />
+              <span>Créer une nouvelle annonce</span>
+            </Link>
+          </PremiumButton>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardDescription>Total annonces</CardDescription>
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
-            <CardTitle className="text-3xl">{totalListings || 0}</CardTitle>
-          </CardHeader>
-        </Card>
+        {/* Statistiques */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            icon={Package}
+            label="Annonces actives"
+            value={activeListings || 0}
+            gradient="primary"
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="Total annonces"
+            value={totalListings || 0}
+            gradient="success"
+          />
+          <StatCard
+            icon={Eye}
+            label="Vues totales"
+            value={0}
+            gradient="purple"
+          />
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardDescription>Vues totales</CardDescription>
-              <Eye className="w-5 h-5 text-primary" />
+        {/* Dernières annonces */}
+        <Card className="shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-6 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
             </div>
-            <CardTitle className="text-3xl">0</CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Dernières annonces */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Mes dernières annonces</CardTitle>
-          <CardDescription>
-            {totalListings === 0 
-              ? "Vous n'avez pas encore créé d'annonce"
-              : `${totalListings} annonce(s) au total`
-            }
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!recentListings || recentListings.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
-              <p className="text-neutral-500 mb-4">Aucune annonce pour le moment</p>
-              <Button asChild>
-                <Link href="/dashboard/listings/new">
-                  Créer ma première annonce
-                </Link>
-              </Button>
+            <div className="relative z-10">
+              <CardTitle className="text-white text-2xl font-bold mb-2 flex items-center gap-3">
+                <Sparkles className="w-6 h-6" />
+                Mes dernières annonces
+              </CardTitle>
+              <CardDescription className="text-blue-100 text-base font-medium">
+                {totalListings === 0
+                  ? "Vous n'avez pas encore créé d'annonce"
+                  : `${totalListings} annonce(s) au total`
+                }
+              </CardDescription>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {enrichedListings.map((listing) => (
-                <div
-                  key={listing.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:border-primary transition-colors"
-                >
-                  <div className="flex-1">
-                    {listing.listing_type === 'unit' && listing.details ? (
-                      <>
-                        <h3 className="font-medium">
-                          {listing.details.brand} {listing.details.model}
-                        </h3>
-                        <p className="text-sm text-neutral-600">
-                          {listing.details.reference && `Réf. ${listing.details.reference} • `}
-                          {listing.details.price !== undefined && listing.details.price !== null
-                            ? `${Number(listing.details.price).toFixed(2)}€`
-                            : 'Prix non défini'}
-                        </p>
-                      </>
-                    ) : listing.listing_type === 'lot' && listing.details ? (
-                      <>
-                        <h3 className="font-medium">Lot de lunettes</h3>
-                        <p className="text-sm text-neutral-600">
-                          {listing.details.quantity} pièces • {listing.details.total_price !== undefined && listing.details.total_price !== null
-                            ? `${Number(listing.details.total_price).toFixed(2)}€`
-                            : 'Prix non défini'}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="font-medium">Annonce</h3>
-                        <p className="text-sm text-neutral-600">Détails non disponibles</p>
-                      </>
-                    )}
+          </div>
+          <CardContent className="p-6">
+            {!recentListings || recentListings.length === 0 ? (
+              <div className="text-center py-16 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
+                <div className="relative z-10">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
+                    <Package className="w-12 h-12 text-blue-600" />
                   </div>
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/dashboard/listings/${listing.id}`}>
-                      Voir
+                  <p className="text-neutral-600 mb-6 text-lg font-medium">Aucune annonce pour le moment</p>
+                  <PremiumButton asChild gradient="primary" glow size="lg" className="shadow-xl">
+                    <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
+                      <PlusCircle className="w-5 h-5" />
+                      <span>Créer ma première annonce</span>
                     </Link>
-                  </Button>
+                  </PremiumButton>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {enrichedListings.map((listing) => (
+                  <div
+                    key={listing.id}
+                    className="flex items-center justify-between p-5 border-2 border-blue-200/60 rounded-2xl hover:border-blue-400 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-blue-50/30 hover:scale-[1.02]"
+                  >
+                    <div className="flex-1">
+                      {listing.listing_type === 'unit' && listing.details ? (
+                        <>
+                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                            {listing.details.brand} {listing.details.model}
+                          </h3>
+                          <p className="text-sm text-muted-foreground font-medium">
+                            {listing.details.reference && `Réf. ${listing.details.reference} • `}
+                            <span className="text-blue-600 font-bold">
+                              {listing.details.price !== undefined && listing.details.price !== null
+                                ? `${Number(listing.details.price).toFixed(0)}€`
+                                : 'Prix non défini'}
+                            </span>
+                          </p>
+                        </>
+                      ) : listing.listing_type === 'lot' && listing.details ? (
+                        <>
+                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                            Lot de lunettes
+                          </h3>
+                          <p className="text-sm text-muted-foreground font-medium">
+                            {listing.details.quantity} pièces • <span className="text-blue-600 font-bold">
+                              {listing.details.total_price !== undefined && listing.details.total_price !== null
+                                ? `${Number(listing.details.total_price).toFixed(0)}€`
+                                : 'Prix non défini'}
+                            </span>
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="font-bold text-lg mb-1">Annonce</h3>
+                          <p className="text-sm text-muted-foreground">Détails non disponibles</p>
+                        </>
+                      )}
+                    </div>
+                    <PremiumButton asChild size="sm" gradient="primary" className="ml-4">
+                      <Link href={`/dashboard/listings/${listing.id}`}><span>Voir</span></Link>
+                    </PremiumButton>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
