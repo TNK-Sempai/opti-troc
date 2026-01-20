@@ -84,7 +84,7 @@ export function AdminNav({ profile }: AdminNavProps) {
   ];
 
   return (
-    <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+    <header className="bg-white/95 backdrop-blur-md border-b-2 border-purple-200/60 sticky top-0 z-50 shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">

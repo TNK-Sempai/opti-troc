@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { ConversationsList } from '@/components/messages/ConversationsList'
 import { ConversationView } from '@/components/messages/ConversationView'
 import { Card } from '@/components/ui/card'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Mail, Inbox } from 'lucide-react'
+import { StatCard } from '@/components/ui/stat-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,42 +95,71 @@ export default async function MessagesPage({ searchParams }: PageProps) {
 
   const selectedConversationId = params.conversation
 
+  // Calculer les statistiques
+  const totalConversations = enrichedConversations.length
+  const unreadConversations = enrichedConversations.filter(c => c.unreadCount > 0).length
+
   return (
-    <div className="h-[calc(100vh-120px)]">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Messagerie</h1>
-        <p className="text-muted-foreground mt-2">
-          Communiquez avec les autres professionnels et l'équipe Opti-Troc
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-purple-50/10 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6 h-[calc(100%-100px)]">
-        {/* Liste des conversations */}
-        <div className="lg:col-span-1">
-          <ConversationsList
-            conversations={enrichedConversations}
-            selectedId={selectedConversationId}
-            currentUserId={user.id}
-          />
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
+              <Mail className="w-10 h-10 text-blue-600" />
+              Messagerie
+            </span>
+          </h1>
+          <p className="text-lg text-muted-foreground font-medium">
+            Communiquez avec les autres professionnels et l'équipe Opti-Troc
+          </p>
         </div>
 
-        {/* Vue de la conversation */}
-        <div className="lg:col-span-2">
-          {selectedConversationId ? (
-            <ConversationView
-              conversationId={selectedConversationId}
-              currentUserId={user.id}
-            />
-          ) : (
-            <Card className="h-full flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-semibold mb-2">Aucune conversation sélectionnée</p>
-                <p className="text-sm">Sélectionnez une conversation dans la liste</p>
-              </div>
-            </Card>
-          )}
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <StatCard icon={Inbox} label="Conversations" value={totalConversations} gradient="primary" />
+          <StatCard icon={MessageSquare} label="Non lues" value={unreadConversations} gradient={unreadConversations > 0 ? 'danger' : 'secondary'} />
         </div>
+
+        {/* Messaging layout */}
+        <Card className="shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95 overflow-hidden">
+          <div className="grid lg:grid-cols-3 h-[calc(100vh-350px)] min-h-[500px]">
+            {/* Liste des conversations */}
+            <div className="lg:col-span-1 border-r border-blue-100">
+              <ConversationsList
+                conversations={enrichedConversations}
+                selectedId={selectedConversationId}
+                currentUserId={user.id}
+              />
+            </div>
+
+            {/* Vue de la conversation */}
+            <div className="lg:col-span-2">
+              {selectedConversationId ? (
+                <ConversationView
+                  conversationId={selectedConversationId}
+                  currentUserId={user.id}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-50/30 to-purple-50/30">
+                  <div className="text-center text-muted-foreground p-8">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
+                      <MessageSquare className="w-12 h-12 text-blue-600" />
+                    </div>
+                    <p className="text-xl font-bold text-neutral-700 mb-2">Aucune conversation sélectionnée</p>
+                    <p className="text-base font-medium">Sélectionnez une conversation dans la liste pour commencer</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   )

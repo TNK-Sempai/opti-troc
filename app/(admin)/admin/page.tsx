@@ -50,7 +50,7 @@ export default async function AdminPage() {
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         {/* Stats principales */}
         <div className="mb-8">
           <h2 className="text-4xl md:text-5xl font-extrabold mb-3">
@@ -101,7 +101,7 @@ export default async function AdminPage() {
             <Card className="border-amber-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-amber-400">
               <CardContent className="p-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <User className="w-7 h-7 text-white" />
@@ -123,7 +123,7 @@ export default async function AdminPage() {
             <Card className="border-blue-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-blue-400">
               <CardContent className="p-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Mail className="w-7 h-7 text-white" />
@@ -145,7 +145,7 @@ export default async function AdminPage() {
             <Card className="border-purple-200/60 hover:shadow-xl transition-all duration-300 overflow-hidden h-full hover:border-purple-400">
               <CardContent className="p-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <Package className="w-7 h-7 text-white" />
@@ -168,7 +168,7 @@ export default async function AdminPage() {
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
               </div>
-              <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center justify-between relative">
                 <div>
                   <CardTitle className="text-white text-2xl font-bold mb-2">Dernières demandes</CardTitle>
                   <CardDescription className="text-amber-100 text-base font-medium">

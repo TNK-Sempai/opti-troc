@@ -267,7 +267,7 @@ export default async function ShopPage({
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-3">
@@ -348,7 +348,7 @@ export default async function ShopPage({
               <Card className="border-neutral-200/60 shadow-xl overflow-hidden">
                 <CardContent className="text-center py-24 relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-orange-50/30 opacity-50" />
-                  <div className="relative z-10">
+                  <div className="relative">
                     <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
                       <Package className="w-12 h-12 text-blue-600" />
                     </div>

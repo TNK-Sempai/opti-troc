@@ -72,7 +72,7 @@ export default async function WantToBuyPage() {
         <div className="absolute top-20 left-10 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full mb-6 border border-white/20">
               <Search className="w-5 h-5" />
@@ -200,7 +200,7 @@ export default async function WantToBuyPage() {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 text-center relative">
           <Sparkles className="w-16 h-16 mx-auto mb-6 text-teal-300 animate-pulse" />
 
           <h2 className="text-4xl md:text-5xl font-extrabold mb-6">

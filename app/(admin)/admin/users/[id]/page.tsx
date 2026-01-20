@@ -54,7 +54,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-5xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-5xl relative">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Button asChild variant="ghost" size="sm" className="hover:bg-white/80 hover:shadow-md transition-all duration-300 border border-neutral-200">
@@ -84,7 +84,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <CardTitle className="text-white text-xl font-bold relative z-10">Informations personnelles</CardTitle>
+                <CardTitle className="text-white text-xl font-bold relative">Informations personnelles</CardTitle>
               </div>
               <CardContent className="p-6">
                 <div className="grid md:grid-cols-2 gap-5">
@@ -115,7 +115,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <CardTitle className="text-white text-xl font-bold relative z-10">Entreprise</CardTitle>
+                <CardTitle className="text-white text-xl font-bold relative">Entreprise</CardTitle>
               </div>
               <CardContent className="p-6">
                 <div className="grid md:grid-cols-2 gap-5">
@@ -161,7 +161,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <CardTitle className="text-white text-lg font-bold relative z-10">Informations</CardTitle>
+                <CardTitle className="text-white text-lg font-bold relative">Informations</CardTitle>
               </div>
               <CardContent className="p-5 space-y-4">
                 <div className="space-y-1">
@@ -196,7 +196,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <CardTitle className="text-white text-lg font-bold relative z-10">Actions</CardTitle>
+                <CardTitle className="text-white text-lg font-bold relative">Actions</CardTitle>
               </div>
               <CardContent className="p-5 space-y-2">
                 <UserActionButtons userId={userProfile.id} status={userProfile.status} />

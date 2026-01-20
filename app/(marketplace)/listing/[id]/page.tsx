@@ -131,7 +131,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-6 relative z-10">
+      <div className="container mx-auto px-4 py-6 relative">
         {/* Breadcrumb */}
         <Button asChild variant="ghost" size="lg" className="mb-6 hover:bg-blue-100 hover:text-blue-700 transition-all duration-300 font-semibold shadow-sm hover:shadow-md hover:scale-105">
           <Link href="/shop">
@@ -364,7 +364,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     <div className="absolute inset-0 opacity-20">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                     </div>
-                    <span className="text-4xl font-extrabold relative z-10 drop-shadow-lg">
+                    <span className="text-4xl font-extrabold relative drop-shadow-lg">
                       {isUnit && details
                         ? `${parseFloat(details.price).toFixed(0)}€`
                         : `${parseFloat(details?.total_price || 0).toFixed(0)}€`
@@ -376,7 +376,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     <div className="absolute inset-0 opacity-20">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                     </div>
-                    <div className="flex items-center gap-3 relative z-10">
+                    <div className="flex items-center gap-3 relative">
                       <Lock className="w-7 h-7" />
                       <div>
                         <p className="text-base font-bold">Prix masqué</p>
@@ -442,7 +442,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     <div className="absolute inset-0 opacity-20">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                     </div>
-                    <h3 className="text-sm font-bold text-white uppercase relative z-10 flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white uppercase relative flex items-center gap-2">
                       <Building2 className="w-4 h-4" />
                       Vendeur
                     </h3>

@@ -84,7 +84,7 @@ export default async function MarketplacePage() {
         <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 text-center relative">
           {/* Badge animé */}
           <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full mb-8 border border-white/20 hover:scale-105 transition-transform duration-300">
             <span className="relative flex h-3 w-3">
@@ -297,7 +297,7 @@ export default async function MarketplacePage() {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 text-center relative">
           <Sparkles className="w-16 h-16 mx-auto mb-6 text-orange-300 animate-pulse" />
 
           <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
@@ -319,7 +319,7 @@ export default async function MarketplacePage() {
               </Link>
             </PremiumButton>
 
-            <Button asChild size="lg" variant="outline" className="h-14 px-10 text-lg border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm font-semibold">
+            <Button asChild size="lg" className="h-14 px-10 text-lg bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-xl">
               <Link href="/shop">
                 Parcourir les annonces
                 <ArrowRight className="w-5 h-5 ml-2" />

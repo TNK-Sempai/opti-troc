@@ -60,7 +60,7 @@ export default async function AdminMessagesPage({
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
@@ -252,7 +252,7 @@ export default async function AdminMessagesPage({
             ) : (
               <div className="text-center py-24 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
                     <Mail className="w-12 h-12 text-blue-600" />
                   </div>

@@ -89,7 +89,7 @@ export default async function DashboardPage() {
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
             <div className="absolute inset-0 opacity-20">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
             </div>
-            <div className="relative z-10">
+            <div className="relative">
               <CardTitle className="text-white text-2xl font-bold mb-2 flex items-center gap-3">
                 <Sparkles className="w-6 h-6" />
                 Mes dernières annonces
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
             {!recentListings || recentListings.length === 0 ? (
               <div className="text-center py-16 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
                     <Package className="w-12 h-12 text-blue-600" />
                   </div>

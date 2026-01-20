@@ -60,17 +60,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-neutral-50 flex items-center justify-center p-4 py-8 md:py-12">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-primary-dark">
+        <div className="text-center mb-6 md:mb-8">
+          <Link href="/" className="text-xl md:text-2xl font-bold text-primary-dark">
             Opti-troc
           </Link>
-          <h1 className="text-3xl font-bold text-primary-dark mt-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary-dark mt-3 md:mt-4">
             Connexion
           </h1>
-          <p className="text-neutral-600 mt-2">
+          <p className="text-neutral-600 mt-1 md:mt-2 text-sm md:text-base">
             Accédez à votre compte professionnel
           </p>
         </div>

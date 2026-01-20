@@ -57,7 +57,7 @@ export default async function DashboardWantedItemsPage() {
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
@@ -86,7 +86,7 @@ export default async function DashboardWantedItemsPage() {
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
               </div>
-              <div className="relative z-10 flex items-center gap-3">
+              <div className="relative flex items-center gap-3">
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
                   <Bell className="w-6 h-6 text-white" />
                 </div>
@@ -119,7 +119,7 @@ export default async function DashboardWantedItemsPage() {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <div className="relative z-10 flex items-center gap-3">
+                <div className="relative flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
                     <Plus className="w-6 h-6 text-white" />
                   </div>
@@ -144,7 +144,7 @@ export default async function DashboardWantedItemsPage() {
                 <div className="absolute inset-0 opacity-20">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
                 </div>
-                <div className="relative z-10">
+                <div className="relative">
                   <CardTitle className="text-white text-xl font-bold flex items-center gap-2">
                     <Sparkles className="w-5 h-5" />
                     Mes recherches en cours
@@ -158,7 +158,7 @@ export default async function DashboardWantedItemsPage() {
                 {!wantedItems || wantedItems.length === 0 ? (
                   <div className="text-center py-16 relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-neutral-50 opacity-50 rounded-xl" />
-                    <div className="relative z-10">
+                    <div className="relative">
                       <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl flex items-center justify-center shadow-lg">
                         <Search className="w-10 h-10 text-emerald-600" />
                       </div>

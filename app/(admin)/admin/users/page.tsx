@@ -67,7 +67,7 @@ export default async function AdminUsersPage({
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -251,7 +251,7 @@ export default async function AdminUsersPage({
             ) : (
               <div className="text-center py-24 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-neutral-50 opacity-50 rounded-xl" />
-                <div className="relative z-10">
+                <div className="relative">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center shadow-lg">
                     <User className="w-12 h-12 text-purple-600" />
                   </div>

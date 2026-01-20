@@ -13,18 +13,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search, SlidersHorizontal, X } from 'lucide-react'
 
 interface MarketplaceFiltersProps {
   brands: string[]
   models: Record<string, string[]>
 }
 
-export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) {
-  const router = useRouter()
+// Composant de filtres réutilisable
+function FilterForm({
+  brands,
+  models,
+  onSubmit,
+  onReset,
+}: {
+  brands: string[]
+  models: Record<string, string[]>
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  onReset: () => void
+}) {
   const searchParams = useSearchParams()
-
   const [selectedBrand, setSelectedBrand] = useState(searchParams.get('brand') || 'all')
   const [availableModels, setAvailableModels] = useState<string[]>([])
 
@@ -36,12 +52,213 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
     }
   }, [selectedBrand, models])
 
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      {/* Recherche */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Recherche
+        </Label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <Input
+            name="search"
+            placeholder="Marque, modèle..."
+            defaultValue={searchParams.get('search') || ''}
+            className="pl-10 h-10"
+          />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Type */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Type
+        </Label>
+        <Select name="type" defaultValue={searchParams.get('type') || 'all'}>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous types</SelectItem>
+            <SelectItem value="unit">Unitaire</SelectItem>
+            <SelectItem value="lot">Lot</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Marque */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Marque
+        </Label>
+        <Select
+          name="brand"
+          value={selectedBrand}
+          onValueChange={setSelectedBrand}
+        >
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Toutes" />
+          </SelectTrigger>
+          <SelectContent className="max-h-[200px]">
+            <SelectItem value="all">Toutes</SelectItem>
+            {brands.map((brand) => (
+              <SelectItem key={brand} value={brand}>
+                {brand}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Modèle */}
+      {availableModels.length > 0 && (
+        <div>
+          <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+            Modèle
+          </Label>
+          <Select name="model" defaultValue={searchParams.get('model') || 'all'}>
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Tous" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[200px]">
+              <SelectItem value="all">Tous</SelectItem>
+              {availableModels.map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <Separator />
+
+      {/* Genre */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Genre
+        </Label>
+        <Select name="gender" defaultValue={searchParams.get('gender') || 'all'}>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="homme">Homme</SelectItem>
+            <SelectItem value="femme">Femme</SelectItem>
+            <SelectItem value="mixte">Mixte</SelectItem>
+            <SelectItem value="enfant">Enfant</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Catégorie */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Catégorie
+        </Label>
+        <Select name="category" defaultValue={searchParams.get('category') || 'all'}>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes</SelectItem>
+            <SelectItem value="vue">Vue</SelectItem>
+            <SelectItem value="solaires">Solaires</SelectItem>
+            <SelectItem value="sport">Sport</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* État */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          État
+        </Label>
+        <Select name="state" defaultValue={searchParams.get('state') || 'all'}>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="neuf_etiquette">Neuf étiquette</SelectItem>
+            <SelectItem value="neuf_sans_etiquette">Neuf</SelectItem>
+            <SelectItem value="tres_bon">Très bon</SelectItem>
+            <SelectItem value="bon">Bon</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Separator />
+
+      {/* Prix */}
+      <div>
+        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+          Prix (€)
+        </Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            name="minPrice"
+            type="number"
+            placeholder="Min"
+            defaultValue={searchParams.get('minPrice') || ''}
+            className="h-10"
+          />
+          <Input
+            name="maxPrice"
+            type="number"
+            placeholder="Max"
+            defaultValue={searchParams.get('maxPrice') || ''}
+            className="h-10"
+          />
+        </div>
+      </div>
+
+      {/* Boutons */}
+      <div className="space-y-2 pt-4">
+        <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700 font-semibold">
+          Appliquer
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full h-10"
+          onClick={onReset}
+        >
+          Réinitialiser
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Compter les filtres actifs
+  const activeFiltersCount = [
+    searchParams.get('search'),
+    searchParams.get('type') && searchParams.get('type') !== 'all',
+    searchParams.get('brand') && searchParams.get('brand') !== 'all',
+    searchParams.get('model') && searchParams.get('model') !== 'all',
+    searchParams.get('gender') && searchParams.get('gender') !== 'all',
+    searchParams.get('category') && searchParams.get('category') !== 'all',
+    searchParams.get('state') && searchParams.get('state') !== 'all',
+    searchParams.get('minPrice'),
+    searchParams.get('maxPrice'),
+  ].filter(Boolean).length
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const params = new URLSearchParams()
 
-    // Ajouter tous les paramètres non vides
     formData.forEach((value, key) => {
       if (value && value !== 'all') {
         params.set(key, value.toString())
@@ -49,214 +266,74 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
     })
 
     router.push(`/shop?${params.toString()}`)
+    setIsOpen(false)
+  }
+
+  function handleReset() {
+    router.push('/shop')
+    setIsOpen(false)
   }
 
   return (
-    <Card className="border-blue-200/60 shadow-xl overflow-hidden backdrop-blur-sm bg-white/95 sticky top-20">
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-5 relative overflow-hidden">
-        {/* Animated background pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
-        </div>
-
-        <div className="flex items-center gap-3 text-white relative z-10">
-          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-            <SlidersHorizontal className="w-5 h-5" />
-          </div>
-          <h2 className="font-bold text-lg">Filtres</h2>
-        </div>
+    <>
+      {/* Version Mobile - Bouton qui ouvre un Sheet */}
+      <div className="lg:hidden">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="w-full h-12 justify-between border-2">
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4" />
+                Filtres
+              </span>
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle className="flex items-center gap-2">
+                <SlidersHorizontal className="w-5 h-5" />
+                Filtres
+              </SheetTitle>
+            </SheetHeader>
+            <FilterForm
+              brands={brands}
+              models={models}
+              onSubmit={handleSubmit}
+              onReset={handleReset}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
 
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Recherche */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Recherche
-            </Label>
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
-              <Input
-                name="search"
-                placeholder="Marque, modèle..."
-                defaultValue={searchParams.get('search') || ''}
-                className="pl-10 h-11 border-neutral-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-sm"
-              />
+      {/* Version Desktop - Sidebar */}
+      <div className="hidden lg:block">
+        <Card className="border-0 shadow-md overflow-hidden bg-white rounded-xl">
+          <div className="bg-neutral-900 p-4">
+            <div className="flex items-center gap-2 text-white">
+              <SlidersHorizontal className="w-5 h-5" />
+              <h2 className="font-bold">Filtres</h2>
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-auto">
+                  {activeFiltersCount}
+                </span>
+              )}
             </div>
           </div>
 
-          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
-
-          {/* Type */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Type
-            </Label>
-            <Select name="type" defaultValue={searchParams.get('type') || 'all'}>
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous types</SelectItem>
-                <SelectItem value="unit">📦 Unitaire</SelectItem>
-                <SelectItem value="lot">📚 Lot</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Marque - Dynamique */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Marque
-            </Label>
-            <Select
-              name="brand"
-              value={selectedBrand}
-              onValueChange={setSelectedBrand}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Toutes les marques" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                <SelectItem value="all">Toutes les marques</SelectItem>
-                {brands.map((brand) => (
-                  <SelectItem key={brand} value={brand}>
-                    {brand}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Modèle - Dynamique basé sur la marque */}
-          {availableModels.length > 0 && (
-            <div>
-              <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-                <div className="w-1 h-4 bg-blue-600 rounded-full" />
-                Modèle
-              </Label>
-              <Select name="model" defaultValue={searchParams.get('model') || 'all'}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Tous les modèles" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  <SelectItem value="all">Tous les modèles</SelectItem>
-                  {availableModels.map((model) => (
-                    <SelectItem key={model} value={model}>
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
-
-          {/* Genre */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Genre
-            </Label>
-            <Select name="gender" defaultValue={searchParams.get('gender') || 'all'}>
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="homme">Homme</SelectItem>
-                <SelectItem value="femme">Femme</SelectItem>
-                <SelectItem value="mixte">Mixte</SelectItem>
-                <SelectItem value="enfant">Enfant</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Catégorie */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Catégorie
-            </Label>
-            <Select name="category" defaultValue={searchParams.get('category') || 'all'}>
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes</SelectItem>
-                <SelectItem value="vue">Vue</SelectItem>
-                <SelectItem value="solaires">Solaires</SelectItem>
-                <SelectItem value="sport">Sport</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* État */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              État
-            </Label>
-            <Select name="state" defaultValue={searchParams.get('state') || 'all'}>
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="neuf_etiquette">Neuf étiquette</SelectItem>
-                <SelectItem value="neuf_sans_etiquette">Neuf</SelectItem>
-                <SelectItem value="tres_bon">Très bon</SelectItem>
-                <SelectItem value="bon">Bon</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Separator className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
-
-          {/* Prix */}
-          <div>
-            <Label className="text-xs font-bold text-blue-700 uppercase mb-2.5 flex items-center gap-2">
-              <div className="w-1 h-4 bg-blue-600 rounded-full" />
-              Prix (€)
-            </Label>
-            <div className="space-y-2">
-              <Input
-                name="minPrice"
-                type="number"
-                placeholder="Min"
-                defaultValue={searchParams.get('minPrice') || ''}
-                className="h-10"
-              />
-              <Input
-                name="maxPrice"
-                type="number"
-                placeholder="Max"
-                defaultValue={searchParams.get('maxPrice') || ''}
-                className="h-10"
-              />
-            </div>
-          </div>
-
-          {/* Boutons */}
-          <div className="space-y-3 pt-4">
-            <Button type="submit" className="w-full h-12 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-bold text-base">
-              Appliquer les filtres
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-11 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
-              onClick={() => router.push('/shop')}
-            >
-              Réinitialiser tout
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          <CardContent className="p-4">
+            <FilterForm
+              brands={brands}
+              models={models}
+              onSubmit={handleSubmit}
+              onReset={handleReset}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

@@ -34,7 +34,7 @@ export default async function AdminListingsPage({
       unit_listings(*),
       lot_listings(*),
       listing_photos(*),
-      user_profiles(company_name, city)
+      seller:user_profiles!listings_user_id_fkey(company_name, city)
     `, { count: 'exact' })
 
   if (params.type && params.type !== 'all') {
@@ -47,6 +47,13 @@ export default async function AdminListingsPage({
     console.error('Error fetching listings:', error)
   }
 
+  // Debug: log les résultats
+  console.log('[Admin Listings] Query result:', {
+    dataLength: allListings?.length ?? 'null',
+    count,
+    error: error?.message || null
+  })
+
   // Utiliser un tableau vide si pas de données
   const listings = allListings || []
 
@@ -56,8 +63,8 @@ export default async function AdminListingsPage({
       ? (Array.isArray(listing.unit_listings) ? listing.unit_listings[0] : listing.unit_listings)
       : (Array.isArray(listing.lot_listings) ? listing.lot_listings[0] : listing.lot_listings)
     const photo = listing.listing_photos?.find((p: any) => p.is_primary) || listing.listing_photos?.[0]
-    const seller = listing.user_profiles
-    return { ...listing, details, photo, seller }
+    // seller est déjà aliasé dans la requête
+    return { ...listing, details, photo }
   })
 
   if (params.search) {
@@ -101,7 +108,7 @@ export default async function AdminListingsPage({
         <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
@@ -194,7 +201,7 @@ export default async function AdminListingsPage({
           <Card className="shadow-xl border-purple-200/60 backdrop-blur-sm bg-white/95">
             <CardContent className="text-center py-24 relative">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-neutral-50 opacity-50 rounded-xl" />
-              <div className="relative z-10">
+              <div className="relative">
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center shadow-lg">
                   <Package className="w-12 h-12 text-purple-600" />
                 </div>

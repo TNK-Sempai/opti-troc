@@ -1,139 +1,265 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PremiumButton } from '@/components/ui/premium-button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, Layers, Eye, Calendar, Edit, Trash2 } from 'lucide-react'
+import {
+  Package,
+  Layers,
+  Eye,
+  Calendar,
+  Edit,
+  Trash2,
+  ExternalLink,
+  CheckCircle,
+  PauseCircle,
+  ShoppingBag,
+  Clock,
+  TrendingUp
+} from 'lucide-react'
 import { deleteListing } from './[id]/actions'
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffTime = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return "Aujourd'hui"
+  if (diffDays === 1) return "Hier"
+  if (diffDays < 7) return `Il y a ${diffDays} jours`
+  if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} sem.`
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function formatCondition(condition: string) {
+  const conditions: Record<string, { label: string; color: string }> = {
+    'new': { label: 'Neuf', color: 'bg-emerald-100 text-emerald-700' },
+    'like_new': { label: 'Comme neuf', color: 'bg-blue-100 text-blue-700' },
+    'good': { label: 'Bon état', color: 'bg-amber-100 text-amber-700' },
+    'fair': { label: 'État correct', color: 'bg-orange-100 text-orange-700' },
+  }
+  return conditions[condition] || { label: condition, color: 'bg-neutral-100 text-neutral-700' }
+}
 
 export default function ListingsList({ listings }: { listings: any[] }) {
   return (
-    <div className="space-y-3">
-      {listings.map((listing) => (
-        <Card key={listing.id} className="overflow-hidden hover:shadow-md transition-shadow border-neutral-200">
-          <div className="flex gap-4 p-4">
-            {/* Image */}
-            <div className="relative w-24 h-24 flex-shrink-0 bg-neutral-50 rounded overflow-hidden">
-              {listing.photo ? (
-                <Image
-                  src={listing.photo.photo_url}
-                  alt="Produit"
-                  fill
-                  className="object-cover"
-                  sizes="96px"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {listing.listing_type === 'unit' ? (
-                    <Package className="w-8 h-8 text-neutral-300" />
-                  ) : (
-                    <Layers className="w-8 h-8 text-neutral-300" />
-                  )}
-                </div>
-              )}
-            </div>
+    <div className="space-y-4">
+      {listings.map((listing) => {
+        const isUnit = listing.listing_type === 'unit'
+        const details = listing.details
+        const isActive = listing.status === 'active'
+        const isSold = listing.status === 'sold'
+        const condition = details?.condition ? formatCondition(details.condition) : null
 
-            {/* Infos */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <div className="flex-1 min-w-0">
-                  {listing.listing_type === 'unit' && listing.details ? (
-                    <>
-                      <h3 className="font-semibold text-base truncate">
-                        {listing.details.brand} {listing.details.model}
-                      </h3>
-                      {listing.details.reference && (
-                        <p className="text-sm font-mono text-neutral-600">
-                          {listing.details.reference}
-                        </p>
-                      )}
-                    </>
-                  ) : listing.listing_type === 'lot' && listing.details ? (
-                    <>
-                      <h3 className="font-semibold text-base">Lot de lunettes</h3>
-                      <p className="text-sm text-neutral-600 line-clamp-1">
-                        {listing.details.description}
-                      </p>
-                    </>
-                  ) : null}
-                </div>
+        return (
+          <Card
+            key={listing.id}
+            className={`overflow-hidden transition-all duration-300 border-0 shadow-md hover:shadow-xl bg-white ${
+              isSold ? 'opacity-70' : ''
+            }`}
+          >
+            <div className="flex gap-0">
+              {/* Image - Plus grande et carrée */}
+              <div className="relative w-40 h-40 flex-shrink-0 bg-neutral-100 overflow-hidden">
+                {listing.photo ? (
+                  <Image
+                    src={listing.photo.photo_url}
+                    alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    sizes="160px"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+                    {isUnit ? (
+                      <Package className="w-12 h-12 text-neutral-300" />
+                    ) : (
+                      <Layers className="w-12 h-12 text-neutral-300" />
+                    )}
+                  </div>
+                )}
 
-                {/* Prix */}
-                <div className="text-right flex-shrink-0">
-                  {listing.listing_type === 'unit' && listing.details ? (
-                    <p className="text-xl font-bold text-primary">
-                      {parseFloat(listing.details.price).toFixed(2)}€
-                    </p>
-                  ) : listing.listing_type === 'lot' && listing.details ? (
-                    <p className="text-xl font-bold text-green-600">
-                      {parseFloat(listing.details.total_price).toFixed(2)}€
-                    </p>
-                  ) : null}
+                {/* Status overlay si vendu */}
+                {isSold && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="bg-purple-600 text-white px-4 py-1 rounded-full font-bold text-sm shadow-lg transform -rotate-12">
+                      VENDU
+                    </div>
+                  </div>
+                )}
+
+                {/* Type badge */}
+                <div className="absolute top-2 left-2">
+                  <Badge className={`text-[10px] font-bold border-0 shadow-sm ${
+                    isUnit ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+                  }`}>
+                    {isUnit ? 'UNITAIRE' : 'LOT'}
+                  </Badge>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge className={listing.listing_type === 'unit' ? 'bg-primary' : 'bg-green-600'}>
-                    {listing.listing_type === 'unit' ? 'Unitaire' : 'Lot'}
-                  </Badge>
-                  <Badge variant="outline" className={
-                    listing.status === 'active' ? 'border-green-600 text-green-700' : ''
-                  }>
-                    {listing.status === 'active' ? 'Actif' : 
-                     listing.status === 'sold' ? 'Vendu' : 'Pausé'}
-                  </Badge>
-                  
-                  <div className="flex items-center gap-3 text-sm text-neutral-600">
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-4 h-4" />
-                      {listing.views_count || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(listing.created_at).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                    </span>
+              {/* Contenu principal */}
+              <div className="flex-1 p-5 flex flex-col min-w-0">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  {/* Infos produit */}
+                  <div className="flex-1 min-w-0">
+                    {isUnit && details ? (
+                      <>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-xl text-neutral-900 truncate">
+                            {details.brand}
+                          </h3>
+                          {condition && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${condition.color}`}>
+                              {condition.label}
+                            </span>
+                          )}
+                        </div>
+                        {details.model && (
+                          <p className="text-base text-neutral-600 font-medium truncate mb-1">
+                            {details.model}
+                          </p>
+                        )}
+                        {details.reference && (
+                          <span className="inline-flex items-center gap-1 text-xs font-mono bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded">
+                            <span className="text-neutral-400">REF:</span>
+                            {details.reference}
+                          </span>
+                        )}
+                      </>
+                    ) : details ? (
+                      <>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-xl text-neutral-900">
+                            Lot de lunettes
+                          </h3>
+                          {details.quantity && (
+                            <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                              {details.quantity} pièces
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-base text-neutral-600 line-clamp-1">
+                          {details.description}
+                        </p>
+                      </>
+                    ) : null}
+                  </div>
+
+                  {/* Prix */}
+                  <div className="text-right flex-shrink-0">
+                    {isUnit && details ? (
+                      <p className="text-3xl font-black text-blue-600">
+                        {parseFloat(details.price).toFixed(0)}€
+                      </p>
+                    ) : details ? (
+                      <>
+                        <p className="text-3xl font-black text-emerald-600">
+                          {parseFloat(details.total_price).toFixed(0)}€
+                        </p>
+                        {details.quantity && (
+                          <p className="text-xs text-neutral-500 mt-1">
+                            ≈ {(parseFloat(details.total_price) / details.quantity).toFixed(0)}€/pièce
+                          </p>
+                        )}
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/dashboard/listings/${listing.id}/edit`}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Modifier
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm">
-                    <Link href={`/dashboard/listings/${listing.id}`}>
-                      Voir
-                    </Link>
-                  </Button>
-                  <form action={deleteListing}>
-                    <input type="hidden" name="listingId" value={listing.id} />
-                    <Button 
-                      type="submit" 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={(e) => {
-                        if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {
-                          e.preventDefault()
-                        }
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </form>
+                {/* Métadonnées et actions */}
+                <div className="mt-auto flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm">
+                    {/* Status */}
+                    {!isSold && (
+                      <span className={`inline-flex items-center gap-1.5 font-semibold ${
+                        isActive ? 'text-emerald-600' : 'text-amber-600'
+                      }`}>
+                        {isActive ? (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+                            En ligne
+                          </>
+                        ) : (
+                          <>
+                            <PauseCircle className="w-4 h-4" />
+                            En pause
+                          </>
+                        )}
+                      </span>
+                    )}
+
+                    {/* Vues */}
+                    <span className="flex items-center gap-1.5 text-neutral-500">
+                      <Eye className="w-4 h-4" />
+                      {listing.views_count || 0} vues
+                    </span>
+
+                    {/* Date */}
+                    <span className="flex items-center gap-1.5 text-neutral-500">
+                      <Clock className="w-4 h-4" />
+                      {formatDate(listing.created_at)}
+                    </span>
+
+                    {/* Infos supplémentaires pour unitaire */}
+                    {isUnit && details && (
+                      <>
+                        {details.gender && (
+                          <span className="text-neutral-400">
+                            {details.gender === 'men' ? 'Homme' : details.gender === 'women' ? 'Femme' : 'Mixte'}
+                          </span>
+                        )}
+                        {details.frame_type && (
+                          <span className="text-neutral-400">
+                            {details.frame_type === 'optical' ? 'Optique' : 'Solaire'}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <PremiumButton asChild size="sm" variant="outline" className="h-9 border-neutral-200">
+                      <Link href={`/dashboard/listings/${listing.id}/edit`} className="inline-flex items-center gap-1.5">
+                        <Edit className="w-3.5 h-3.5" />
+                        Modifier
+                      </Link>
+                    </PremiumButton>
+
+                    <PremiumButton asChild size="sm" gradient="primary" className="h-9">
+                      <Link href={`/dashboard/listings/${listing.id}`} className="inline-flex items-center gap-1.5">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Voir
+                      </Link>
+                    </PremiumButton>
+
+                    <form action={deleteListing}>
+                      <input type="hidden" name="listingId" value={listing.id} />
+                      <PremiumButton
+                        type="submit"
+                        size="sm"
+                        variant="outline"
+                        className="h-9 px-3 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {
+                            e.preventDefault()
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </PremiumButton>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
-      ))}
+          </Card>
+        )
+      })}
     </div>
   )
 }
