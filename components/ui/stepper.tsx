@@ -31,7 +31,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                     {
                       'bg-primary text-white': isCurrent,
                       'bg-success text-white': isCompleted,
-                      'bg-neutral-200 text-neutral-500': isUpcoming,
+                      'bg-light-grey text-medium-grey': isUpcoming,
                     }
                   )}
                 >
@@ -49,14 +49,14 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                       'text-sm font-medium',
                       {
                         'text-primary': isCurrent,
-                        'text-neutral-900': isCompleted,
-                        'text-neutral-500': isUpcoming,
+                        'text-charcoal': isCompleted,
+                        'text-medium-grey': isUpcoming,
                       }
                     )}
                   >
                     {step.title}
                   </p>
-                  <p className="text-xs text-neutral-500 mt-1">
+                  <p className="text-xs text-medium-grey mt-1">
                     {step.description}
                   </p>
                 </div>
@@ -69,7 +69,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                     'flex-1 h-0.5 mx-4 transition-all',
                     {
                       'bg-success': isCompleted,
-                      'bg-neutral-200': !isCompleted,
+                      'bg-light-grey': !isCompleted,
                     }
                   )}
                 />

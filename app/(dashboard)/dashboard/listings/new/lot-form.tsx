@@ -263,7 +263,7 @@ export default function LotListingForm({ onBack }: LotListingFormProps) {
             {/* Photos */}
             <div>
               <Label>Photos * (1 à 10 photos)</Label>
-              <p className="text-sm text-neutral-500 mb-2">
+              <p className="text-sm text-medium-grey mb-2">
                 Photographiez le lot dans son ensemble et quelques détails
               </p>
               <FileUpload
@@ -286,7 +286,7 @@ export default function LotListingForm({ onBack }: LotListingFormProps) {
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="flex-1 bg-green-600 hover:bg-green-700">
+              <Button type="submit" disabled={isSubmitting} className="flex-1 bg-fern hover:bg-hunter-green">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

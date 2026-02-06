@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { loginSchema, type LoginForm } from '@/lib/validations/auth'
 import { login } from './actions'
@@ -50,7 +51,7 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard')
       }
-      
+
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
@@ -60,23 +61,34 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-neutral-50 flex items-center justify-center p-4 py-8 md:py-12">
+    <div className="min-h-dvh bg-dust-grey flex items-center justify-center p-4 py-8 md:py-12 relative">
+      {/* Bouton retour */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 text-dark-grey hover:text-pine-teal transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Retour à l'accueil</span>
+      </Link>
+
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6 md:mb-8">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-primary-dark">
-            Opti-troc
+          <Link href="/" className="flex justify-center">
+            <div className="relative w-40 h-14">
+              <Image src="/opti-troc-logo.png" alt="Opti-Troc" fill className="object-contain" />
+            </div>
           </Link>
-          <h1 className="text-2xl md:text-3xl font-bold text-primary-dark mt-3 md:mt-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-pine-teal font-serif mt-3 md:mt-4">
             Connexion
           </h1>
-          <p className="text-neutral-600 mt-1 md:mt-2 text-sm md:text-base">
+          <p className="text-hunter-green mt-1 md:mt-2 text-sm md:text-base">
             Accédez à votre compte professionnel
           </p>
         </div>
 
         {/* Formulaire */}
-        <Card>
+        <Card className="bg-off-white border-light-grey border-t-4 border-t-gold">
           <CardHeader>
             <CardTitle>Se connecter</CardTitle>
             <CardDescription>Entrez vos identifiants</CardDescription>
@@ -123,15 +135,15 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <Link 
-                  href="/forgot-password" 
-                  className="text-primary hover:underline"
+                <Link
+                  href="/forgot-password"
+                  className="text-fern hover:underline"
                 >
                   Mot de passe oublié ?
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full bg-gold hover:bg-gold-hover text-charcoal font-semibold border-0" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -146,9 +158,9 @@ export default function LoginPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-neutral-600 mt-6">
+        <p className="text-center text-sm text-dark-grey mt-6">
           Pas encore de compte ?{' '}
-          <Link href="/register" className="text-primary hover:underline font-medium">
+          <Link href="/register" className="text-fern hover:underline font-medium">
             S'inscrire gratuitement
           </Link>
         </p>

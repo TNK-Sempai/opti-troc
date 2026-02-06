@@ -50,9 +50,9 @@ export default async function AdminUsersPage({
   }
 
   const statusLabels: Record<string, { label: string; gradient: string; border: string }> = {
-    validated: { label: 'Validé', gradient: 'from-emerald-500 to-emerald-600', border: 'border-emerald-200' },
-    pending: { label: 'En attente', gradient: 'from-amber-500 to-amber-600', border: 'border-amber-200' },
-    incomplete: { label: 'Incomplet', gradient: 'from-neutral-400 to-neutral-500', border: 'border-neutral-200' },
+    validated: { label: 'Validé', gradient: 'from-fern to-hunter-green', border: 'border-fern/30' },
+    pending: { label: 'En attente', gradient: 'from-gold to-gold-hover', border: 'border-gold/30' },
+    incomplete: { label: 'Incomplet', gradient: 'from-medium-grey to-dark-grey', border: 'border-light-grey' },
     rejected: { label: 'Rejeté', gradient: 'from-red-500 to-red-600', border: 'border-red-200' },
     suspended: { label: 'Suspendu', gradient: 'from-orange-500 to-orange-600', border: 'border-orange-200' },
   }
@@ -60,20 +60,14 @@ export default async function AdminUsersPage({
   const currentStatus = params.status || 'all'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-purple-50/20 to-blue-50/10 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 max-w-7xl relative">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-              <span className="bg-gradient-to-r from-purple-600 via-purple-700 to-blue-700 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
-                <Users className="w-10 h-10 text-purple-600" />
+              <span className="text-forest-gradient drop-shadow-sm flex items-center gap-3">
+                <Users className="w-10 h-10 text-pine-teal" />
                 Utilisateurs
               </span>
             </h1>
@@ -85,22 +79,22 @@ export default async function AdminUsersPage({
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={Users} label="Total" value={stats.total} gradient="primary" />
-          <StatCard icon={CheckCircle} label="Validés" value={stats.validated} gradient="success" />
-          <StatCard icon={Clock} label="En attente" value={stats.pending} gradient="secondary" />
-          <StatCard icon={XCircle} label="Rejetés" value={stats.rejected} gradient="danger" />
+          <StatCard icon={<Users className="w-5 h-5" />} label="Total" value={stats.total} gradient="primary" />
+          <StatCard icon={<CheckCircle className="w-5 h-5" />} label="Validés" value={stats.validated} gradient="success" />
+          <StatCard icon={<Clock className="w-5 h-5" />} label="En attente" value={stats.pending} gradient="secondary" />
+          <StatCard icon={<XCircle className="w-5 h-5" />} label="Rejetés" value={stats.rejected} gradient="danger" />
         </div>
 
         {/* Filtres */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1">
             <form method="GET" className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-purple-600 transition-colors" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-pine-teal transition-colors" />
               <Input
                 name="search"
                 placeholder="Rechercher par nom, entreprise..."
                 defaultValue={params.search}
-                className="pl-11 h-12 shadow-lg border-2 border-purple-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 font-medium"
+                className="pl-11 h-12 shadow-lg border-2 border-dry-sage focus:border-fern focus:ring-2 focus:ring-fern/20 font-medium"
               />
             </form>
           </div>
@@ -110,14 +104,14 @@ export default async function AdminUsersPage({
               href="/admin/users?status=all"
               className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
                 currentStatus === 'all'
-                  ? 'bg-gradient-to-r from-neutral-700 to-neutral-800 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : 'bg-white border-2 border-neutral-200 hover:border-neutral-400 hover:shadow-lg hover:scale-105'
+                  ? 'bg-gradient-to-r from-dark-grey to-charcoal text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-light-grey hover:border-medium-grey hover:shadow-lg hover:scale-105'
               }`}
             >
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Tous</span>
               <Badge className={`h-5 px-2.5 text-xs font-bold ${
-                currentStatus === 'all' ? 'bg-white/20 text-white border-0' : 'bg-neutral-100 text-neutral-700'
+                currentStatus === 'all' ? 'bg-white/20 text-white border-0' : 'bg-dust-grey text-dark-grey'
               }`}>
                 {stats.total}
               </Badge>
@@ -127,8 +121,8 @@ export default async function AdminUsersPage({
               href="/admin/users?status=validated"
               className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
                 currentStatus === 'validated'
-                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : 'bg-white border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg hover:scale-105'
+                  ? 'bg-gradient-to-r from-fern to-hunter-green text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-fern/30 hover:border-fern/50 hover:shadow-lg hover:scale-105'
               }`}
             >
               <CheckCircle className="w-4 h-4" />
@@ -137,7 +131,7 @@ export default async function AdminUsersPage({
                 <Badge className={`h-5 px-2.5 text-xs font-bold ${
                   currentStatus === 'validated'
                     ? 'bg-white/20 text-white border-0'
-                    : 'bg-emerald-100 text-emerald-700'
+                    : 'bg-fern/10 text-fern'
                 }`}>
                   {stats.validated}
                 </Badge>
@@ -148,8 +142,8 @@ export default async function AdminUsersPage({
               href="/admin/users?status=pending"
               className={`px-5 h-12 rounded-xl flex items-center gap-2.5 text-sm font-bold transition-all duration-300 ${
                 currentStatus === 'pending'
-                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : 'bg-white border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg hover:scale-105'
+                  ? 'bg-gradient-to-r from-gold to-gold-hover text-charcoal shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-white border-2 border-dry-sage hover:border-gold/40 hover:shadow-lg hover:scale-105'
               }`}
             >
               <Clock className="w-4 h-4" />
@@ -158,7 +152,7 @@ export default async function AdminUsersPage({
                 <Badge className={`h-5 px-2.5 text-xs font-bold ${
                   currentStatus === 'pending'
                     ? 'bg-white/20 text-white border-0'
-                    : 'bg-amber-100 text-amber-700'
+                    : 'bg-gold/10 text-gold'
                 }`}>
                   {stats.pending}
                 </Badge>
@@ -189,17 +183,17 @@ export default async function AdminUsersPage({
         </div>
 
         {/* Liste */}
-        <Card className="shadow-xl border-purple-200/60 backdrop-blur-sm bg-white/95 overflow-hidden">
+        <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white overflow-hidden">
           <CardContent className="p-0">
             {filteredUsers.length > 0 ? (
-              <div className="divide-y divide-neutral-200">
+              <div className="divide-y divide-light-grey">
                 {filteredUsers.map((user) => {
                   const statusInfo = statusLabels[user.status] || statusLabels.incomplete
 
                   return (
                     <div
                       key={user.id}
-                      className={`p-5 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 border-l-4 ${statusInfo.border}`}
+                      className={`p-5 hover:bg-gradient-to-r hover:from-pine-teal/5 hover:to-transparent transition-all duration-300 border-l-4 ${statusInfo.border}`}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1">
@@ -208,14 +202,14 @@ export default async function AdminUsersPage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2.5 mb-2 flex-wrap">
-                              <h4 className="font-bold text-base bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                              <h4 className="font-bold text-base bg-gradient-to-r from-charcoal to-dark-grey bg-clip-text text-transparent">
                                 {user.first_name} {user.last_name}
                               </h4>
                               <Badge className={`bg-gradient-to-r ${statusInfo.gradient} text-white text-xs border-0 shadow-sm font-bold`}>
                                 {statusInfo.label}
                               </Badge>
                               {user.role === 'admin' && (
-                                <Badge variant="outline" className="text-xs border-purple-300 text-purple-700 font-bold">Admin</Badge>
+                                <Badge variant="outline" className="text-xs border-pine-teal text-pine-teal font-bold">Admin</Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium flex-wrap">
@@ -233,7 +227,7 @@ export default async function AdminUsersPage({
                                   {user.vat_number}
                                 </span>
                               )}
-                              <span className="flex items-center gap-1.5 bg-neutral-100 px-2.5 py-1 rounded-lg">
+                              <span className="flex items-center gap-1.5 bg-dust-grey px-2.5 py-1 rounded-lg">
                                 <Calendar className="w-3.5 h-3.5" />
                                 {new Date(user.created_at).toLocaleDateString('fr-FR')}
                               </span>
@@ -250,12 +244,12 @@ export default async function AdminUsersPage({
               </div>
             ) : (
               <div className="text-center py-24 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-neutral-50 opacity-50 rounded-xl" />
+                <div className="absolute inset-0 bg-pine-teal/5 opacity-50 rounded-xl" />
                 <div className="relative">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center shadow-lg">
-                    <User className="w-12 h-12 text-purple-600" />
+                  <div className="w-24 h-24 mx-auto mb-6 bg-pine-teal/10 rounded-3xl flex items-center justify-center shadow-lg">
+                    <User className="w-12 h-12 text-pine-teal" />
                   </div>
-                  <p className="text-neutral-700 font-bold mb-2 text-xl">Aucun utilisateur</p>
+                  <p className="text-dark-grey font-bold mb-2 text-xl">Aucun utilisateur</p>
                   <p className="text-base text-muted-foreground font-medium">
                     {params.search || params.status !== 'all'
                       ? 'Essayez de modifier vos critères de recherche'

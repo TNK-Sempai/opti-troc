@@ -51,13 +51,13 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       .select('*')
       .eq('listing_id', id)
       .single()
-    
+
     const { data: items } = await supabase
       .from('lot_items')
       .select('*')
       .eq('lot_id', id)
       .order('display_order')
-    
+
     details = lotData
     lotItems = items
   }
@@ -68,14 +68,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" className="text-pine-teal hover:text-pine-teal hover:bg-pine-teal/10">
           <Link href="/dashboard/listings">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Mes annonces
           </Link>
         </Button>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="border-pine-teal text-pine-teal hover:bg-pine-teal/10">
             <Link href={`/dashboard/listings/${listing.id}/edit`}>
               <Edit className="w-4 h-4 mr-2" />
               Modifier
@@ -96,26 +96,26 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="lg:col-span-2 space-y-6">
           {/* Photos */}
           {photos && photos.length > 0 && (
-            <Card>
+            <Card className="bg-off-white border-light-grey">
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-4">
                   {photos.map((photo: any) => (
-                    <div 
-                      key={photo.id} 
+                    <div
+                      key={photo.id}
                       className={`relative rounded-lg overflow-hidden ${
                         photo.is_primary ? 'col-span-2 aspect-video' : 'aspect-square'
                       }`}
                     >
-                      <Image 
-                        src={photo.photo_url} 
-                        alt="Photo produit" 
-                        fill 
+                      <Image
+                        src={photo.photo_url}
+                        alt="Photo produit"
+                        fill
                         className="object-cover"
                         sizes={photo.is_primary ? "100vw" : "50vw"}
                       />
                       {photo.is_primary && (
                         <div className="absolute top-3 left-3">
-                          <Badge>Photo principale</Badge>
+                          <Badge className="bg-pine-teal text-white">Photo principale</Badge>
                         </div>
                       )}
                     </div>
@@ -128,47 +128,47 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* Annonce unitaire */}
           {listing.listing_type === 'unit' && details && (
             <>
-              <Card>
+              <Card className="bg-off-white border-light-grey">
                 <CardHeader>
-                  <CardTitle>Détails du produit</CardTitle>
+                  <CardTitle className="text-pine-teal font-serif">Détails du produit</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-neutral-500">Marque</p>
-                      <p className="font-medium">{details.brand}</p>
+                      <p className="text-sm text-medium-grey">Marque</p>
+                      <p className="font-medium text-charcoal">{details.brand}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-500">Modèle</p>
-                      <p className="font-medium">{details.model}</p>
+                      <p className="text-sm text-medium-grey">Modèle</p>
+                      <p className="font-medium text-charcoal">{details.model}</p>
                     </div>
                     {details.reference && (
                       <div>
-                        <p className="text-sm text-neutral-500">Référence</p>
-                        <p className="font-medium font-mono text-sm">{details.reference}</p>
+                        <p className="text-sm text-medium-grey">Référence</p>
+                        <p className="font-medium font-mono text-sm text-charcoal">{details.reference}</p>
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-neutral-500">Genre</p>
-                      <p className="font-medium">
-                        {details.gender === 'homme' ? '👨 Homme' :
-                         details.gender === 'femme' ? '👩 Femme' :
-                         details.gender === 'mixte' ? '👤 Mixte' : '👶 Enfant'}
+                      <p className="text-sm text-medium-grey">Genre</p>
+                      <p className="font-medium text-charcoal">
+                        {details.gender === 'homme' ? 'Homme' :
+                         details.gender === 'femme' ? 'Femme' :
+                         details.gender === 'mixte' ? 'Mixte' : 'Enfant'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-500">Type</p>
-                      <p className="font-medium">
-                        {details.category === 'vue' ? '🕶️ Optique (Vue)' :
-                         details.category === 'solaires' ? '😎 Solaires' : '🏃 Sport'}
+                      <p className="text-sm text-medium-grey">Type</p>
+                      <p className="font-medium text-charcoal">
+                        {details.category === 'vue' ? 'Optique (Vue)' :
+                         details.category === 'solaires' ? 'Solaires' : 'Sport'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-500">État</p>
-                      <p className="font-medium">
-                        {details.state === 'neuf_etiquette' ? '✨ Neuf avec étiquette' :
-                         details.state === 'neuf_sans_etiquette' ? '🌟 Neuf sans étiquette' :
-                         details.state === 'tres_bon' ? '👍 Très bon état' : '👌 Bon état'}
+                      <p className="text-sm text-medium-grey">État</p>
+                      <p className="font-medium text-charcoal">
+                        {details.state === 'neuf_etiquette' ? 'Neuf avec étiquette' :
+                         details.state === 'neuf_sans_etiquette' ? 'Neuf sans étiquette' :
+                         details.state === 'tres_bon' ? 'Très bon état' : 'Bon état'}
                       </p>
                     </div>
                   </div>
@@ -176,24 +176,24 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   {/* Couleurs et matériau */}
                   {(details.color_frame || details.color_lens || details.material) && (
                     <>
-                      <div className="border-t my-4" />
+                      <div className="border-t border-light-grey my-4" />
                       <div className="grid grid-cols-2 gap-4">
                         {details.color_frame && (
                           <div>
-                            <p className="text-sm text-neutral-500">Couleur monture</p>
-                            <p className="font-medium">{details.color_frame}</p>
+                            <p className="text-sm text-medium-grey">Couleur monture</p>
+                            <p className="font-medium text-charcoal">{details.color_frame}</p>
                           </div>
                         )}
                         {details.color_lens && (
                           <div>
-                            <p className="text-sm text-neutral-500">Couleur verres</p>
-                            <p className="font-medium">{details.color_lens}</p>
+                            <p className="text-sm text-medium-grey">Couleur verres</p>
+                            <p className="font-medium text-charcoal">{details.color_lens}</p>
                           </div>
                         )}
                         {details.material && (
                           <div>
-                            <p className="text-sm text-neutral-500">Matériau</p>
-                            <p className="font-medium">{details.material}</p>
+                            <p className="text-sm text-medium-grey">Matériau</p>
+                            <p className="font-medium text-charcoal">{details.material}</p>
                           </div>
                         )}
                       </div>
@@ -203,26 +203,26 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   {/* Dimensions */}
                   {(details.size_lens || details.size_bridge || details.size_temple) && (
                     <>
-                      <div className="border-t my-4" />
+                      <div className="border-t border-light-grey my-4" />
                       <div>
-                        <p className="text-sm text-neutral-500 mb-2">Dimensions</p>
+                        <p className="text-sm text-medium-grey mb-2">Dimensions</p>
                         <div className="flex gap-4 text-sm">
                           {details.size_lens && (
                             <div>
-                              <span className="text-neutral-500">Verres:</span>{' '}
-                              <span className="font-medium">{details.size_lens}mm</span>
+                              <span className="text-medium-grey">Verres:</span>{' '}
+                              <span className="font-medium text-charcoal">{details.size_lens}mm</span>
                             </div>
                           )}
                           {details.size_bridge && (
                             <div>
-                              <span className="text-neutral-500">Pont:</span>{' '}
-                              <span className="font-medium">{details.size_bridge}mm</span>
+                              <span className="text-medium-grey">Pont:</span>{' '}
+                              <span className="font-medium text-charcoal">{details.size_bridge}mm</span>
                             </div>
                           )}
                           {details.size_temple && (
                             <div>
-                              <span className="text-neutral-500">Branches:</span>{' '}
-                              <span className="font-medium">{details.size_temple}mm</span>
+                              <span className="text-medium-grey">Branches:</span>{' '}
+                              <span className="font-medium text-charcoal">{details.size_temple}mm</span>
                             </div>
                           )}
                         </div>
@@ -232,12 +232,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-off-white border-light-grey">
                 <CardHeader>
-                  <CardTitle>Description</CardTitle>
+                  <CardTitle className="text-pine-teal font-serif">Description</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="whitespace-pre-wrap">{details.description}</p>
+                  <p className="whitespace-pre-wrap text-dark-grey">{details.description}</p>
                 </CardContent>
               </Card>
             </>
@@ -246,29 +246,29 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* Annonce lot */}
           {listing.listing_type === 'lot' && details && lotItems && (
             <>
-              <Card>
+              <Card className="bg-off-white border-light-grey">
                 <CardHeader>
-                  <CardTitle>Articles du lot ({lotItems.length})</CardTitle>
+                  <CardTitle className="text-pine-teal font-serif">Articles du lot ({lotItems.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {lotItems.map((item: any) => (
-                      <div key={item.id} className="p-4 border rounded-lg">
+                      <div key={item.id} className="p-4 border border-light-grey rounded-lg bg-dust-grey">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-semibold">
+                            <p className="font-semibold text-charcoal">
                               {item.brand} {item.model}
                             </p>
                             {item.reference && (
-                              <p className="text-sm font-mono text-neutral-600">{item.reference}</p>
+                              <p className="text-sm font-mono text-medium-grey">{item.reference}</p>
                             )}
-                            <p className="text-sm text-neutral-500 mt-1">
-                              {item.state === 'neuf_etiquette' ? '✨ Neuf avec étiquette' :
-                               item.state === 'neuf_sans_etiquette' ? '🌟 Neuf sans étiquette' :
-                               item.state === 'tres_bon' ? '👍 Très bon état' : '👌 Bon état'}
+                            <p className="text-sm text-medium-grey mt-1">
+                              {item.state === 'neuf_etiquette' ? 'Neuf avec étiquette' :
+                               item.state === 'neuf_sans_etiquette' ? 'Neuf sans étiquette' :
+                               item.state === 'tres_bon' ? 'Très bon état' : 'Bon état'}
                             </p>
                           </div>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="border-light-grey text-charcoal">
                             <Package className="w-3 h-3 mr-1" />
                             x{item.quantity}
                           </Badge>
@@ -279,12 +279,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-off-white border-light-grey">
                 <CardHeader>
-                  <CardTitle>Description du lot</CardTitle>
+                  <CardTitle className="text-pine-teal font-serif">Description du lot</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="whitespace-pre-wrap">{details.description}</p>
+                  <p className="whitespace-pre-wrap text-dark-grey">{details.description}</p>
                 </CardContent>
               </Card>
             </>
@@ -293,18 +293,18 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <Card>
+          <Card className="bg-off-white border-light-grey">
             <CardHeader>
-              <CardTitle>Informations</CardTitle>
+              <CardTitle className="text-pine-teal font-serif">Informations</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Statut */}
               <div>
-                <p className="text-sm text-neutral-500 mb-2">Statut</p>
+                <p className="text-sm text-medium-grey mb-2">Statut</p>
                 <Badge className={
-                  listing.status === 'active' ? 'bg-green-600' :
-                  listing.status === 'sold' ? 'bg-blue-600' :
-                  listing.status === 'paused' ? 'bg-orange-600' : 'bg-neutral-500'
+                  listing.status === 'active' ? 'bg-success text-white' :
+                  listing.status === 'sold' ? 'bg-gold text-charcoal' :
+                  listing.status === 'paused' ? 'bg-warning text-charcoal' : 'bg-medium-grey text-white'
                 }>
                   {listing.status === 'active' ? 'Actif' :
                    listing.status === 'sold' ? 'Vendu' :
@@ -314,13 +314,13 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
               {/* Prix */}
               <div>
-                <p className="text-sm text-neutral-500 mb-1">Prix</p>
+                <p className="text-sm text-medium-grey mb-1">Prix</p>
                 {listing.listing_type === 'unit' && details ? (
-                  <p className="text-3xl font-bold text-primary">
+                  <p className="text-3xl font-bold text-pine-teal">
                     {parseFloat(details.price).toFixed(2)}€
                   </p>
                 ) : listing.listing_type === 'lot' && details ? (
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-3xl font-bold text-gold">
                     {parseFloat(details.total_price).toFixed(2)}€
                   </p>
                 ) : null}
@@ -328,35 +328,35 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
               {/* Remise en main propre */}
               {listing.listing_type === 'unit' && details?.allow_hand_delivery && (
-                <div className="flex items-center gap-2 text-sm text-neutral-600 p-3 bg-blue-50 rounded-lg">
-                  <MapPin className="w-4 h-4 text-blue-600" />
+                <div className="flex items-center gap-2 text-sm text-dark-grey p-3 bg-dust-grey border border-light-grey rounded-lg">
+                  <MapPin className="w-4 h-4 text-pine-teal" />
                   <span>Remise en main propre possible</span>
                 </div>
               )}
 
               {/* Vente partielle */}
               {listing.listing_type === 'lot' && details?.allow_partial_sale && (
-                <div className="flex items-center gap-2 text-sm text-neutral-600 p-3 bg-green-50 rounded-lg">
-                  <Package className="w-4 h-4 text-green-600" />
+                <div className="flex items-center gap-2 text-sm text-dark-grey p-3 bg-dust-grey border border-light-grey rounded-lg">
+                  <Package className="w-4 h-4 text-pine-teal" />
                   <span>Vente partielle acceptée</span>
                 </div>
               )}
 
               {/* Stats */}
-              <div className="border-t pt-4">
+              <div className="border-t border-light-grey pt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <div className="flex items-center gap-2 text-sm text-medium-grey">
                     <Eye className="w-4 h-4" />
                     <span>Vues</span>
                   </div>
-                  <span className="font-semibold">{listing.views_count || 0}</span>
+                  <span className="font-semibold text-charcoal">{listing.views_count || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <div className="flex items-center gap-2 text-sm text-medium-grey">
                     <Calendar className="w-4 h-4" />
                     <span>Créée le</span>
                   </div>
-                  <span className="font-semibold text-sm">
+                  <span className="font-semibold text-sm text-charcoal">
                     {new Date(listing.created_at).toLocaleDateString('fr-FR')}
                   </span>
                 </div>

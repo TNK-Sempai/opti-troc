@@ -125,14 +125,14 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12">
+    <div className="min-h-screen bg-dust-grey py-12">
       <div className="container mx-auto px-4 max-w-3xl">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-dark">
             Complétez votre profil
           </h1>
-          <p className="text-neutral-600 mt-2">
+          <p className="text-dark-grey mt-2">
             Dernières étapes avant de pouvoir vendre
           </p>
         </div>
@@ -306,7 +306,7 @@ export default function OnboardingPage() {
 
                 <div>
                   <Label>Logo / Photo de profil *</Label>
-                  <p className="text-sm text-neutral-500 mb-2">
+                  <p className="text-sm text-medium-grey mb-2">
                     Cette image sera affichée sur votre profil et vos annonces
                   </p>
                   <FileUpload
@@ -323,7 +323,7 @@ export default function OnboardingPage() {
 
                 <div>
                   <Label>Horaires d'ouverture (optionnel)</Label>
-                  <p className="text-sm text-neutral-500 mb-2">
+                  <p className="text-sm text-medium-grey mb-2">
                     Ajoutez vos horaires jour par jour
                   </p>
                   <OpeningHoursInput
@@ -334,7 +334,7 @@ export default function OnboardingPage() {
 
                 <div>
                   <Label>Photos de la boutique (optionnel)</Label>
-                  <p className="text-sm text-neutral-500 mb-2">
+                  <p className="text-sm text-medium-grey mb-2">
                     Jusqu'à 3 photos de votre point de vente
                   </p>
                   <FileUpload

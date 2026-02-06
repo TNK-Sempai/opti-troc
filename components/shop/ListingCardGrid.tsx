@@ -10,8 +10,8 @@ export function ListingCardGrid({ listing }: { listing: any }) {
 
   return (
     <Link href={`/listing/${listing.id}`}>
-      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-neutral-200 h-full hover:border-primary/50 hover:-translate-y-1">
-        <div className="relative h-40 bg-gradient-to-br from-neutral-100 to-neutral-50">
+      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-light-grey h-full hover:border-primary/50 hover:-translate-y-1">
+        <div className="relative h-40 bg-gradient-to-br from-dust-grey to-off-white">
           {listing.photo ? (
             <Image
               src={listing.photo.photo_url}
@@ -23,15 +23,15 @@ export function ListingCardGrid({ listing }: { listing: any }) {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               {isUnit ? (
-                <Package className="w-10 h-10 text-neutral-300" />
+                <Package className="w-10 h-10 text-dry-sage" />
               ) : (
-                <Layers className="w-10 h-10 text-neutral-300" />
+                <Layers className="w-10 h-10 text-dry-sage" />
               )}
             </div>
           )}
 
           <div className="absolute top-2 left-2">
-            <Badge className={`text-xs ${isUnit ? 'bg-primary' : 'bg-green-600'} shadow-lg`}>
+            <Badge className={`text-xs ${isUnit ? 'bg-primary' : 'bg-fern'} shadow-lg`}>
               {isUnit ? 'Unit' : 'Lot'}
             </Badge>
           </div>
@@ -64,13 +64,13 @@ export function ListingCardGrid({ listing }: { listing: any }) {
               {details.reference && (
                 <div className="mb-3">
                   <p className="text-xs font-medium text-primary/70 mb-1">RÉFÉRENCE</p>
-                  <p className="text-xs font-mono bg-neutral-100 px-2 py-1 rounded inline-block">
+                  <p className="text-xs font-mono bg-dust-grey px-2 py-1 rounded inline-block">
                     {details.reference}
                   </p>
                 </div>
               )}
 
-              <div className="pt-3 border-t border-neutral-200">
+              <div className="pt-3 border-t border-light-grey">
                 <p className="text-xl font-bold text-primary">
                   {parseFloat(details.price).toFixed(0)}€
                 </p>
@@ -78,13 +78,13 @@ export function ListingCardGrid({ listing }: { listing: any }) {
             </>
           ) : details ? (
             <>
-              <h3 className="font-semibold text-sm mb-1 group-hover:text-green-600 transition-colors">
+              <h3 className="font-semibold text-sm mb-1 group-hover:text-fern transition-colors">
                 Lot de lunettes
               </h3>
               <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                 {details.description}
               </p>
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-lg font-bold text-fern">
                 {parseFloat(details.total_price).toFixed(0)}€
               </p>
             </>

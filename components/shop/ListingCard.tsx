@@ -41,31 +41,31 @@ export function ListingCard({
 
   return (
     <Link href={`/listing/${listing.id}`} className="block h-full">
-      <Card className="group overflow-hidden h-full border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-white rounded-xl">
-        {/* Image - aspect ratio plus court */}
-        <div className="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
+      <Card className="group overflow-hidden h-full border border-light-grey shadow-card hover:shadow-forest hover:border-fern/40 transition-all duration-300 bg-off-white rounded-lg hover:-translate-y-1">
+        {/* Image */}
+        <div className="relative aspect-[4/3] bg-dust-grey overflow-hidden">
           {listing.photo ? (
             <Image
               src={listing.photo.photo_url}
               alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 group-hover:brightness-105 transition-all duration-500"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+            <div className="absolute inset-0 flex items-center justify-center bg-dust-grey">
               {isUnit ? (
-                <Package className="w-12 h-12 text-neutral-300" />
+                <Package className="w-10 h-10 text-dry-sage" />
               ) : (
-                <Layers className="w-12 h-12 text-neutral-300" />
+                <Layers className="w-10 h-10 text-dry-sage" />
               )}
             </div>
           )}
 
           {/* Type badge */}
           <div className="absolute top-2 left-2 z-10">
-            <Badge className={`text-[10px] font-bold border-0 shadow-sm px-1.5 py-0.5 ${
-              isUnit ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+            <Badge className={`text-[10px] font-semibold border-0 px-1.5 py-0.5 ${
+              isUnit ? 'bg-pine-teal text-white' : 'bg-fern text-white'
             }`}>
               {isUnit ? 'UNIT' : 'LOT'}
             </Badge>
@@ -74,51 +74,51 @@ export function ListingCard({
           {/* New badge */}
           {showNew && (
             <div className="absolute top-2 right-2 z-10">
-              <Badge className="text-[10px] font-bold bg-orange-500 text-white border-0 shadow-sm px-1.5 py-0.5">
+              <Badge className="text-[10px] font-semibold bg-gold text-charcoal border-0 px-1.5 py-0.5">
                 NEW
               </Badge>
             </div>
           )}
 
-          {/* Stats overlay en bas */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 flex items-center justify-between">
-            <span className="text-[10px] text-white/90 flex items-center gap-1">
+          {/* Stats overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2 flex items-center justify-between">
+            <span className="text-[10px] text-white/80 flex items-center gap-1">
               <Eye className="w-3 h-3" />
               {listing.views_count || 0}
             </span>
-            <span className="text-[10px] text-white/90 flex items-center gap-1">
+            <span className="text-[10px] text-white/80 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {formatDate(listing.created_at)}
             </span>
           </div>
         </div>
 
-        {/* Content - compact */}
+        {/* Content */}
         <CardContent className="p-3">
           {isUnit && details ? (
             <>
-              {/* Prix en premier */}
-              <div className="mb-2">
+              {/* Prix */}
+              <div className="mb-1.5">
                 {isValidated ? (
-                  <span className="text-xl font-black text-blue-600">
-                    {parseFloat(details.price).toFixed(0)}€
+                  <span className="text-lg font-semibold text-gold font-mono">
+                    {parseFloat(details.price).toFixed(0)}&euro;
                   </span>
                 ) : (
-                  <span className="text-sm text-neutral-400 flex items-center gap-1">
+                  <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Prix masqué
+                    Prix masque
                   </span>
                 )}
               </div>
 
               {/* Marque */}
-              <h3 className="font-bold text-sm text-neutral-900 line-clamp-1 mb-0.5">
+              <h3 className="font-medium text-sm text-charcoal line-clamp-1 mb-0.5">
                 {details.brand}
               </h3>
 
-              {/* Modèle */}
+              {/* Modele */}
               {details.model && (
-                <p className="text-xs text-neutral-500 line-clamp-1">
+                <p className="text-xs text-medium-grey line-clamp-1">
                   {details.model}
                 </p>
               )}
@@ -126,24 +126,24 @@ export function ListingCard({
           ) : details ? (
             <>
               {/* Prix du lot */}
-              <div className="mb-2">
+              <div className="mb-1.5">
                 {isValidated ? (
-                  <span className="text-xl font-black text-emerald-600">
-                    {parseFloat(details.total_price).toFixed(0)}€
+                  <span className="text-lg font-semibold text-gold font-mono">
+                    {parseFloat(details.total_price).toFixed(0)}&euro;
                   </span>
                 ) : (
-                  <span className="text-sm text-neutral-400 flex items-center gap-1">
+                  <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Prix masqué
+                    Prix masque
                   </span>
                 )}
               </div>
 
-              <h3 className="font-bold text-sm text-neutral-900 line-clamp-1 mb-0.5">
+              <h3 className="font-medium text-sm text-charcoal line-clamp-1 mb-0.5">
                 Lot de lunettes
               </h3>
 
-              <p className="text-xs text-neutral-500 line-clamp-1">
+              <p className="text-xs text-medium-grey line-clamp-1">
                 {details.description}
               </p>
             </>
@@ -154,39 +154,39 @@ export function ListingCard({
   )
 }
 
-// Vue liste compacte
+// Vue liste
 function ListingCardListView({ listing, isValidated }: { listing: any; isValidated: boolean }) {
   const isUnit = listing.listing_type === 'unit'
   const details = listing.details
 
   return (
     <Link href={`/listing/${listing.id}`} className="block">
-      <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white rounded-xl">
+      <Card className="group overflow-hidden border border-light-grey shadow-card hover:shadow-forest hover:border-fern/40 transition-all duration-300 bg-off-white rounded-lg">
         <div className="flex">
           {/* Image */}
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40 shrink-0 bg-neutral-100 overflow-hidden">
+          <div className="relative w-32 h-32 sm:w-40 sm:h-40 shrink-0 bg-dust-grey overflow-hidden">
             {listing.photo ? (
               <Image
                 src={listing.photo.photo_url}
                 alt={isUnit && details ? `${details.brand} ${details.model}` : 'Lot'}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover group-hover:scale-105 group-hover:brightness-105 transition-all duration-500"
                 sizes="160px"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 {isUnit ? (
-                  <Package className="w-10 h-10 text-neutral-300" />
+                  <Package className="w-10 h-10 text-dry-sage" />
                 ) : (
-                  <Layers className="w-10 h-10 text-neutral-300" />
+                  <Layers className="w-10 h-10 text-dry-sage" />
                 )}
               </div>
             )}
 
             {/* Type badge */}
             <div className="absolute top-2 left-2">
-              <Badge className={`text-[10px] font-bold border-0 shadow-sm ${
-                isUnit ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+              <Badge className={`text-[10px] font-semibold border-0 ${
+                isUnit ? 'bg-pine-teal text-white' : 'bg-fern text-white'
               }`}>
                 {isUnit ? 'UNIT' : 'LOT'}
               </Badge>
@@ -199,21 +199,21 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
               <div className="min-w-0 flex-1">
                 {isUnit && details ? (
                   <>
-                    <h3 className="font-bold text-base text-neutral-900 truncate">
+                    <h3 className="font-medium text-base text-charcoal truncate">
                       {details.brand}
                     </h3>
                     {details.model && (
-                      <p className="text-sm text-neutral-600 truncate">
+                      <p className="text-sm text-dark-grey truncate">
                         {details.model}
                       </p>
                     )}
                   </>
                 ) : details ? (
                   <>
-                    <h3 className="font-bold text-base text-neutral-900">
+                    <h3 className="font-medium text-base text-charcoal">
                       Lot de lunettes
                     </h3>
-                    <p className="text-sm text-neutral-600 line-clamp-1">
+                    <p className="text-sm text-dark-grey line-clamp-1">
                       {details.description}
                     </p>
                   </>
@@ -223,22 +223,22 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
               {/* Prix */}
               <div className="shrink-0 text-right">
                 {isValidated ? (
-                  <span className={`text-2xl font-black ${isUnit ? 'text-blue-600' : 'text-emerald-600'}`}>
+                  <span className="text-xl font-semibold text-gold font-mono">
                     {isUnit
                       ? parseFloat(details?.price || 0).toFixed(0)
-                      : parseFloat(details?.total_price || 0).toFixed(0)}€
+                      : parseFloat(details?.total_price || 0).toFixed(0)}&euro;
                   </span>
                 ) : (
-                  <span className="text-sm text-neutral-400 flex items-center gap-1">
+                  <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Masqué
+                    Masque
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Méta infos */}
-            <div className="mt-auto flex items-center gap-4 text-xs text-neutral-500">
+            {/* Meta */}
+            <div className="mt-auto flex items-center gap-4 text-xs text-medium-grey">
               <span className="flex items-center gap-1">
                 <Eye className="w-3.5 h-3.5" />
                 {listing.views_count || 0} vues
@@ -248,7 +248,7 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
                 {formatDate(listing.created_at)}
               </span>
               {isUnit && details?.reference && (
-                <span className="font-mono text-neutral-400 hidden sm:block">
+                <span className="font-mono text-dry-sage hidden sm:block">
                   {details.reference}
                 </span>
               )}

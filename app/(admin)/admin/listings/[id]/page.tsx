@@ -67,12 +67,12 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
             <p className="text-sm text-muted-foreground">Gestion admin</p>
           </div>
         </div>
-        <Badge className={listing.status === 'active' ? 'bg-green-600' : 'bg-yellow-600'}>
+        <Badge className={listing.status === 'active' ? 'bg-fern' : 'bg-gold'}>
           {listing.status === 'active' ? 'Active' : 'En pause'}
         </Badge>
       </div>
 
-      <Card className="mb-6 border-orange-200 bg-orange-50/50">
+      <Card className="mb-6 border-gold/30 bg-gold/5">
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
             <Ban className="w-4 h-4" />
@@ -100,7 +100,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="relative h-64 bg-gradient-to-br from-neutral-100 to-neutral-50 rounded-lg overflow-hidden">
+                <div className="relative h-64 bg-dust-grey rounded-lg overflow-hidden">
                   {primaryPhoto ? (
                     <Image
                       src={primaryPhoto.photo_url}
@@ -111,7 +111,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Package className="w-12 h-12 text-neutral-300" />
+                      <Package className="w-12 h-12 text-dry-sage" />
                     </div>
                   )}
                 </div>
@@ -147,7 +147,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Prix total</p>
-                      <p className="text-xl font-bold text-green-600">{parseFloat(details.total_price).toFixed(2)}€</p>
+                      <p className="text-xl font-bold text-gold">{parseFloat(details.total_price).toFixed(2)}€</p>
                     </div>
                   </div>
                 ) : null}

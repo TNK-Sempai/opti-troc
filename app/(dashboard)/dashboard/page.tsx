@@ -82,18 +82,12 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-orange-50/10 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-            <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent drop-shadow-sm">
+            <span className="text-forest-gradient drop-shadow-sm">
               Bienvenue, {profile?.first_name} !
             </span>
           </h1>
@@ -115,19 +109,19 @@ export default async function DashboardPage() {
         {/* Statistiques */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <StatCard
-            icon={Package}
+            icon={<Package className="w-5 h-5" />}
             label="Annonces actives"
             value={activeListings || 0}
             gradient="primary"
           />
           <StatCard
-            icon={TrendingUp}
+            icon={<TrendingUp className="w-5 h-5" />}
             label="Total annonces"
             value={totalListings || 0}
             gradient="success"
           />
           <StatCard
-            icon={Eye}
+            icon={<Eye className="w-5 h-5" />}
             label="Vues totales"
             value={0}
             gradient="purple"
@@ -135,8 +129,8 @@ export default async function DashboardPage() {
         </div>
 
         {/* Dernières annonces */}
-        <Card className="shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-6 relative overflow-hidden">
+        <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white overflow-hidden">
+          <div className="bg-gradient-to-r from-pine-teal via-hunter-green to-pine-teal p-6 relative overflow-hidden">
             <div className="absolute inset-0 opacity-20">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)]" style={{ backgroundSize: '24px 24px' }} />
             </div>
@@ -145,7 +139,7 @@ export default async function DashboardPage() {
                 <Sparkles className="w-6 h-6" />
                 Mes dernières annonces
               </CardTitle>
-              <CardDescription className="text-blue-100 text-base font-medium">
+              <CardDescription className="text-dust-grey/80 text-base font-medium">
                 {totalListings === 0
                   ? "Vous n'avez pas encore créé d'annonce"
                   : `${totalListings} annonce(s) au total`
@@ -156,12 +150,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             {!recentListings || recentListings.length === 0 ? (
               <div className="text-center py-16 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-pine-teal/5 to-dust-grey opacity-50 rounded-xl" />
                 <div className="relative">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
-                    <Package className="w-12 h-12 text-blue-600" />
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-pine-teal/20 to-fern/20 rounded-3xl flex items-center justify-center shadow-lg">
+                    <Package className="w-12 h-12 text-pine-teal" />
                   </div>
-                  <p className="text-neutral-600 mb-6 text-lg font-medium">Aucune annonce pour le moment</p>
+                  <p className="text-dark-grey mb-6 text-lg font-medium">Aucune annonce pour le moment</p>
                   <PremiumButton asChild gradient="primary" glow size="lg" className="shadow-xl">
                     <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
                       <PlusCircle className="w-5 h-5" />
@@ -175,17 +169,17 @@ export default async function DashboardPage() {
                 {enrichedListings.map((listing) => (
                   <div
                     key={listing.id}
-                    className="flex items-center justify-between p-5 border-2 border-blue-200/60 rounded-2xl hover:border-blue-400 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-blue-50/30 hover:scale-[1.02]"
+                    className="flex items-center justify-between p-5 border-2 border-dry-sage/40 rounded-2xl hover:border-fern/40 hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-off-white to-pine-teal/5 hover:scale-[1.02]"
                   >
                     <div className="flex-1">
                       {listing.listing_type === 'unit' && listing.details ? (
                         <>
-                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-charcoal to-dark-grey bg-clip-text text-transparent">
                             {listing.details.brand} {listing.details.model}
                           </h3>
                           <p className="text-sm text-muted-foreground font-medium">
                             {listing.details.reference && `Réf. ${listing.details.reference} • `}
-                            <span className="text-blue-600 font-bold">
+                            <span className="text-gold font-bold">
                               {listing.details.price !== undefined && listing.details.price !== null
                                 ? `${Number(listing.details.price).toFixed(0)}€`
                                 : 'Prix non défini'}
@@ -194,11 +188,11 @@ export default async function DashboardPage() {
                         </>
                       ) : listing.listing_type === 'lot' && listing.details ? (
                         <>
-                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                          <h3 className="font-bold text-lg mb-1 bg-gradient-to-r from-charcoal to-dark-grey bg-clip-text text-transparent">
                             Lot de lunettes
                           </h3>
                           <p className="text-sm text-muted-foreground font-medium">
-                            {listing.details.quantity} pièces • <span className="text-blue-600 font-bold">
+                            {listing.details.quantity} pièces • <span className="text-gold font-bold">
                               {listing.details.total_price !== undefined && listing.details.total_price !== null
                                 ? `${Number(listing.details.total_price).toFixed(0)}€`
                                 : 'Prix non défini'}

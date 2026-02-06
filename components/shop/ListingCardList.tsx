@@ -10,11 +10,11 @@ export function ListingCardList({ listing }: { listing: any }) {
 
   return (
     <Link href={`/listing/${listing.id}`}>
-      <Card className="group overflow-hidden hover:shadow-lg transition-all border-neutral-200 hover:border-primary/50">
+      <Card className="group overflow-hidden hover:shadow-lg transition-all border-light-grey hover:border-primary/50">
         <CardContent className="p-0">
           <div className="flex gap-4">
             {/* Image */}
-            <div className="relative w-48 h-32 flex-shrink-0 bg-gradient-to-br from-neutral-100 to-neutral-50">
+            <div className="relative w-48 h-32 flex-shrink-0 bg-gradient-to-br from-dust-grey to-off-white">
               {listing.photo ? (
                 <Image
                   src={listing.photo.photo_url}
@@ -26,15 +26,15 @@ export function ListingCardList({ listing }: { listing: any }) {
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   {isUnit ? (
-                    <Package className="w-12 h-12 text-neutral-300" />
+                    <Package className="w-12 h-12 text-dry-sage" />
                   ) : (
-                    <Layers className="w-12 h-12 text-neutral-300" />
+                    <Layers className="w-12 h-12 text-dry-sage" />
                   )}
                 </div>
               )}
 
               <div className="absolute top-2 left-2">
-                <Badge className={`text-xs ${isUnit ? 'bg-primary' : 'bg-green-600'} shadow-lg`}>
+                <Badge className={`text-xs ${isUnit ? 'bg-primary' : 'bg-fern'} shadow-lg`}>
                   {isUnit ? 'Unitaire' : 'Lot'}
                 </Badge>
               </div>
@@ -66,7 +66,7 @@ export function ListingCardList({ listing }: { listing: any }) {
                   {details.reference && (
                     <div className="mb-3">
                       <p className="text-xs font-medium text-primary/70 mb-1">RÉFÉRENCE</p>
-                      <p className="text-xs font-mono bg-neutral-100 px-2 py-1 rounded inline-block">
+                      <p className="text-xs font-mono bg-dust-grey px-2 py-1 rounded inline-block">
                         {details.reference}
                       </p>
                     </div>
@@ -90,13 +90,13 @@ export function ListingCardList({ listing }: { listing: any }) {
                 </div>
               ) : details ? (
                 <div>
-                  <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">
+                  <h3 className="font-bold text-lg mb-2 group-hover:text-fern transition-colors">
                     Lot de lunettes
                   </h3>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                     {details.description}
                   </p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-fern">
                     {parseFloat(details.total_price).toFixed(0)}€
                   </p>
                 </div>

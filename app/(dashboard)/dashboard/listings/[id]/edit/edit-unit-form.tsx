@@ -173,7 +173,7 @@ export default function EditUnitListingForm({ listing, details, photos }: EditUn
                       </Button>
                       {photo.is_primary && (
                         <div className="absolute bottom-2 left-2">
-                          <span className="text-xs bg-primary text-white px-2 py-1 rounded">
+                          <span className="text-xs bg-pine-teal text-white px-2 py-1 rounded">
                             Principale
                           </span>
                         </div>
@@ -187,7 +187,7 @@ export default function EditUnitListingForm({ listing, details, photos }: EditUn
             {/* Nouvelles photos */}
             <div>
               <Label>Ajouter de nouvelles photos (optionnel)</Label>
-              <p className="text-sm text-neutral-500 mb-2">
+              <p className="text-sm text-medium-grey mb-2">
                 Maximum 5 photos au total (actuelles + nouvelles)
               </p>
               <FileUpload
@@ -302,15 +302,15 @@ export default function EditUnitListingForm({ listing, details, photos }: EditUn
               <Label className="mb-2 block">Dimensions (mm)</Label>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="sizeLens" className="text-xs text-neutral-500">Verres</Label>
+                  <Label htmlFor="sizeLens" className="text-xs text-medium-grey">Verres</Label>
                   <Input id="sizeLens" {...form.register('sizeLens')} placeholder="52" />
                 </div>
                 <div>
-                  <Label htmlFor="sizeBridge" className="text-xs text-neutral-500">Pont</Label>
+                  <Label htmlFor="sizeBridge" className="text-xs text-medium-grey">Pont</Label>
                   <Input id="sizeBridge" {...form.register('sizeBridge')} placeholder="21" />
                 </div>
                 <div>
-                  <Label htmlFor="sizeTemple" className="text-xs text-neutral-500">Branches</Label>
+                  <Label htmlFor="sizeTemple" className="text-xs text-medium-grey">Branches</Label>
                   <Input id="sizeTemple" {...form.register('sizeTemple')} placeholder="140" />
                 </div>
               </div>

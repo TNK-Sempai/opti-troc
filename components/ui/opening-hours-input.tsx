@@ -50,14 +50,14 @@ export function OpeningHoursInput({ value = [], onChange }: OpeningHoursInputPro
           {value.map((item, index) => (
             <div
               key={index}
-              className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200"
+              className="flex items-center gap-3 p-3 bg-dust-grey rounded-lg border border-light-grey"
             >
               <div className="flex-1 grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-sm font-medium text-neutral-700">{item.day}</p>
+                  <p className="text-sm font-medium text-dark-grey">{item.day}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-neutral-600">{item.hours}</p>
+                  <p className="text-sm text-dark-grey">{item.hours}</p>
                 </div>
               </div>
               <Button
@@ -108,7 +108,7 @@ export function OpeningHoursInput({ value = [], onChange }: OpeningHoursInputPro
       </div>
 
       {value.length === 0 && (
-        <p className="text-sm text-neutral-500 text-center py-4 border border-dashed rounded-lg">
+        <p className="text-sm text-medium-grey text-center py-4 border border-dashed rounded-lg">
           Aucun horaire ajouté. Ajoutez vos horaires d'ouverture ci-dessus.
         </p>
       )}

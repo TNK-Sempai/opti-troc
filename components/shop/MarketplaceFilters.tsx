@@ -21,14 +21,13 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { Search, SlidersHorizontal } from 'lucide-react'
 
 interface MarketplaceFiltersProps {
   brands: string[]
   models: Record<string, string[]>
 }
 
-// Composant de filtres réutilisable
 function FilterForm({
   brands,
   models,
@@ -56,29 +55,29 @@ function FilterForm({
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Recherche */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
           Recherche
         </Label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-fern" />
           <Input
             name="search"
-            placeholder="Marque, modèle..."
+            placeholder="Marque, modele..."
             defaultValue={searchParams.get('search') || ''}
-            className="pl-10 h-10"
+            className="pl-10 h-10 border-light-grey bg-off-white"
           />
         </div>
       </div>
 
-      <Separator />
+      <Separator className="bg-light-grey" />
 
       {/* Type */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
           Type
         </Label>
         <Select name="type" defaultValue={searchParams.get('type') || 'all'}>
-          <SelectTrigger className="h-10">
+          <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -91,7 +90,7 @@ function FilterForm({
 
       {/* Marque */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
           Marque
         </Label>
         <Select
@@ -99,7 +98,7 @@ function FilterForm({
           value={selectedBrand}
           onValueChange={setSelectedBrand}
         >
-          <SelectTrigger className="h-10">
+          <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
             <SelectValue placeholder="Toutes" />
           </SelectTrigger>
           <SelectContent className="max-h-[200px]">
@@ -113,14 +112,14 @@ function FilterForm({
         </Select>
       </div>
 
-      {/* Modèle */}
+      {/* Modele */}
       {availableModels.length > 0 && (
         <div>
-          <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
-            Modèle
+          <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
+            Modele
           </Label>
           <Select name="model" defaultValue={searchParams.get('model') || 'all'}>
-            <SelectTrigger className="h-10">
+            <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
               <SelectValue placeholder="Tous" />
             </SelectTrigger>
             <SelectContent className="max-h-[200px]">
@@ -135,15 +134,15 @@ function FilterForm({
         </div>
       )}
 
-      <Separator />
+      <Separator className="bg-light-grey" />
 
       {/* Genre */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
           Genre
         </Label>
         <Select name="gender" defaultValue={searchParams.get('gender') || 'all'}>
-          <SelectTrigger className="h-10">
+          <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -156,13 +155,13 @@ function FilterForm({
         </Select>
       </div>
 
-      {/* Catégorie */}
+      {/* Categorie */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
-          Catégorie
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
+          Categorie
         </Label>
         <Select name="category" defaultValue={searchParams.get('category') || 'all'}>
-          <SelectTrigger className="h-10">
+          <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -174,31 +173,31 @@ function FilterForm({
         </Select>
       </div>
 
-      {/* État */}
+      {/* Etat */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
-          État
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
+          Etat
         </Label>
         <Select name="state" defaultValue={searchParams.get('state') || 'all'}>
-          <SelectTrigger className="h-10">
+          <SelectTrigger className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="neuf_etiquette">Neuf étiquette</SelectItem>
+            <SelectItem value="neuf_etiquette">Neuf etiquette</SelectItem>
             <SelectItem value="neuf_sans_etiquette">Neuf</SelectItem>
-            <SelectItem value="tres_bon">Très bon</SelectItem>
+            <SelectItem value="tres_bon">Tres bon</SelectItem>
             <SelectItem value="bon">Bon</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <Separator />
+      <Separator className="bg-light-grey" />
 
       {/* Prix */}
       <div>
-        <Label className="text-xs font-bold text-neutral-600 uppercase mb-2 block">
-          Prix (€)
+        <Label className="text-xs font-semibold text-dark-grey uppercase mb-2 block tracking-wider">
+          Prix (EUR)
         </Label>
         <div className="grid grid-cols-2 gap-2">
           <Input
@@ -206,30 +205,30 @@ function FilterForm({
             type="number"
             placeholder="Min"
             defaultValue={searchParams.get('minPrice') || ''}
-            className="h-10"
+            className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5"
           />
           <Input
             name="maxPrice"
             type="number"
             placeholder="Max"
             defaultValue={searchParams.get('maxPrice') || ''}
-            className="h-10"
+            className="h-10 border-light-grey bg-off-white focus:border-fern focus:ring-fern/20 hover:bg-pine-teal/5"
           />
         </div>
       </div>
 
       {/* Boutons */}
       <div className="space-y-2 pt-4">
-        <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700 font-semibold">
+        <Button type="submit" className="w-full h-11 bg-pine-teal hover:bg-hunter-green text-white font-medium">
           Appliquer
         </Button>
         <Button
           type="button"
           variant="outline"
-          className="w-full h-10"
+          className="w-full h-10 border-light-grey"
           onClick={onReset}
         >
-          Réinitialiser
+          Reinitialiser
         </Button>
       </div>
     </form>
@@ -241,7 +240,6 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
 
-  // Compter les filtres actifs
   const activeFiltersCount = [
     searchParams.get('search'),
     searchParams.get('type') && searchParams.get('type') !== 'all',
@@ -276,23 +274,23 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
 
   return (
     <>
-      {/* Version Mobile - Bouton qui ouvre un Sheet */}
+      {/* Version Mobile */}
       <div className="lg:hidden">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full h-12 justify-between border-2">
+            <Button variant="outline" className="w-full h-12 justify-between border-light-grey">
               <span className="flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4" />
                 Filtres
               </span>
               {activeFiltersCount > 0 && (
-                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-pine-teal text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                   {activeFiltersCount}
                 </span>
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto">
+          <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto bg-off-white">
             <SheetHeader className="mb-4">
               <SheetTitle className="flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5" />
@@ -309,15 +307,15 @@ export function MarketplaceFilters({ brands, models }: MarketplaceFiltersProps) 
         </Sheet>
       </div>
 
-      {/* Version Desktop - Sidebar */}
+      {/* Version Desktop */}
       <div className="hidden lg:block">
-        <Card className="border-0 shadow-md overflow-hidden bg-white rounded-xl">
-          <div className="bg-neutral-900 p-4">
+        <Card className="border border-light-grey bg-off-white rounded-lg overflow-hidden">
+          <div className="bg-pine-teal p-4">
             <div className="flex items-center gap-2 text-white">
-              <SlidersHorizontal className="w-5 h-5" />
-              <h2 className="font-bold">Filtres</h2>
+              <SlidersHorizontal className="w-4 h-4" />
+              <h2 className="font-semibold text-sm">Filtres</h2>
               {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-auto">
+                <span className="bg-gold text-charcoal text-xs font-semibold px-2 py-0.5 rounded-full ml-auto">
                   {activeFiltersCount}
                 </span>
               )}

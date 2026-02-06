@@ -36,12 +36,12 @@ function formatDate(dateString: string) {
 
 function formatCondition(condition: string) {
   const conditions: Record<string, { label: string; color: string }> = {
-    'new': { label: 'Neuf', color: 'bg-emerald-100 text-emerald-700' },
-    'like_new': { label: 'Comme neuf', color: 'bg-blue-100 text-blue-700' },
-    'good': { label: 'Bon état', color: 'bg-amber-100 text-amber-700' },
-    'fair': { label: 'État correct', color: 'bg-orange-100 text-orange-700' },
+    'new': { label: 'Neuf', color: 'bg-fern/10 text-fern' },
+    'like_new': { label: 'Comme neuf', color: 'bg-pine-teal/10 text-pine-teal' },
+    'good': { label: 'Bon état', color: 'bg-dry-sage/20 text-hunter-green' },
+    'fair': { label: 'État correct', color: 'bg-gold/10 text-gold' },
   }
-  return conditions[condition] || { label: condition, color: 'bg-neutral-100 text-neutral-700' }
+  return conditions[condition] || { label: condition, color: 'bg-dust-grey text-dark-grey' }
 }
 
 export default function ListingsList({ listings }: { listings: any[] }) {
@@ -63,7 +63,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
           >
             <div className="flex gap-0">
               {/* Image - Plus grande et carrée */}
-              <div className="relative w-40 h-40 flex-shrink-0 bg-neutral-100 overflow-hidden">
+              <div className="relative w-40 h-40 flex-shrink-0 bg-dust-grey overflow-hidden">
                 {listing.photo ? (
                   <Image
                     src={listing.photo.photo_url}
@@ -73,11 +73,11 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     sizes="160px"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-dust-grey to-off-white">
                     {isUnit ? (
-                      <Package className="w-12 h-12 text-neutral-300" />
+                      <Package className="w-12 h-12 text-medium-grey" />
                     ) : (
-                      <Layers className="w-12 h-12 text-neutral-300" />
+                      <Layers className="w-12 h-12 text-medium-grey" />
                     )}
                   </div>
                 )}
@@ -85,7 +85,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                 {/* Status overlay si vendu */}
                 {isSold && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="bg-purple-600 text-white px-4 py-1 rounded-full font-bold text-sm shadow-lg transform -rotate-12">
+                    <div className="bg-pine-teal text-white px-4 py-1 rounded-full font-bold text-sm shadow-lg transform -rotate-12">
                       VENDU
                     </div>
                   </div>
@@ -94,7 +94,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                 {/* Type badge */}
                 <div className="absolute top-2 left-2">
                   <Badge className={`text-[10px] font-bold border-0 shadow-sm ${
-                    isUnit ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+                    isUnit ? 'bg-pine-teal text-white' : 'bg-fern text-white'
                   }`}>
                     {isUnit ? 'UNITAIRE' : 'LOT'}
                   </Badge>
@@ -109,7 +109,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     {isUnit && details ? (
                       <>
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-xl text-neutral-900 truncate">
+                          <h3 className="font-bold text-xl text-charcoal truncate">
                             {details.brand}
                           </h3>
                           {condition && (
@@ -119,13 +119,13 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                           )}
                         </div>
                         {details.model && (
-                          <p className="text-base text-neutral-600 font-medium truncate mb-1">
+                          <p className="text-base text-dark-grey font-medium truncate mb-1">
                             {details.model}
                           </p>
                         )}
                         {details.reference && (
-                          <span className="inline-flex items-center gap-1 text-xs font-mono bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded">
-                            <span className="text-neutral-400">REF:</span>
+                          <span className="inline-flex items-center gap-1 text-xs font-mono bg-dust-grey text-medium-grey px-2 py-0.5 rounded">
+                            <span className="text-dry-sage">REF:</span>
                             {details.reference}
                           </span>
                         )}
@@ -133,16 +133,16 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     ) : details ? (
                       <>
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-xl text-neutral-900">
+                          <h3 className="font-bold text-xl text-charcoal">
                             Lot de lunettes
                           </h3>
                           {details.quantity && (
-                            <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                            <span className="text-xs font-bold bg-fern/10 text-fern px-2 py-0.5 rounded-full">
                               {details.quantity} pièces
                             </span>
                           )}
                         </div>
-                        <p className="text-base text-neutral-600 line-clamp-1">
+                        <p className="text-base text-dark-grey line-clamp-1">
                           {details.description}
                         </p>
                       </>
@@ -152,16 +152,16 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                   {/* Prix */}
                   <div className="text-right flex-shrink-0">
                     {isUnit && details ? (
-                      <p className="text-3xl font-black text-blue-600">
+                      <p className="text-3xl font-black text-gold">
                         {parseFloat(details.price).toFixed(0)}€
                       </p>
                     ) : details ? (
                       <>
-                        <p className="text-3xl font-black text-emerald-600">
+                        <p className="text-3xl font-black text-gold">
                           {parseFloat(details.total_price).toFixed(0)}€
                         </p>
                         {details.quantity && (
-                          <p className="text-xs text-neutral-500 mt-1">
+                          <p className="text-xs text-medium-grey mt-1">
                             ≈ {(parseFloat(details.total_price) / details.quantity).toFixed(0)}€/pièce
                           </p>
                         )}
@@ -176,7 +176,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     {/* Status */}
                     {!isSold && (
                       <span className={`inline-flex items-center gap-1.5 font-semibold ${
-                        isActive ? 'text-emerald-600' : 'text-amber-600'
+                        isActive ? 'text-fern' : 'text-gold'
                       }`}>
                         {isActive ? (
                           <>
@@ -193,13 +193,13 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     )}
 
                     {/* Vues */}
-                    <span className="flex items-center gap-1.5 text-neutral-500">
+                    <span className="flex items-center gap-1.5 text-medium-grey">
                       <Eye className="w-4 h-4" />
                       {listing.views_count || 0} vues
                     </span>
 
                     {/* Date */}
-                    <span className="flex items-center gap-1.5 text-neutral-500">
+                    <span className="flex items-center gap-1.5 text-medium-grey">
                       <Clock className="w-4 h-4" />
                       {formatDate(listing.created_at)}
                     </span>
@@ -208,12 +208,12 @@ export default function ListingsList({ listings }: { listings: any[] }) {
                     {isUnit && details && (
                       <>
                         {details.gender && (
-                          <span className="text-neutral-400">
+                          <span className="text-dry-sage">
                             {details.gender === 'men' ? 'Homme' : details.gender === 'women' ? 'Femme' : 'Mixte'}
                           </span>
                         )}
                         {details.frame_type && (
-                          <span className="text-neutral-400">
+                          <span className="text-dry-sage">
                             {details.frame_type === 'optical' ? 'Optique' : 'Solaire'}
                           </span>
                         )}
@@ -223,7 +223,7 @@ export default function ListingsList({ listings }: { listings: any[] }) {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    <PremiumButton asChild size="sm" variant="outline" className="h-9 border-neutral-200">
+                    <PremiumButton asChild size="sm" variant="outline" className="h-9 border-dry-sage">
                       <Link href={`/dashboard/listings/${listing.id}/edit`} className="inline-flex items-center gap-1.5">
                         <Edit className="w-3.5 h-3.5" />
                         Modifier

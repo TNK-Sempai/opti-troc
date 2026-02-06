@@ -16,7 +16,7 @@ export default async function PendingPage() {
     .single()
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-dust-grey flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mb-4">
@@ -32,8 +32,8 @@ export default async function PendingPage() {
             <div className="flex gap-3 p-4 bg-info/5 rounded-lg border border-info/20">
               <FileCheck className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-neutral-900">Documents reçus</p>
-                <p className="text-sm text-neutral-600 mt-1">
+                <p className="font-medium text-sm text-charcoal">Documents reçus</p>
+                <p className="text-sm text-dark-grey mt-1">
                   Notre équipe vérifie vos informations et documents
                 </p>
               </div>
@@ -42,8 +42,8 @@ export default async function PendingPage() {
             <div className="flex gap-3 p-4 bg-warning/5 rounded-lg border border-warning/20">
               <Clock className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-neutral-900">Délai de validation</p>
-                <p className="text-sm text-neutral-600 mt-1">
+                <p className="font-medium text-sm text-charcoal">Délai de validation</p>
+                <p className="text-sm text-dark-grey mt-1">
                   Vous recevrez une réponse sous 24-48 heures
                 </p>
               </div>
@@ -52,8 +52,8 @@ export default async function PendingPage() {
             <div className="flex gap-3 p-4 bg-success/5 rounded-lg border border-success/20">
               <Mail className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sm text-neutral-900">Notification par email</p>
-                <p className="text-sm text-neutral-600 mt-1">
+                <p className="font-medium text-sm text-charcoal">Notification par email</p>
+                <p className="text-sm text-dark-grey mt-1">
                   Nous vous préviendrons dès que votre compte sera validé
                 </p>
               </div>
@@ -65,14 +65,14 @@ export default async function PendingPage() {
               <p className="text-sm font-semibold text-warning mb-1">
                 🎉 Early Adopter
               </p>
-              <p className="text-xs text-neutral-700">
+              <p className="text-xs text-charcoal">
                 Vous bénéficiez de l'offre 1€/mois pendant 3 mois
               </p>
             </div>
           )}
 
           <div className="pt-4 border-t">
-            <p className="text-sm text-neutral-600 text-center mb-4">
+            <p className="text-sm text-dark-grey text-center mb-4">
               Bonjour {profile?.first_name || profile?.contact_name}, merci pour votre patience !
             </p>
             

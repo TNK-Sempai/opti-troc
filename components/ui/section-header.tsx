@@ -1,5 +1,9 @@
+'use client'
+
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
+import { fadeInUp } from '@/lib/animations'
 
 interface SectionHeaderProps {
   icon: LucideIcon
@@ -14,27 +18,32 @@ export function SectionHeader({
   icon: Icon,
   title,
   subtitle,
-  iconColor = 'text-primary',
-  iconBg = 'bg-primary/10',
+  iconColor = 'text-pine-teal',
+  iconBg = 'bg-pine-teal/10',
   className
 }: SectionHeaderProps) {
   return (
-    <div className={cn('flex items-center gap-4', className)}>
+    <motion.div
+      variants={fadeInUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-50px' }}
+      className={cn('flex items-center gap-3', className)}
+    >
       <div className={cn(
-        'w-14 h-14 rounded-2xl flex items-center justify-center',
-        'shadow-lg transition-all duration-300 hover:scale-110 hover:rotate-3',
+        'w-10 h-10 rounded-lg flex items-center justify-center',
         iconBg
       )}>
-        <Icon className={cn('w-7 h-7', iconColor)} />
+        <Icon className={cn('w-5 h-5', iconColor)} />
       </div>
       <div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+        <h2 className="font-serif text-2xl text-pine-teal">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+          <p className="text-sm text-medium-grey mt-0.5">{subtitle}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

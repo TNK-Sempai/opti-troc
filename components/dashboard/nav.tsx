@@ -11,10 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck, Search } from 'lucide-react'
+import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck, Search, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface DashboardNavProps {
   isAdmin?: boolean
@@ -61,27 +61,19 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
   ]
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b-2 border-blue-200/60 sticky top-0 z-50 shadow-lg">
-      <div className="container mx-auto px-4 py-4">
+    <header className="bg-pine-teal backdrop-blur-sm border-b border-hunter-green sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+            <Link href="/" className="flex items-center gap-3 shrink-0">
+              <div className="relative w-32 h-10 bg-white/10 rounded-lg p-0.5">
                 <Image
                   src="/opti-troc-logo.png"
-                  alt="Opti-Troc Logo"
+                  alt="Opti-Troc"
                   fill
-                  sizes="40px"
-                  className="object-contain"
+                  sizes="128px"
+                  className="object-contain object-left"
                 />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gradient-primary">
-                  Opti-Troc
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  Dashboard
-                </p>
               </div>
             </Link>
 
@@ -93,8 +85,12 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                   <Button
                     key={item.href}
                     asChild
-                    variant={isActive ? 'secondary' : 'ghost'}
+                    variant={isActive ? 'default' : 'ghost'}
                     size="sm"
+                    className={isActive
+                      ? 'bg-hunter-green text-white hover:bg-fern'
+                      : 'text-dry-sage hover:text-white hover:bg-hunter-green'
+                    }
                   >
                     <Link href={item.href}>
                       <Icon className="w-4 h-4 mr-2" />
@@ -107,8 +103,15 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
           </div>
 
           <div className="flex items-center gap-2">
+            <Button asChild size="sm" className="hidden lg:flex h-9 bg-gold hover:bg-gold-hover text-pine-teal font-semibold border-0">
+              <Link href="/dashboard/listings/new">
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Nouvelle annonce
+              </Link>
+            </Button>
+
             {isAdmin && (
-              <Button asChild variant="outline" size="sm" className="hidden lg:flex">
+              <Button asChild variant="ghost" size="sm" className="hidden lg:flex text-dry-sage hover:text-white hover:bg-hunter-green border-0">
                 <Link href="/admin">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   <span className="hidden md:inline">Panel Admin</span>
@@ -116,19 +119,19 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
               </Button>
             )}
 
-            <Button asChild variant="outline" size="sm" className="hidden md:flex">
+            <Button asChild variant="ghost" size="sm" className="hidden md:flex text-dry-sage hover:text-white hover:bg-hunter-green border-0">
               <Link href="/shop">Marketplace</Link>
             </Button>
 
             {/* Menu utilisateur Desktop */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mr-2">
-                    <User className="w-4 h-4 text-primary" />
+                <Button variant="ghost" size="sm" className="hidden md:flex text-white hover:bg-hunter-green border-0">
+                  <div className="w-6 h-6 bg-fern rounded-full flex items-center justify-center mr-2">
+                    <User className="w-4 h-4 text-white" />
                   </div>
                   {userProfile && (
-                    <span>
+                    <span className="text-dust-grey">
                       {userProfile.first_name} {userProfile.last_name}
                     </span>
                   )}
@@ -138,11 +141,11 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                 {userProfile && (
                   <>
                     <div className="px-2 py-1.5">
-                      <p className="text-sm font-semibold">
+                      <p className="text-sm font-semibold text-charcoal">
                         {userProfile.company_name}
                       </p>
                       {userEmail && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-medium-grey">
                           {userEmail}
                         </p>
                       )}
@@ -177,7 +180,7 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-2" />
-                  Déconnexion
+                  Deconnexion
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -186,7 +189,7 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden text-white hover:bg-hunter-green"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <Menu className="w-5 h-5" />
@@ -195,7 +198,7 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
         </div>
 
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pb-2 space-y-1">
+          <nav className="md:hidden mt-4 pb-2 space-y-1 border-t border-hunter-green pt-3">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -203,9 +206,12 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                 <Button
                   key={item.href}
                   asChild
-                  variant={isActive ? 'secondary' : 'ghost'}
+                  variant={isActive ? 'default' : 'ghost'}
                   size="sm"
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${isActive
+                    ? 'bg-hunter-green text-white hover:bg-fern'
+                    : 'text-dry-sage hover:text-white hover:bg-hunter-green'
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Link href={item.href}>
@@ -215,15 +221,21 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                 </Button>
               )
             })}
+            <Button asChild className="w-full justify-start bg-gold hover:bg-gold-hover text-pine-teal font-semibold border-0" size="sm">
+              <Link href="/dashboard/listings/new">
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Nouvelle annonce
+              </Link>
+            </Button>
             {isAdmin && (
-              <Button asChild variant="outline" size="sm" className="w-full justify-start">
+              <Button asChild variant="ghost" size="sm" className="w-full justify-start text-dry-sage hover:text-white hover:bg-hunter-green">
                 <Link href="/admin">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Panel Admin
                 </Link>
               </Button>
             )}
-            <Button asChild variant="outline" size="sm" className="w-full justify-start">
+            <Button asChild variant="ghost" size="sm" className="w-full justify-start text-dry-sage hover:text-white hover:bg-hunter-green">
               <Link href="/shop">Marketplace</Link>
             </Button>
           </nav>

@@ -30,7 +30,7 @@ export function WantedItemCard({ item, isValidated, currentUserId }: WantedItemC
               {item.brand} {item.model}
             </h3>
             {item.reference && (
-              <p className="text-xs font-mono bg-neutral-100 px-2 py-1 rounded inline-block">
+              <p className="text-xs font-mono bg-dust-grey px-2 py-1 rounded inline-block">
                 Réf: {item.reference}
               </p>
             )}

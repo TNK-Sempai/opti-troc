@@ -69,7 +69,7 @@ export function MessageActions({ message }: MessageActionsProps) {
   }
 
   const statusLabels: Record<string, { label: string; color: string }> = {
-    new: { label: 'Nouveau', color: 'bg-blue-600' },
+    new: { label: 'Nouveau', color: 'bg-pine-teal' },
     read: { label: 'Lu', color: 'bg-yellow-600' },
     replied: { label: 'Répondu', color: 'bg-green-600' }
   }
@@ -137,7 +137,7 @@ export function MessageActions({ message }: MessageActionsProps) {
           {/* Message */}
           <div>
             <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Message</h4>
-            <div className="bg-neutral-50 rounded-lg p-4 border">
+            <div className="bg-dust-grey rounded-lg p-4 border">
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.message}</p>
             </div>
           </div>

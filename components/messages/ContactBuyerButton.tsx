@@ -75,7 +75,7 @@ export function ContactBuyerButton({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="w-full text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+          className="w-full text-sm font-semibold bg-gradient-to-r from-pine-teal to-hunter-green hover:from-hunter-green hover:to-hunter-green"
           size="sm"
         >
           <MessageCircle className="w-4 h-4 mr-1.5" />

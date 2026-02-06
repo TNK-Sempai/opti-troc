@@ -114,20 +114,14 @@ export default async function MyListingsPage({
   const viewMode = params.view || 'grid'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-orange-50/10 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 left-20 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-              <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent drop-shadow-sm flex items-center gap-3">
-                <Package className="w-10 h-10 text-blue-600" />
+              <span className="text-forest-gradient drop-shadow-sm flex items-center gap-3">
+                <Package className="w-10 h-10 text-pine-teal" />
                 Mes annonces
               </span>
             </h1>
@@ -145,30 +139,30 @@ export default async function MyListingsPage({
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={Package} label="Total" value={stats.total} gradient="primary" />
-          <StatCard icon={CheckCircle} label="Actives" value={stats.active} gradient="success" />
-          <StatCard icon={ShoppingBag} label="Vendues" value={stats.sold} gradient="purple" />
-          <StatCard icon={Pause} label="En pause" value={stats.paused} gradient="secondary" />
+          <StatCard icon={<Package className="w-5 h-5" />} label="Total" value={stats.total} gradient="primary" />
+          <StatCard icon={<CheckCircle className="w-5 h-5" />} label="Actives" value={stats.active} gradient="success" />
+          <StatCard icon={<ShoppingBag className="w-5 h-5" />} label="Vendues" value={stats.sold} gradient="purple" />
+          <StatCard icon={<Pause className="w-5 h-5" />} label="En pause" value={stats.paused} gradient="secondary" />
         </div>
 
         {/* Barre de recherche et filtres */}
-        <Card className="mb-8 shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95">
+        <Card className="mb-8 shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white">
           <CardContent className="p-6">
             <form method="GET" className="flex flex-col md:flex-row gap-4">
               {/* Recherche */}
               <div className="flex-1 relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-pine-teal transition-colors" />
                 <Input
                   name="search"
                   placeholder="Rechercher par marque, modèle, référence..."
                   defaultValue={params.search}
-                  className="pl-11 h-12 shadow-sm border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-medium"
+                  className="pl-11 h-12 shadow-sm border-2 border-dry-sage focus:border-fern focus:ring-2 focus:ring-fern/20 font-medium"
                 />
               </div>
 
               {/* Filtre Statut */}
               <Select name="status" defaultValue={params.status || 'all'}>
-                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-blue-200 focus:border-blue-500 font-medium">
+                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-dry-sage focus:border-fern font-medium">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,7 +175,7 @@ export default async function MyListingsPage({
 
               {/* Filtre Type */}
               <Select name="type" defaultValue={params.type || 'all'}>
-                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-blue-200 focus:border-blue-500 font-medium">
+                <SelectTrigger className="w-full md:w-44 h-12 border-2 border-dry-sage focus:border-fern font-medium">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -192,13 +186,13 @@ export default async function MyListingsPage({
               </Select>
 
               {/* Toggle Vue */}
-              <div className="flex gap-1 border-2 border-blue-200 rounded-xl p-1.5 bg-white">
+              <div className="flex gap-1 border-2 border-dry-sage rounded-xl p-1.5 bg-white">
                 <Link
                   href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'grid' } as Record<string, string>).toString()}`}
                   className={`px-4 py-2 rounded-lg flex items-center justify-center transition-all duration-300 ${
                     viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                      : 'hover:bg-blue-50 text-muted-foreground'
+                      ? 'bg-gradient-to-r from-pine-teal to-hunter-green text-white shadow-lg'
+                      : 'hover:bg-pine-teal/5 text-muted-foreground'
                   }`}
                 >
                   <Grid3x3 className="w-5 h-5" />
@@ -207,8 +201,8 @@ export default async function MyListingsPage({
                   href={`/dashboard/listings?${new URLSearchParams({ ...params, view: 'list' } as Record<string, string>).toString()}`}
                   className={`px-4 py-2 rounded-lg flex items-center justify-center transition-all duration-300 ${
                     viewMode === 'list'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                      : 'hover:bg-blue-50 text-muted-foreground'
+                      ? 'bg-gradient-to-r from-pine-teal to-hunter-green text-white shadow-lg'
+                      : 'hover:bg-pine-teal/5 text-muted-foreground'
                   }`}
                 >
                   <List className="w-5 h-5" />
@@ -228,14 +222,14 @@ export default async function MyListingsPage({
 
         {/* Liste des annonces */}
         {enrichedListings.length === 0 ? (
-          <Card className="shadow-xl border-blue-200/60 backdrop-blur-sm bg-white/95">
+          <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white">
             <CardContent className="text-center py-24 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-neutral-50 opacity-50 rounded-xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-pine-teal/5 to-dust-grey opacity-50 rounded-xl" />
               <div className="relative">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
-                  <Package className="w-12 h-12 text-blue-600" />
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-pine-teal/20 to-fern/20 rounded-3xl flex items-center justify-center shadow-lg">
+                  <Package className="w-12 h-12 text-pine-teal" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-charcoal to-dark-grey bg-clip-text text-transparent">
                   {params.search || params.status || params.type ? 'Aucun résultat' : 'Aucune annonce'}
                 </h3>
                 <p className="text-muted-foreground mb-8 text-lg font-medium">

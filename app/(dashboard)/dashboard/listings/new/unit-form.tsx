@@ -289,7 +289,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
 
             {/* Option saisie manuelle */}
             {category && (
-              <div className="flex items-center space-x-2 p-4 bg-neutral-50 rounded-lg">
+              <div className="flex items-center space-x-2 p-4 bg-dust-grey rounded-lg">
                 <Checkbox
                   id="manual"
                   checked={useManualEntry}
@@ -371,7 +371,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-neutral-500 mt-1">
+                        <p className="text-xs text-medium-grey mt-1">
                           Auto-remplit les détails du produit
                         </p>
                       </div>
@@ -471,7 +471,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                   <Label className="mb-2 block">Dimensions (mm)</Label>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="sizeLens" className="text-xs text-neutral-500">Verres</Label>
+                      <Label htmlFor="sizeLens" className="text-xs text-medium-grey">Verres</Label>
                       <Input
                         id="sizeLens"
                         {...form.register('sizeLens')}
@@ -479,7 +479,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="sizeBridge" className="text-xs text-neutral-500">Pont</Label>
+                      <Label htmlFor="sizeBridge" className="text-xs text-medium-grey">Pont</Label>
                       <Input
                         id="sizeBridge"
                         {...form.register('sizeBridge')}
@@ -487,7 +487,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="sizeTemple" className="text-xs text-neutral-500">Branches</Label>
+                      <Label htmlFor="sizeTemple" className="text-xs text-medium-grey">Branches</Label>
                       <Input
                         id="sizeTemple"
                         {...form.register('sizeTemple')}
@@ -548,7 +548,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                 {/* Photos */}
                 <div>
                   <Label>Photos * (1 à 5 photos)</Label>
-                  <p className="text-sm text-neutral-500 mb-2">
+                  <p className="text-sm text-medium-grey mb-2">
                     Ajoutez des photos claires pour augmenter vos chances de vente
                   </p>
                   <FileUpload

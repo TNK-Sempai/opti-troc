@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { simpleRegistrationSchema, type SimpleRegistrationForm } from '@/lib/validations/auth'
 import { registerSimple } from './simple-actions'
@@ -45,33 +46,44 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-dust-grey flex items-center justify-center p-4 py-8 relative">
+      {/* Bouton retour */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 text-dark-grey hover:text-pine-teal transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Retour à l'accueil</span>
+      </Link>
+
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-primary-dark">
-            Opti-troc
+          <Link href="/" className="flex justify-center">
+            <div className="relative w-40 h-14">
+              <Image src="/opti-troc-logo.png" alt="Opti-Troc" fill className="object-contain" />
+            </div>
           </Link>
-          <h1 className="text-3xl font-bold text-primary-dark mt-4">
+          <h1 className="text-3xl font-bold text-pine-teal font-serif mt-4">
             Créer votre compte
           </h1>
-          <p className="text-neutral-600 mt-2">
+          <p className="text-hunter-green mt-2">
             Rejoignez la marketplace B2B pour opticiens
           </p>
         </div>
 
         {/* Offre de lancement */}
-        <div className="mb-6 p-4 bg-warning/10 border-2 border-warning/30 rounded-xl text-center">
-          <p className="text-sm font-semibold text-warning mb-1">
-            🎉 Offre de lancement
+        <div className="mb-6 p-4 bg-gold-light border border-gold/30 rounded-xl text-center">
+          <p className="text-sm font-semibold text-gold-hover mb-1">
+            Offre de lancement
           </p>
-          <p className="text-xs text-neutral-700">
+          <p className="text-xs text-dark-grey">
             <span className="font-bold">1€/mois pendant 3 mois</span> - Limité aux 2000 premiers inscrits
           </p>
         </div>
 
         {/* Formulaire */}
-        <Card>
+        <Card className="bg-off-white border-light-grey border-t-4 border-t-gold">
           <CardHeader>
             <CardTitle>Informations de base</CardTitle>
             <CardDescription>Créez votre compte en quelques secondes</CardDescription>
@@ -180,7 +192,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full bg-gold hover:bg-gold-hover text-charcoal font-semibold border-0" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -195,9 +207,9 @@ export default function RegisterPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-neutral-600 mt-6">
+        <p className="text-center text-sm text-dark-grey mt-6">
           Vous avez déjà un compte ?{' '}
-          <Link href="/login" className="text-primary hover:underline">
+          <Link href="/login" className="text-fern hover:underline">
             Se connecter
           </Link>
         </p>

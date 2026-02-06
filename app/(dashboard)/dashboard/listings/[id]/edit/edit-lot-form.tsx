@@ -298,7 +298,7 @@ export default function EditLotListingForm({ listing, details, items, photos }: 
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="flex-1 bg-green-600 hover:bg-green-700">
+              <Button type="submit" disabled={isSubmitting} className="flex-1 bg-fern hover:bg-hunter-green">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -260,20 +260,12 @@ export default async function ShopPage({
   const viewMode = (params.view || "grid") as "grid" | "list";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/20 to-orange-50/10 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-3">
-            <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent drop-shadow-sm">
-              Marketplace
-            </span>
+          <h1 className="font-serif text-3xl md:text-4xl text-pine-teal mb-3">
+            Marketplace
           </h1>
           <p className="text-lg text-muted-foreground font-medium">
             Découvrez {totalResults} annonce{totalResults > 1 ? 's' : ''} de professionnels vérifiés
@@ -291,7 +283,7 @@ export default async function ShopPage({
           {/* Contenu principal */}
           <div className="lg:col-span-4 space-y-6">
             {/* Contrôles de vue et tri */}
-            <Card className="border-blue-200/60 shadow-lg backdrop-blur-sm bg-white/80 hover:shadow-xl transition-all duration-300">
+            <Card className="border border-light-grey bg-off-white hover:shadow-card-hover transition-shadow">
               <CardContent className="p-5">
                 <ViewControls totalResults={totalResults} />
               </CardContent>
@@ -299,18 +291,18 @@ export default async function ShopPage({
 
             {/* Filtres actifs */}
             {activeFilters.length > 0 && (
-              <Card className="border-orange-200/60 shadow-lg backdrop-blur-sm bg-white/80 hover:shadow-xl transition-all duration-300">
+              <Card className="border border-light-grey bg-off-white hover:shadow-card-hover transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs font-bold text-orange-700 uppercase tracking-wider flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                    <span className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-pine-teal" />
                       Filtres actifs
                     </span>
                     {activeFilters.map((filter) => (
                       <Badge
                         key={filter.key}
                         variant="secondary"
-                        className="gap-2 pl-3 pr-2 py-1.5 bg-gradient-to-r from-orange-100 to-orange-50 hover:from-orange-200 hover:to-orange-100 border border-orange-300/50 text-orange-800 font-semibold shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
+                        className="gap-2 pl-3 pr-2 py-1.5 bg-dry-sage/20 border border-dry-sage/40 text-charcoal font-semibold shadow-sm transition-shadow"
                       >
                         {filter.label}
                         <Link
@@ -324,7 +316,7 @@ export default async function ShopPage({
                               )
                             )
                           ).toString()}`}
-                          className="hover:text-red-600 transition-colors hover:scale-125 inline-flex"
+                          className="hover:text-red-600 transition-colors inline-flex"
                         >
                           <X className="w-3.5 h-3.5" />
                         </Link>
@@ -334,7 +326,7 @@ export default async function ShopPage({
                       asChild
                       variant="ghost"
                       size="sm"
-                      className="h-8 text-xs font-semibold hover:bg-red-100 hover:text-red-700 transition-all duration-300"
+                      className="h-8 text-xs font-semibold hover:bg-red-100 hover:text-red-700 transition-shadow"
                     >
                       <Link href="/shop">Tout effacer</Link>
                     </Button>
@@ -345,20 +337,19 @@ export default async function ShopPage({
 
             {/* Grille/Liste annonces */}
             {paginatedListings.length === 0 ? (
-              <Card className="border-neutral-200/60 shadow-xl overflow-hidden">
+              <Card className="border border-light-grey bg-off-white shadow-card overflow-hidden">
                 <CardContent className="text-center py-24 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-orange-50/30 opacity-50" />
                   <div className="relative">
-                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center shadow-lg">
-                      <Package className="w-12 h-12 text-blue-600" />
+                    <div className="w-24 h-24 mx-auto mb-6 bg-pine-teal/10 rounded-3xl flex items-center justify-center shadow-card">
+                      <Package className="w-12 h-12 text-pine-teal" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+                    <h3 className="text-2xl font-bold mb-3 text-pine-teal">
                       Aucune annonce trouvée
                     </h3>
                     <p className="text-muted-foreground mb-8 text-lg">
                       Essayez de modifier vos critères de recherche
                     </p>
-                    <Button asChild size="lg" className="shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                    <Button asChild size="lg" className="bg-pine-teal text-white hover:bg-hunter-green shadow-card hover:shadow-card-hover transition-shadow">
                       <Link href="/shop">Réinitialiser les filtres</Link>
                     </Button>
                   </div>
@@ -382,17 +373,17 @@ export default async function ShopPage({
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <Card className="border-blue-200/60 shadow-lg backdrop-blur-sm bg-white/80 hover:shadow-xl transition-all duration-300">
+                  <Card className="border border-light-grey bg-off-white hover:shadow-card-hover transition-shadow">
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <p className="text-sm font-semibold text-muted-foreground">
-                          <span className="text-blue-600 font-bold">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{" "}
-                          <span className="text-blue-600 font-bold">{totalResults}</span> résultats
+                          <span className="text-charcoal font-semibold">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{" "}
+                          <span className="text-charcoal font-semibold">{totalResults}</span> résultats
                         </p>
 
                         <div className="flex items-center gap-2">
                           {page > 1 && (
-                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md hover:scale-105 hover:border-blue-400 hover:text-blue-700 transition-all duration-300 font-semibold">
+                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
                               <Link
                                 href={`/shop?${new URLSearchParams({
                                   ...params,
@@ -422,8 +413,8 @@ export default async function ShopPage({
                                   }
                                   size="sm"
                                   className={pageNum === page
-                                    ? "w-10 shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-bold"
-                                    : "w-10 hover:bg-blue-100 hover:text-blue-700 transition-all duration-300 font-semibold"
+                                    ? "w-10 shadow-card bg-pine-teal text-white hover:bg-hunter-green font-bold"
+                                    : "w-10 hover:bg-dust-grey/50 hover:text-pine-teal transition-shadow font-semibold"
                                   }
                                 >
                                   <Link
@@ -440,7 +431,7 @@ export default async function ShopPage({
                           )}
 
                           {page < totalPages && (
-                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-md hover:scale-105 hover:border-blue-400 hover:text-blue-700 transition-all duration-300 font-semibold">
+                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
                               <Link
                                 href={`/shop?${new URLSearchParams({
                                   ...params,

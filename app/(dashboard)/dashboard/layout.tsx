@@ -33,7 +33,7 @@ export default async function DashboardLayout({
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
+    <div className="min-h-screen bg-dust-grey flex flex-col">
       <DashboardNav
         isAdmin={isAdmin}
         userProfile={{

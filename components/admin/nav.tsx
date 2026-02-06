@@ -84,16 +84,16 @@ export function AdminNav({ profile }: AdminNavProps) {
   ];
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b-2 border-purple-200/60 sticky top-0 z-50 shadow-lg">
-      <div className="container mx-auto px-4 py-4">
+    <header className="bg-pine-teal backdrop-blur-md border-b border-hunter-green sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                <h1 className="text-xl font-bold text-primary">Panel Admin</h1>
+              <div className="flex items-center gap-2 mb-0.5">
+                <ShieldCheck className="w-5 h-5 text-gold" />
+                <h1 className="text-xl font-bold text-white">Panel Admin</h1>
               </div>
-              <p className="text-xs text-muted-foreground">Gestion Opti-Troc</p>
+              <p className="text-xs text-dry-sage">Gestion Opti-Troc</p>
             </div>
 
             {/* Navigation */}
@@ -108,15 +108,18 @@ export function AdminNav({ profile }: AdminNavProps) {
                   <Button
                     key={item.href}
                     asChild
-                    variant={isActive ? "secondary" : "ghost"}
+                    variant="ghost"
                     size="sm"
-                    className="relative"
+                    className={isActive
+                      ? "bg-hunter-green text-white hover:bg-fern"
+                      : "text-dry-sage hover:text-white hover:bg-hunter-green"
+                    }
                   >
                     <Link href={item.href}>
                       <Icon className="w-4 h-4 mr-2" />
                       {item.label}
                       {item.badge && (
-                        <Badge className="ml-2 bg-red-600 text-white h-5 px-1.5 text-xs">
+                        <Badge className="ml-2 bg-gold text-pine-teal h-5 px-1.5 text-xs font-bold">
                           {item.badge}
                         </Badge>
                       )}
@@ -129,7 +132,7 @@ export function AdminNav({ profile }: AdminNavProps) {
 
           <div className="flex items-center gap-2">
             {/* Switch vers dashboard user */}
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="ghost" size="sm" className="text-dry-sage hover:text-white hover:bg-hunter-green border-0">
               <Link href="/dashboard">
                 <ArrowLeftRight className="w-4 h-4 mr-2" />
                 <span className="hidden md:inline">Mode utilisateur</span>
@@ -139,11 +142,11 @@ export function AdminNav({ profile }: AdminNavProps) {
             {/* Menu profil */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mr-2">
-                    <User className="w-4 h-4 text-primary" />
+                <Button variant="ghost" size="sm" className="text-white hover:bg-hunter-green border-0">
+                  <div className="w-6 h-6 bg-fern rounded-full flex items-center justify-center mr-2">
+                    <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="hidden md:inline">
+                  <span className="hidden md:inline text-dust-grey">
                     {profile.first_name} {profile.last_name}
                   </span>
                 </Button>

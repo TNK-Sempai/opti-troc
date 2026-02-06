@@ -32,7 +32,7 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    const form = e.currentTarget; // Stocker la référence avant l'async
+    const form = e.currentTarget;
     const formData = new FormData(form);
     const result = await submitContactMessage(formData);
 
@@ -44,7 +44,7 @@ export default function ContactPage() {
         message:
           "Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.",
       });
-      form.reset(); // Utiliser la référence stockée
+      form.reset();
     } else {
       setSubmitStatus({
         success: false,
@@ -53,15 +53,16 @@ export default function ContactPage() {
     }
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-blue-50/30">
+    <div className="min-h-screen bg-dust-grey">
       <div className="container mx-auto px-4 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-primary text-white">Contact</Badge>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+          <Badge className="mb-4 bg-pine-teal text-white">Contact</Badge>
+          <h1 className="text-4xl font-serif font-bold mb-4 text-pine-teal">
             Contactez-nous
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <div className="w-12 h-1 bg-gold mx-auto mb-4" />
+          <p className="text-xl text-dark-grey max-w-2xl mx-auto">
             Une question ? Notre équipe est là pour vous aider
           </p>
         </div>
@@ -69,9 +70,9 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Formulaire */}
           <div className="lg:col-span-2">
-            <Card className="shadow-lg border-primary/10">
+            <Card className="shadow-lg bg-off-white border-light-grey">
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-6">
+                <h2 className="text-xl font-serif font-bold mb-6 text-pine-teal">
                   Envoyez-nous un message
                 </h2>
 
@@ -79,16 +80,16 @@ export default function ContactPage() {
                   <div
                     className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
                       submitStatus.success
-                        ? "bg-green-50 border border-green-200"
-                        : "bg-red-50 border border-red-200"
+                        ? "bg-fern/10 border border-fern/30"
+                        : "bg-error/10 border border-error/30"
                     }`}
                   >
                     {submitStatus.success && (
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <CheckCircle className="w-5 h-5 text-fern mt-0.5" />
                     )}
                     <p
                       className={`text-sm ${
-                        submitStatus.success ? "text-green-800" : "text-red-800"
+                        submitStatus.success ? "text-hunter-green" : "text-error"
                       }`}
                     >
                       {submitStatus.message}
@@ -101,12 +102,12 @@ export default function ContactPage() {
                     <div>
                       <Label
                         htmlFor="name"
-                        className="text-sm font-medium mb-2 block"
+                        className="text-sm font-medium mb-2 block text-charcoal"
                       >
                         Nom complet *
                       </Label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-medium-grey" />
                         <Input
                           id="name"
                           name="name"
@@ -121,12 +122,12 @@ export default function ContactPage() {
                     <div>
                       <Label
                         htmlFor="email"
-                        className="text-sm font-medium mb-2 block"
+                        className="text-sm font-medium mb-2 block text-charcoal"
                       >
                         Email *
                       </Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-medium-grey" />
                         <Input
                           id="email"
                           name="email"
@@ -143,7 +144,7 @@ export default function ContactPage() {
                   <div>
                     <Label
                       htmlFor="company"
-                      className="text-sm font-medium mb-2 block"
+                      className="text-sm font-medium mb-2 block text-charcoal"
                     >
                       Entreprise
                     </Label>
@@ -159,7 +160,7 @@ export default function ContactPage() {
                   <div>
                     <Label
                       htmlFor="subject"
-                      className="text-sm font-medium mb-2 block"
+                      className="text-sm font-medium mb-2 block text-charcoal"
                     >
                       Sujet *
                     </Label>
@@ -176,7 +177,7 @@ export default function ContactPage() {
                   <div>
                     <Label
                       htmlFor="message"
-                      className="text-sm font-medium mb-2 block"
+                      className="text-sm font-medium mb-2 block text-charcoal"
                     >
                       Message *
                     </Label>
@@ -192,7 +193,7 @@ export default function ContactPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 font-semibold shadow-md bg-gradient-to-r from-primary to-primary-dark"
+                    className="w-full h-11 font-semibold shadow-md bg-gold hover:bg-gold-hover text-charcoal"
                     size="lg"
                     disabled={isSubmitting}
                   >
@@ -204,25 +205,25 @@ export default function ContactPage() {
             </Card>
           </div>
 
-          {/* Infos contact - reste identique */}
+          {/* Infos contact */}
           <div className="space-y-4">
-            <Card className="shadow-md border-primary/10">
+            <Card className="shadow-md bg-off-white border-light-grey">
               <CardContent className="p-5">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-primary" />
+                <h3 className="font-bold mb-4 flex items-center gap-2 text-pine-teal">
+                  <Phone className="w-5 h-5 text-pine-teal" />
                   Coordonnées
                 </h3>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex items-start gap-3">
-                    <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
+                    <Mail className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-muted-foreground mb-0.5">
+                      <div className="text-xs text-medium-grey mb-0.5">
                         Email
                       </div>
                       <a
                         href="mailto:tanuki.corporation@gmail.com"
-                        className="text-primary hover:underline"
+                        className="text-pine-teal hover:underline"
                       >
                         tanuki.corporation@gmail.com
                       </a>
@@ -230,14 +231,14 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
+                    <Phone className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-muted-foreground mb-0.5">
+                      <div className="text-xs text-medium-grey mb-0.5">
                         Téléphone
                       </div>
                       <a
                         href="tel:+32465186866"
-                        className="text-primary hover:underline"
+                        className="text-pine-teal hover:underline"
                       >
                         0465 18 68 66
                       </a>
@@ -245,12 +246,12 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                    <MapPin className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-muted-foreground mb-0.5">
+                      <div className="text-xs text-medium-grey mb-0.5">
                         Adresse
                       </div>
-                      <p className="text-sm">
+                      <p className="text-sm text-dark-grey">
                         Avenue de l'indépendance belge 131 (APT 4.02)
                         <br />
                         1081 Bruxelles, Belgique
@@ -261,69 +262,69 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md border-primary/10">
+            <Card className="shadow-md bg-off-white border-light-grey">
               <CardContent className="p-5">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-primary" />
+                <h3 className="font-bold mb-4 flex items-center gap-2 text-pine-teal">
+                  <Clock className="w-5 h-5 text-pine-teal" />
                   Horaires
                 </h3>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">
+                    <span className="text-medium-grey">
                       Lundi - Vendredi
                     </span>
-                    <span className="font-medium">9h - 18h</span>
+                    <span className="font-medium text-charcoal">9h - 18h</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Samedi</span>
-                    <span className="font-medium">10h - 16h</span>
+                    <span className="text-medium-grey">Samedi</span>
+                    <span className="font-medium text-charcoal">10h - 16h</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Dimanche</span>
-                    <span className="font-medium">Fermé</span>
+                    <span className="text-medium-grey">Dimanche</span>
+                    <span className="font-medium text-charcoal">Fermé</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-md border-primary/10 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
+            <Card className="shadow-md bg-off-white border-pine-teal/10">
               <CardContent className="p-5">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <HelpCircle className="w-5 h-5 text-blue-600" />
+                <h3 className="font-bold mb-4 flex items-center gap-2 text-pine-teal">
+                  <HelpCircle className="w-5 h-5 text-gold" />
                   Questions fréquentes
                 </h3>
 
                 <div className="space-y-3">
                   <div>
-                    <h4 className="text-sm font-semibold mb-1">
+                    <h4 className="text-sm font-semibold mb-1 text-charcoal">
                       Comment vendre sur Opti-Troc ?
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-medium-grey">
                       Créez un compte professionnel, publiez vos annonces et
                       gérez vos ventes depuis votre tableau de bord.
                     </p>
                   </div>
 
-                  <Separator />
+                  <Separator className="bg-light-grey" />
 
                   <div>
-                    <h4 className="text-sm font-semibold mb-1">
+                    <h4 className="text-sm font-semibold mb-1 text-charcoal">
                       Qui peut s'inscrire ?
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-medium-grey">
                       Uniquement les professionnels de l'optique avec un numéro
                       SIRET valide.
                     </p>
                   </div>
 
-                  <Separator />
+                  <Separator className="bg-light-grey" />
 
                   <div>
-                    <h4 className="text-sm font-semibold mb-1">
+                    <h4 className="text-sm font-semibold mb-1 text-charcoal">
                       Les paiements sont-ils sécurisés ?
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-medium-grey">
                       Oui, toutes les transactions sont protégées et les
                       vendeurs sont vérifiés.
                     </p>

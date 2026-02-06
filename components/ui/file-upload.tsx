@@ -73,7 +73,7 @@ export function FileUpload({
           'relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
           {
             'border-primary bg-primary/5': dragActive,
-            'border-neutral-300 hover:border-primary hover:bg-neutral-50': !dragActive && !error,
+            'border-dry-sage hover:border-primary hover:bg-dust-grey': !dragActive && !error,
             'border-error bg-error/5': error,
           }
         )}
@@ -92,12 +92,12 @@ export function FileUpload({
           onChange={handleChange}
         />
 
-        <Upload className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
-        <p className="text-sm text-neutral-600 mb-1">
+        <Upload className="w-12 h-12 mx-auto mb-4 text-medium-grey" />
+        <p className="text-sm text-dark-grey mb-1">
           Glissez-déposez vos fichiers ici ou{' '}
           <span className="text-primary font-medium">parcourez</span>
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-medium-grey">
           {accept.includes('image') ? 'JPG, PNG, WEBP' : 'PDF, JPG, PNG'} - Max {maxSize / 1000000}MB
         </p>
       </div>
@@ -112,7 +112,7 @@ export function FileUpload({
           {value.map((file, index) => (
             <div
               key={index}
-              className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200"
+              className="flex items-center gap-3 p-3 bg-dust-grey rounded-lg border border-light-grey"
             >
               {file.type.startsWith('image/') ? (
                 <img
@@ -121,14 +121,14 @@ export function FileUpload({
                   className="w-12 h-12 object-cover rounded"
                 />
               ) : (
-                <FileText className="w-12 h-12 text-neutral-400" />
+                <FileText className="w-12 h-12 text-medium-grey" />
               )}
               
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 truncate">
+                <p className="text-sm font-medium text-charcoal truncate">
                   {file.name}
                 </p>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-medium-grey">
                   {(file.size / 1000).toFixed(0)} KB
                 </p>
               </div>
@@ -139,9 +139,9 @@ export function FileUpload({
                   e.stopPropagation()
                   removeFile(index)
                 }}
-                className="p-1 hover:bg-neutral-200 rounded transition-colors"
+                className="p-1 hover:bg-light-grey rounded transition-colors"
               >
-                <X className="w-4 h-4 text-neutral-600" />
+                <X className="w-4 h-4 text-dark-grey" />
               </button>
             </div>
           ))}

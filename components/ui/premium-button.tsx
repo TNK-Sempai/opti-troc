@@ -1,48 +1,44 @@
 'use client'
 
 import * as React from 'react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { LucideIcon } from 'lucide-react'
+import type { TargetAndTransition } from 'framer-motion'
+
+const gradientStyles = {
+  primary: 'bg-pine-teal hover:bg-hunter-green text-white',
+  secondary: 'bg-hunter-green hover:bg-pine-teal text-white',
+  success: 'bg-fern hover:bg-hunter-green text-white',
+  danger: 'bg-error hover:bg-error/90 text-white',
+  gold: 'bg-gold hover:bg-gold-hover text-charcoal',
+} as const
 
 interface PremiumButtonProps extends React.ComponentPropsWithoutRef<typeof Button> {
   icon?: LucideIcon
-  gradient?: 'primary' | 'secondary' | 'success' | 'danger'
+  gradient?: keyof typeof gradientStyles
   glow?: boolean
-}
-
-const gradientClasses = {
-  primary: 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white border-0',
-  secondary: 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white border-0',
-  success: 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white border-0',
-  danger: 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-0',
-}
-
-const glowClasses = {
-  primary: 'hover:shadow-glow-primary',
-  secondary: 'hover:shadow-glow-secondary',
-  success: 'hover:shadow-xl hover:shadow-emerald-500/30',
-  danger: 'hover:shadow-xl hover:shadow-red-500/30',
 }
 
 export function PremiumButton({
   children,
   icon: Icon,
-  gradient = 'primary',
+  gradient = 'gold',
   glow = false,
   className,
   asChild,
   ...props
 }: PremiumButtonProps) {
+  const gradientClass = gradientStyles[gradient] || gradientStyles.gold
+
   const baseClasses = cn(
-    'relative overflow-hidden transition-all duration-300 font-semibold',
-    'hover:scale-105 hover:-translate-y-0.5',
-    gradient && gradientClasses[gradient],
-    glow && glowClasses[gradient],
+    'relative font-semibold border-0 transition-all duration-200',
+    gradientClass,
+    glow && 'shadow-gold-glow',
     className
   )
 
-  // Quand asChild est utilisé, on ne wrap pas le contenu
   if (asChild) {
     return (
       <Button
@@ -56,14 +52,20 @@ export function PremiumButton({
   }
 
   return (
-    <Button
-      className={baseClasses}
-      {...props}
+    <motion.div
+      whileHover={{ scale: 1.03 } satisfies TargetAndTransition}
+      whileTap={{ scale: 0.97 } satisfies TargetAndTransition}
+      className="inline-flex"
     >
-      <span className="relative flex items-center gap-2">
-        {Icon && <Icon className="w-4 h-4" />}
-        {children}
-      </span>
-    </Button>
+      <Button
+        className={baseClasses}
+        {...props}
+      >
+        <span className="relative flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4" />}
+          {children}
+        </span>
+      </Button>
+    </motion.div>
   )
 }
