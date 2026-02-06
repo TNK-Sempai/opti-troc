@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ['latin'],
