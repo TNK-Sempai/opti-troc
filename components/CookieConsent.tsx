@@ -23,6 +23,11 @@ export default function CookieConsent() {
     setConsent(false)
   }
 
+  const resetConsent = () => {
+  localStorage.removeItem('cookie_consent')
+  window.location.reload()
+}
+
   return (
     <>
       {/* GA4 chargé UNIQUEMENT si accepté */}
