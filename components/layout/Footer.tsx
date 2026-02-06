@@ -1,9 +1,15 @@
+'use client'
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Twitter, Linkedin, Instagram, Mail } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const resetConsent = () => {
+  localStorage.removeItem('cookie_consent')
+  window.location.reload()
+}
 
   return (
     <footer className="bg-pine-teal">
