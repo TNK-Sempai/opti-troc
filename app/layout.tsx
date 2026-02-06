@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
-import { SpeedInsights } from "@vercel/speed-insights/next"
-
 
 const dmSerifDisplay = DM_Serif_Display({
   subsets: ['latin'],
@@ -27,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'Opti-Troc',
-  description: 'Marketplace B2B pour professionnels de l\'optique',
+  description: "Marketplace B2B pour professionnels de l'optique",
 }
 
 export default function RootLayout({
@@ -36,8 +35,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className={`${dmSerifDisplay.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans">{children}</body>
+    <html
+      lang="fr"
+      className={`${dmSerifDisplay.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="font-sans">
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   )
 }
