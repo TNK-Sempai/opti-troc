@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { upsertParticipants, sendMessage } from '@/lib/messaging/conversation-helpers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -20,10 +21,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message required' }, { status: 400 })
     }
 
-    // Récupérer le listing pour obtenir le seller_id
+    // Récupérer le listing pour obtenir le user_id (vendeur)
     const { data: listing, error: listingError } = await supabase
       .from('listings')
-      .select('seller_id, listing_type, unit_listings(brand, model), lot_listings(description)')
+      .select('user_id, listing_type, unit_listings(brand, model), lot_listings(description)')
       .eq('id', listingId)
       .single()
 
@@ -32,11 +33,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier que l'utilisateur ne contacte pas lui-même
-    if (listing.seller_id === user.id) {
+    if (listing.user_id === user.id) {
       return NextResponse.json({ error: 'Cannot contact yourself' }, { status: 400 })
     }
 
-    const recipientId = listing.seller_id
+    const recipientId = listing.user_id
 
     // Vérifier si une conversation existe déjà pour ce listing entre ces 2 utilisateurs
     const { data: existingConvs } = await supabase
@@ -63,11 +64,8 @@ export async function POST(request: NextRequest) {
 
     // Si une conversation existe, ajouter le message et rediriger
     if (existingConvId) {
-      await supabase.from('messages').insert({
-        conversation_id: existingConvId,
-        sender_id: user.id,
-        content: message.trim(),
-      })
+      const { error: msgError } = await sendMessage(supabase, existingConvId, user.id, message)
+      if (msgError) throw msgError
 
       return NextResponse.json({ conversationId: existingConvId })
     }
@@ -82,6 +80,7 @@ export async function POST(request: NextRequest) {
       .insert({
         listing_id: listingId,
         subject: `Concernant: ${listingInfo}`,
+        last_message_at: new Date().toISOString(),
       })
       .select()
       .single()
@@ -90,28 +89,18 @@ export async function POST(request: NextRequest) {
       throw convError
     }
 
-    // Ajouter les participants
-    const { error: partError } = await supabase
-      .from('conversation_participants')
-      .insert([
-        { conversation_id: conversation.id, user_id: user.id },
-        { conversation_id: conversation.id, user_id: recipientId },
-      ])
+    // Ajouter les participants (upsert pour éviter les doublons)
+    const { error: partError } = await upsertParticipants(
+      supabase,
+      conversation.id,
+      [user.id, recipientId]
+    )
 
-    if (partError) {
-      throw partError
-    }
+    if (partError) throw partError
 
     // Ajouter le premier message
-    const { error: msgError } = await supabase.from('messages').insert({
-      conversation_id: conversation.id,
-      sender_id: user.id,
-      content: message.trim(),
-    })
-
-    if (msgError) {
-      throw msgError
-    }
+    const { error: msgError } = await sendMessage(supabase, conversation.id, user.id, message)
+    if (msgError) throw msgError
 
     return NextResponse.json({ conversationId: conversation.id })
   } catch (error: any) {

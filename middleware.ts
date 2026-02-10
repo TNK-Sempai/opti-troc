@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -29,81 +30,92 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  // getUser() valide le token côté serveur ET rafraîchit le JWT si expiré
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirection qui préserve les cookies Supabase (tokens rafraîchis)
+  function redirectTo(path: string) {
+    const url = new URL(path, request.url)
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectResponse
+  }
 
   // Routes publiques
   const publicRoutes = [
-    '/', 
-    '/register', 
-    '/login', 
+    '/',
+    '/register',
+    '/register/success',
+    '/login',
     '/forgot-password',
     '/shop',
     '/about',
-    '/contact'
+    '/contact',
+    '/want-to-buy',
   ]
-  
-  const isPublicRoute = publicRoutes.includes(pathname) || 
+
+  const isPublicRoute = publicRoutes.includes(pathname) ||
                         pathname.startsWith('/listing/') ||
+                        pathname.startsWith('/legal/') ||
                         pathname.startsWith('/api/')
-  
+
   if (isPublicRoute) {
     return supabaseResponse
   }
 
   // Si pas connecté → Login
   if (!user && !pathname.startsWith('/login')) {
-    const url = new URL('/login', request.url)
-    return NextResponse.redirect(url)
+    return redirectTo('/login')
   }
 
-  // Si connecté, vérifier le statut
+  // Si connecté, vérifier le statut et le rôle
   if (user) {
-    const { data: profile } = await supabase
+    // Utiliser le service role pour bypasser les RLS
+    // (le client anon peut échouer si les policies bloquent la lecture)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)
       .single()
 
-    // ADMINS → Ne PAS rediriger automatiquement, ils peuvent aller partout
-    // On retire la redirection automatique vers /admin
-    
-    // USERS normaux
+    // ADMINS → peuvent aller partout, pas de redirection
     if (profile?.role !== 'admin') {
       // Si profil incomplet → /onboarding
       if (profile?.status === 'incomplete' && !pathname.startsWith('/onboarding')) {
-        const url = new URL('/onboarding', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/onboarding')
       }
 
       // Si en attente → /dashboard/pending
       if (profile?.status === 'pending' && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/pending')) {
-        const url = new URL('/dashboard/pending', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/dashboard/pending')
       }
 
       // Si validé et sur /dashboard/pending → /dashboard
       if (profile?.status === 'validated' && pathname.startsWith('/dashboard/pending')) {
-        const url = new URL('/dashboard', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/dashboard')
       }
 
       // Si rejeté → /dashboard/rejected
       if (profile?.status === 'rejected' && !pathname.startsWith('/dashboard/rejected')) {
-        const url = new URL('/dashboard/rejected', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/dashboard/rejected')
       }
 
       // Si suspendu → /dashboard/suspended
       if (profile?.status === 'suspended' && !pathname.startsWith('/dashboard/suspended')) {
-        const url = new URL('/dashboard/suspended', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/dashboard/suspended')
       }
 
       // Bloquer l'accès à /admin pour les non-admins
       if (pathname.startsWith('/admin')) {
-        const url = new URL('/dashboard', request.url)
-        return NextResponse.redirect(url)
+        return redirectTo('/dashboard')
       }
     }
   }

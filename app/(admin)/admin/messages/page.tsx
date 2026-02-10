@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, MailOpen, CheckCircle, Search, Inbox, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Mail, MailOpen, CheckCircle, Search, Inbox, Trash2, X } from 'lucide-react'
 import { MessageQuickActions } from '@/components/admin/message-quick-actions'
 import Link from 'next/link'
 
@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic'
 interface SearchParams {
   status?: string
   search?: string
+  page?: string
+  pageSize?: string
 }
 
 export default async function AdminMessagesPage({
@@ -41,6 +43,22 @@ export default async function AdminMessagesPage({
       msg.subject.toLowerCase().includes(searchLower) ||
       (msg.company && msg.company.toLowerCase().includes(searchLower))
     )
+  }
+
+  // Pagination
+  const pageSizeVal = Math.min(parseInt(params.pageSize || '25') || 25, 100)
+  const totalResults = filteredMessages.length
+  const totalPages = Math.ceil(totalResults / pageSizeVal)
+  const pageNum = Math.max(1, Math.min(parseInt(params.page || '1') || 1, totalPages || 1))
+  const offsetVal = (pageNum - 1) * pageSizeVal
+  const paginatedMessages = filteredMessages.slice(offsetVal, offsetVal + pageSizeVal)
+
+  function buildUrl(overrides: Record<string, string>) {
+    const base: Record<string, string> = {}
+    if (params.status) base.status = params.status
+    if (params.search) base.search = params.search
+    base.pageSize = String(pageSizeVal)
+    return `/admin/messages?${new URLSearchParams({ ...base, ...overrides }).toString()}`
   }
 
   const stats = {
@@ -167,9 +185,9 @@ export default async function AdminMessagesPage({
 
         <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white overflow-hidden">
           <CardContent className="p-0">
-            {filteredMessages && filteredMessages.length > 0 ? (
+            {paginatedMessages && paginatedMessages.length > 0 ? (
               <div className="divide-y divide-light-grey">
-                {filteredMessages.map((message) => {
+                {paginatedMessages.map((message) => {
                   const isNew = message.status === 'new'
 
                   return (
@@ -264,6 +282,72 @@ export default async function AdminMessagesPage({
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {totalResults > 0 && (
+          <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white mt-6">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                  {[25, 50, 100].map(size => (
+                    <Button
+                      key={size}
+                      asChild
+                      variant={pageSizeVal === size ? 'default' : 'outline'}
+                      size="sm"
+                      className={pageSizeVal === size
+                        ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                        : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'}
+                    >
+                      <Link href={buildUrl({ pageSize: String(size), page: '1' })}>{size}</Link>
+                    </Button>
+                  ))}
+                  <span className="text-sm text-muted-foreground font-medium ml-1">par page</span>
+                </div>
+
+                <p className="text-sm font-semibold text-muted-foreground">
+                  <span className="text-charcoal">{offsetVal + 1}-{Math.min(offsetVal + pageSizeVal, totalResults)}</span> sur{' '}
+                  <span className="text-charcoal">{totalResults}</span>
+                </p>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {pageNum > 1 && (
+                      <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                        <Link href={buildUrl({ page: String(pageNum - 1) })}><ChevronLeft className="w-4 h-4" /></Link>
+                      </Button>
+                    )}
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let p = i + 1
+                      if (totalPages > 5 && pageNum > 3) {
+                        p = pageNum - 2 + i
+                        if (p > totalPages) p = totalPages - (4 - i)
+                      }
+                      return (
+                        <Button
+                          key={p}
+                          asChild
+                          variant={p === pageNum ? 'default' : 'ghost'}
+                          size="sm"
+                          className={p === pageNum
+                            ? 'w-9 bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                            : 'w-9 hover:bg-dust-grey hover:text-pine-teal font-semibold'}
+                        >
+                          <Link href={buildUrl({ page: String(p) })}>{p}</Link>
+                        </Button>
+                      )
+                    })}
+                    {pageNum < totalPages && (
+                      <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                        <Link href={buildUrl({ page: String(pageNum + 1) })}><ChevronRight className="w-4 h-4" /></Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

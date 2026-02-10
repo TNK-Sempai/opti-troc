@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { supabaseAdmin } from "@/lib/supabase/admin"
 import { HeaderClient } from "./Header"
 
 export default async function Header() {
@@ -7,7 +8,7 @@ export default async function Header() {
 
   let profile = null
   if (user) {
-    const { data } = await supabase
+    const { data } = await supabaseAdmin
       .from("user_profiles")
       .select("company_name, first_name, last_name")
       .eq("id", user.id)

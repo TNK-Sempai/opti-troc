@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { upsertParticipants, sendMessage } from '@/lib/messaging/conversation-helpers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // Vérifier l'authentification
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json(
@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Récupérer le wanted item et vérifier qu'il existe
     const { data: wantedItem, error: wantedItemError } = await supabase
       .from('wanted_items')
       .select('id, user_id, brand, model, reference')
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vérifier que l'utilisateur ne contacte pas son propre wanted item
     if (wantedItem.user_id === user.id) {
       return NextResponse.json(
         { error: 'Vous ne pouvez pas contacter votre propre recherche' },
@@ -45,88 +43,113 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vérifier si une conversation existe déjà entre ces deux utilisateurs pour ce wanted item
-    const { data: existingConversation } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('wanted_item_id', wantedItemId)
-      .or(`and(user1_id.eq.${user.id},user2_id.eq.${wantedItem.user_id}),and(user1_id.eq.${wantedItem.user_id},user2_id.eq.${user.id})`)
-      .maybeSingle()
+    const recipientId = wantedItem.user_id
 
-    let conversationId: string
+    // Construire le sujet pour identifier la conversation
+    const itemTitle = [wantedItem.brand, wantedItem.model, wantedItem.reference]
+      .filter(Boolean)
+      .join(' ')
+    const subject = `Recherche: ${itemTitle}`
 
-    if (existingConversation) {
-      // Utiliser la conversation existante
-      conversationId = existingConversation.id
+    // Chercher une conversation existante entre ces 2 utilisateurs
+    // avec le même sujet (pas de wanted_item_id sur la table conversations)
+    const { data: myParticipations } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', user.id)
 
-      // Ajouter le message à la conversation existante
-      const { error: messageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: message.trim(),
-        })
+    let existingConvId = null
 
-      if (messageError) {
-        console.error('Error creating message:', messageError)
-        return NextResponse.json(
-          { error: 'Erreur lors de l\'envoi du message' },
-          { status: 500 }
-        )
-      }
+    if (myParticipations && myParticipations.length > 0) {
+      const myConvIds = myParticipations.map(p => p.conversation_id)
 
-      // Mettre à jour la conversation
-      await supabase
-        .from('conversations')
-        .update({
-          last_message_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', conversationId)
-    } else {
-      // Créer une nouvelle conversation
-      const { data: newConversation, error: conversationError } = await supabase
-        .from('conversations')
-        .insert({
-          user1_id: user.id,
-          user2_id: wantedItem.user_id,
-          wanted_item_id: wantedItemId,
-          last_message_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single()
+      // Trouver les conversations partagées avec le destinataire
+      const { data: recipientParticipations } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', recipientId)
+        .in('conversation_id', myConvIds)
 
-      if (conversationError || !newConversation) {
-        console.error('Error creating conversation:', conversationError)
-        return NextResponse.json(
-          { error: 'Erreur lors de la création de la conversation' },
-          { status: 500 }
-        )
-      }
+      if (recipientParticipations && recipientParticipations.length > 0) {
+        const sharedConvIds = recipientParticipations.map(p => p.conversation_id)
 
-      conversationId = newConversation.id
+        // Parmi celles-ci, trouver celle avec le même sujet (sans listing_id)
+        const { data: matchingConvs } = await supabase
+          .from('conversations')
+          .select('id')
+          .in('id', sharedConvIds)
+          .is('listing_id', null)
+          .eq('subject', subject)
+          .limit(1)
 
-      // Créer le premier message
-      const { error: messageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: message.trim(),
-        })
-
-      if (messageError) {
-        console.error('Error creating message:', messageError)
-        return NextResponse.json(
-          { error: 'Erreur lors de l\'envoi du message' },
-          { status: 500 }
-        )
+        if (matchingConvs && matchingConvs.length > 0) {
+          existingConvId = matchingConvs[0].id
+        }
       }
     }
 
+    if (existingConvId) {
+      const { error: messageError } = await sendMessage(supabase, existingConvId, user.id, message)
+
+      if (messageError) {
+        console.error('Error creating message:', messageError)
+        return NextResponse.json(
+          { error: 'Erreur lors de l\'envoi du message' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        conversationId: existingConvId,
+        success: true,
+      })
+    }
+
+    // Créer une nouvelle conversation (listing_id = null pour les wanted items)
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        subject,
+        listing_id: null,
+        last_message_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+
+    if (convError) {
+      console.error('Error creating conversation:', convError)
+      return NextResponse.json(
+        { error: 'Erreur lors de la création de la conversation' },
+        { status: 500 }
+      )
+    }
+
+    const { error: partError } = await upsertParticipants(
+      supabase,
+      conversation.id,
+      [user.id, recipientId]
+    )
+
+    if (partError) {
+      console.error('Error adding participants:', partError)
+      return NextResponse.json(
+        { error: 'Erreur lors de l\'ajout des participants' },
+        { status: 500 }
+      )
+    }
+
+    const { error: messageError } = await sendMessage(supabase, conversation.id, user.id, message)
+
+    if (messageError) {
+      console.error('Error creating message:', messageError)
+      return NextResponse.json(
+        { error: 'Erreur lors de l\'envoi du message' },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json({
-      conversationId,
+      conversationId: conversation.id,
       success: true,
     })
   } catch (error) {

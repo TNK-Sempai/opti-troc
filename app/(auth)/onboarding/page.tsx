@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -22,6 +22,7 @@ import {
 } from '@/lib/validations/auth'
 import { uploadFileToCloudinary, uploadMultipleFiles } from '@/lib/cloudinary/client-upload'
 import { completeOnboarding } from './actions'
+import { event as gtagEvent } from '@/lib/gtag' // <-- import GA4 helper
 
 const steps = [
   { title: 'Entreprise', description: 'Informations légales' },
@@ -115,7 +116,14 @@ export default function OnboardingPage() {
         throw new Error(result.error)
       }
 
-      // 6. Redirection vers page de succès
+      // ✅ 6. Envoyer l'event GA4 sign_up
+      gtagEvent({
+        action: 'sign_up',
+        category: 'user',
+        label: 'Onboarding terminé',
+      })
+
+      // 7. Redirection vers page de succès
       router.push('/onboarding/success')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')

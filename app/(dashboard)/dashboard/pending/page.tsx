@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Clock, Mail, FileCheck } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,7 @@ export default async function PendingPage() {
   
   const { data: { user } } = await supabase.auth.getUser()
   
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select('contact_name, first_name, is_early_adopter, created_at')
     .eq('id', user?.id)

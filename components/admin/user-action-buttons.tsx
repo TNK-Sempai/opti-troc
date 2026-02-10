@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { CheckCircle, XCircle, Ban, Archive, Trash2 } from 'lucide-react'
-import { validateUser, rejectUser, suspendUser, reactivateUser, archiveUser, deleteArchivedUser } from '@/app/actions/users'
+import { validateUser, rejectUser, suspendUser, reactivateUser, archiveUser, deleteArchivedUser, forceDeleteUser } from '@/app/actions/users'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -91,9 +91,22 @@ export function UserActionButtons({ userId, status }: UserActionButtonsProps) {
     setIsLoading(false)
   }
 
+  async function handleForceDelete() {
+    if (!confirm('⚠️ Supprimer définitivement cet utilisateur et son compte auth ? Cette action est IRRÉVERSIBLE.')) return
+    setIsLoading(true)
+    const result = await forceDeleteUser(userId)
+    if (result.success) {
+      alert('Utilisateur supprimé définitivement')
+      router.push('/admin/users')
+    } else {
+      alert(`Erreur: ${result.error}`)
+    }
+    setIsLoading(false)
+  }
+
   if (status === 'pending') {
     return (
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button
           onClick={handleValidate}
           disabled={isLoading}
@@ -110,6 +123,48 @@ export function UserActionButtons({ userId, status }: UserActionButtonsProps) {
         >
           <XCircle className="w-4 h-4 mr-2" />
           Rejeter
+        </Button>
+        <Button
+          onClick={handleForceDelete}
+          disabled={isLoading}
+          variant="outline"
+          size="sm"
+          className="text-red-600"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Supprimer
+        </Button>
+      </div>
+    )
+  }
+
+  if (status === 'incomplete') {
+    return (
+      <div className="flex gap-2">
+        <Button
+          onClick={handleForceDelete}
+          disabled={isLoading}
+          variant="outline"
+          className="text-red-600"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Supprimer
+        </Button>
+      </div>
+    )
+  }
+
+  if (status === 'rejected') {
+    return (
+      <div className="flex gap-2">
+        <Button
+          onClick={handleForceDelete}
+          disabled={isLoading}
+          variant="outline"
+          className="text-red-600"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Supprimer
         </Button>
       </div>
     )

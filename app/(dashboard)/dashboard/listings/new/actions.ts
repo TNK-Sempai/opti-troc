@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function createUnitListing(data: {
   brand: string
@@ -30,7 +31,7 @@ export async function createUnitListing(data: {
     }
 
     // Vérifier que l'utilisateur est validé ou admin
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)
@@ -243,7 +244,7 @@ export async function createLotListing(data: {
     }
 
     // Vérifier que l'utilisateur est validé ou admin
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)

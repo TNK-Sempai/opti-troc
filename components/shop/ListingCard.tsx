@@ -13,6 +13,26 @@ interface ListingCardProps {
   variant?: 'grid' | 'list'
 }
 
+const conditionLabels: Record<string, string> = {
+  neuf_etiquette: 'Neuf',
+  neuf_sans_etiquette: 'Comme neuf',
+  tres_bon: 'Bon',
+  bon: 'Correct'
+}
+
+const conditionColors: Record<string, string> = {
+  neuf_etiquette: 'bg-fern/15 text-fern',
+  neuf_sans_etiquette: 'bg-pine-teal/15 text-pine-teal',
+  tres_bon: 'bg-gold/15 text-gold-hover',
+  bon: 'bg-dust-grey text-dark-grey'
+}
+
+const categoryLabels: Record<string, string> = {
+  vue: 'Vue',
+  solaires: 'Solaires',
+  sport: 'Sport'
+}
+
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   const now = new Date()
@@ -97,8 +117,8 @@ export function ListingCard({
         <CardContent className="p-3">
           {isUnit && details ? (
             <>
-              {/* Prix */}
-              <div className="mb-1.5">
+              {/* Prix + badge condition */}
+              <div className="flex items-center gap-2 mb-1.5">
                 {isValidated ? (
                   <span className="text-lg font-semibold text-gold font-mono">
                     {parseFloat(details.price).toFixed(0)}&euro;
@@ -106,27 +126,40 @@ export function ListingCard({
                 ) : (
                   <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Prix masque
+                    Prix masqu&eacute;
+                  </span>
+                )}
+                {details.state && conditionLabels[details.state] && (
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${conditionColors[details.state] || 'bg-dust-grey text-dark-grey'}`}>
+                    {conditionLabels[details.state]}
                   </span>
                 )}
               </div>
 
-              {/* Marque */}
-              <h3 className="font-medium text-sm text-charcoal line-clamp-1 mb-0.5">
-                {details.brand}
+              {/* Marque + modèle */}
+              <h3 className="text-sm text-charcoal line-clamp-1 mb-0.5">
+                <span className="font-medium">{details.brand}</span>
+                {details.model && <span className="text-medium-grey"> {details.model}</span>}
               </h3>
 
-              {/* Modele */}
-              {details.model && (
-                <p className="text-xs text-medium-grey line-clamp-1">
-                  {details.model}
+              {/* Référence */}
+              {details.reference && (
+                <p className="text-[10px] font-mono text-dry-sage line-clamp-1 mb-0.5">
+                  {details.reference}
                 </p>
+              )}
+
+              {/* Catégorie */}
+              {details.category && categoryLabels[details.category] && (
+                <span className="inline-block text-[10px] bg-dust-grey text-pine-teal px-1.5 py-0.5 rounded mt-0.5">
+                  {categoryLabels[details.category]}
+                </span>
               )}
             </>
           ) : details ? (
             <>
-              {/* Prix du lot */}
-              <div className="mb-1.5">
+              {/* Prix lot + badge quantité */}
+              <div className="flex items-center gap-2 mb-1.5">
                 {isValidated ? (
                   <span className="text-lg font-semibold text-gold font-mono">
                     {parseFloat(details.total_price).toFixed(0)}&euro;
@@ -134,7 +167,12 @@ export function ListingCard({
                 ) : (
                   <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Prix masque
+                    Prix masqu&eacute;
+                  </span>
+                )}
+                {details.quantity && (
+                  <span className="text-[10px] font-semibold bg-fern/15 text-fern px-1.5 py-0.5 rounded">
+                    {details.quantity} pcs
                   </span>
                 )}
               </div>
@@ -143,7 +181,14 @@ export function ListingCard({
                 Lot de lunettes
               </h3>
 
-              <p className="text-xs text-medium-grey line-clamp-1">
+              {/* Prix unitaire */}
+              {isValidated && details.quantity && details.total_price && (
+                <p className="text-[10px] text-medium-grey mb-0.5">
+                  ~{Math.round(parseFloat(details.total_price) / details.quantity)}&euro;/pi&egrave;ce
+                </p>
+              )}
+
+              <p className="text-xs text-medium-grey line-clamp-2">
                 {details.description}
               </p>
             </>
@@ -199,21 +244,34 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
               <div className="min-w-0 flex-1">
                 {isUnit && details ? (
                   <>
-                    <h3 className="font-medium text-base text-charcoal truncate">
-                      {details.brand}
+                    <h3 className="text-base text-charcoal truncate">
+                      <span className="font-medium">{details.brand}</span>
+                      {details.model && <span className="text-dark-grey"> {details.model}</span>}
                     </h3>
-                    {details.model && (
-                      <p className="text-sm text-dark-grey truncate">
-                        {details.model}
-                      </p>
-                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      {details.state && conditionLabels[details.state] && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${conditionColors[details.state] || 'bg-dust-grey text-dark-grey'}`}>
+                          {conditionLabels[details.state]}
+                        </span>
+                      )}
+                      {details.category && categoryLabels[details.category] && (
+                        <span className="text-[10px] bg-dust-grey text-pine-teal px-1.5 py-0.5 rounded">
+                          {categoryLabels[details.category]}
+                        </span>
+                      )}
+                    </div>
                   </>
                 ) : details ? (
                   <>
                     <h3 className="font-medium text-base text-charcoal">
                       Lot de lunettes
+                      {details.quantity && (
+                        <span className="ml-2 text-[10px] font-semibold bg-fern/15 text-fern px-1.5 py-0.5 rounded align-middle">
+                          {details.quantity} pcs
+                        </span>
+                      )}
                     </h3>
-                    <p className="text-sm text-dark-grey line-clamp-1">
+                    <p className="text-sm text-dark-grey line-clamp-1 mt-0.5">
                       {details.description}
                     </p>
                   </>
@@ -223,15 +281,22 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
               {/* Prix */}
               <div className="shrink-0 text-right">
                 {isValidated ? (
-                  <span className="text-xl font-semibold text-gold font-mono">
-                    {isUnit
-                      ? parseFloat(details?.price || 0).toFixed(0)
-                      : parseFloat(details?.total_price || 0).toFixed(0)}&euro;
-                  </span>
+                  <>
+                    <span className="text-xl font-semibold text-gold font-mono">
+                      {isUnit
+                        ? parseFloat(details?.price || 0).toFixed(0)
+                        : parseFloat(details?.total_price || 0).toFixed(0)}&euro;
+                    </span>
+                    {!isUnit && details?.quantity && details?.total_price && (
+                      <p className="text-[10px] text-medium-grey mt-0.5">
+                        ~{Math.round(parseFloat(details.total_price) / details.quantity)}&euro;/pi&egrave;ce
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <span className="text-sm text-medium-grey flex items-center gap-1">
                     <Lock className="w-3 h-3" />
-                    Masque
+                    Masqu&eacute;
                   </span>
                 )}
               </div>
@@ -248,7 +313,7 @@ function ListingCardListView({ listing, isValidated }: { listing: any; isValidat
                 {formatDate(listing.created_at)}
               </span>
               {isUnit && details?.reference && (
-                <span className="font-mono text-dry-sage hidden sm:block">
+                <span className="font-mono text-[10px] text-dry-sage hidden sm:block">
                   {details.reference}
                 </span>
               )}

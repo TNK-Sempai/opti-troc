@@ -18,37 +18,46 @@ export async function registerSimple(data: SimpleRegistrationForm) {
 
     const userId = authData.user.id
 
-    // 2. Mettre à jour le profil créé automatiquement par le trigger
-    const { error: updateError } = await supabaseAdmin
+    // 2. Créer ou mettre à jour le profil utilisateur
+    // Utilise upsert pour être robuste même si le trigger DB ne crée pas le profil
+    const { error: upsertError } = await supabaseAdmin
       .from('user_profiles')
-      .update({
+      .upsert({
+        id: userId,
+        email: data.email,
         civility: data.civility,
         first_name: data.firstName,
         last_name: data.lastName,
         contact_name: `${data.firstName} ${data.lastName}`,
-      })
-      .eq('id', userId)
+        status: 'incomplete',
+        role: 'user',
+      }, { onConflict: 'id' })
 
-    if (updateError) {
-      console.error('Profile update error:', updateError)
-      throw new Error('Erreur lors de la mise à jour du profil')
+    if (upsertError) {
+      console.error('Profile upsert error:', upsertError)
+      throw new Error('Erreur lors de la création du profil')
     }
 
-    // 3. Créer une session pour connecter automatiquement l'utilisateur
+    // 3. Auto-sign-in seulement s'il n'y a pas de session active (ex: admin qui teste)
     const supabase = await createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    })
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
 
-    if (signInError) {
-      console.error('Auto sign-in error:', signInError)
-      // Pas grave, l'utilisateur peut se connecter manuellement
+    if (!currentUser) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
+
+      if (signInError) {
+        console.error('Auto sign-in error:', signInError)
+      }
     }
 
     return {
       success: true,
       userId,
+      // Si un admin est déjà connecté, ne pas auto-sign-in
+      autoSignedIn: !currentUser,
     }
   } catch (error) {
     console.error('Registration error:', error)

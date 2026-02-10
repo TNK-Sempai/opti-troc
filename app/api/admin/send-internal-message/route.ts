@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { upsertParticipants, sendMessage } from '@/lib/messaging/conversation-helpers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -10,8 +11,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Vérifier que l'utilisateur est admin
-  const { data: profile } = await supabase
+  // Vérifier que l'utilisateur est admin (supabaseAdmin pour bypass RLS)
+  const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select('role')
     .eq('id', user.id)
@@ -45,36 +46,43 @@ export async function POST(request: NextRequest) {
 
     const recipientId = recipientAuthUser.id
 
-    // Vérifier si une conversation existe déjà entre l'admin et cet utilisateur
-    const { data: existingConvs } = await supabaseAdmin
-      .from('conversations')
-      .select('id, conversation_participants!inner(user_id)')
-      .is('listing_id', null) // Conversations admin n'ont pas de listing_id
+    // Chercher une conversation admin existante entre l'admin et cet utilisateur
+    const { data: adminParticipations } = await supabaseAdmin
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', user.id)
 
     let existingConvId = null
-    if (existingConvs && existingConvs.length > 0) {
-      for (const conv of existingConvs) {
-        const participants = conv.conversation_participants as any[]
-        const participantIds = participants.map((p: any) => p.user_id)
 
-        if (
-          participantIds.includes(user.id) &&
-          participantIds.includes(recipientId) &&
-          participantIds.length === 2
-        ) {
-          existingConvId = conv.id
-          break
+    if (adminParticipations && adminParticipations.length > 0) {
+      const convIds = adminParticipations.map(p => p.conversation_id)
+
+      const { data: recipientParticipations } = await supabaseAdmin
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', recipientId)
+        .in('conversation_id', convIds)
+
+      if (recipientParticipations && recipientParticipations.length > 0) {
+        const sharedConvIds = recipientParticipations.map(p => p.conversation_id)
+
+        const { data: adminConvs } = await supabaseAdmin
+          .from('conversations')
+          .select('id')
+          .in('id', sharedConvIds)
+          .is('listing_id', null)
+          .limit(1)
+
+        if (adminConvs && adminConvs.length > 0) {
+          existingConvId = adminConvs[0].id
         }
       }
     }
 
     // Si une conversation existe, ajouter le message
     if (existingConvId) {
-      await supabaseAdmin.from('messages').insert({
-        conversation_id: existingConvId,
-        sender_id: user.id,
-        content: content.trim(),
-      })
+      const { error: msgError } = await sendMessage(supabaseAdmin, existingConvId, user.id, content)
+      if (msgError) throw msgError
 
       return NextResponse.json({
         conversationId: existingConvId,
@@ -82,35 +90,30 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Sinon, créer une nouvelle conversation (utiliser supabaseAdmin pour contourner RLS)
+    // Sinon, créer une nouvelle conversation
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('conversations')
       .insert({
         subject: subject || 'Support / Assistance',
-        listing_id: null, // Pas de listing pour les conversations admin
+        listing_id: null,
+        last_message_at: new Date().toISOString(),
       })
       .select()
       .single()
 
     if (convError) throw convError
 
-    // Ajouter les participants (utiliser supabaseAdmin)
-    const { error: partError } = await supabaseAdmin
-      .from('conversation_participants')
-      .insert([
-        { conversation_id: conversation.id, user_id: user.id },
-        { conversation_id: conversation.id, user_id: recipientId },
-      ])
+    // Ajouter les participants (upsert pour éviter les doublons)
+    const { error: partError } = await upsertParticipants(
+      supabaseAdmin,
+      conversation.id,
+      [user.id, recipientId]
+    )
 
     if (partError) throw partError
 
-    // Ajouter le premier message (utiliser supabaseAdmin)
-    const { error: msgError } = await supabaseAdmin.from('messages').insert({
-      conversation_id: conversation.id,
-      sender_id: user.id,
-      content: content.trim(),
-    })
-
+    // Ajouter le premier message
+    const { error: msgError } = await sendMessage(supabaseAdmin, conversation.id, user.id, content)
     if (msgError) throw msgError
 
     return NextResponse.json({

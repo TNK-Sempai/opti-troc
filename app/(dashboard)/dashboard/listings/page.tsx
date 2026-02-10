@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PremiumButton } from '@/components/ui/premium-button'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
-import { PlusCircle, Package, Eye, Grid3x3, List, Search, Filter, CheckCircle, Pause, ShoppingBag, Layers } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { PlusCircle, Package, Eye, Grid3x3, List, Search, Filter, CheckCircle, Pause, ShoppingBag, Layers, ChevronLeft, ChevronRight } from 'lucide-react'
 import ListingsGrid from './listings-grid'
 import ListingsList from './listings-list'
 
@@ -17,6 +18,8 @@ interface SearchParams {
   status?: string
   type?: string
   view?: 'grid' | 'list'
+  page?: string
+  pageSize?: string
 }
 
 export default async function MyListingsPage({
@@ -111,7 +114,26 @@ export default async function MyListingsPage({
     sold: listings.filter(l => l.status === 'sold').length,
     paused: listings.filter(l => l.status === 'paused').length,
   }
+
+  // Pagination
+  const pageSize = Math.min(parseInt(params.pageSize || '25') || 25, 100)
+  const totalResults = enrichedListings.length
+  const totalPages = Math.ceil(totalResults / pageSize)
+  const page = Math.max(1, Math.min(parseInt(params.page || '1') || 1, totalPages || 1))
+  const offset = (page - 1) * pageSize
+  const paginatedListings = enrichedListings.slice(offset, offset + pageSize)
+
   const viewMode = params.view || 'grid'
+
+  function buildUrl(overrides: Record<string, string>) {
+    const base: Record<string, string> = {}
+    if (params.search) base.search = params.search
+    if (params.status) base.status = params.status
+    if (params.type) base.type = params.type
+    if (params.view) base.view = params.view
+    base.pageSize = String(pageSize)
+    return `/dashboard/listings?${new URLSearchParams({ ...base, ...overrides }).toString()}`
+  }
 
   return (
     <div className="min-h-screen bg-dust-grey relative overflow-hidden">
@@ -221,7 +243,7 @@ export default async function MyListingsPage({
         </Card>
 
         {/* Liste des annonces */}
-        {enrichedListings.length === 0 ? (
+        {paginatedListings.length === 0 ? (
           <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white">
             <CardContent className="text-center py-24 relative">
               <div className="absolute inset-0 bg-gradient-to-br from-pine-teal/5 to-dust-grey opacity-50 rounded-xl" />
@@ -248,10 +270,87 @@ export default async function MyListingsPage({
               </div>
             </CardContent>
           </Card>
-        ) : viewMode === 'grid' ? (
-          <ListingsGrid listings={enrichedListings} />
         ) : (
-          <ListingsList listings={enrichedListings} />
+          <>
+            {viewMode === 'grid' ? (
+              <ListingsGrid listings={paginatedListings} />
+            ) : (
+              <ListingsList listings={paginatedListings} />
+            )}
+
+            {/* Pagination */}
+            {totalResults > 0 && (
+              <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white mt-6">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    {/* PageSize selector */}
+                    <div className="flex items-center gap-2">
+                      {[25, 50, 100].map(size => (
+                        <Button
+                          key={size}
+                          asChild
+                          variant={pageSize === size ? 'default' : 'outline'}
+                          size="sm"
+                          className={pageSize === size
+                            ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                            : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'}
+                        >
+                          <Link href={buildUrl({ pageSize: String(size), page: '1' })}>{size}</Link>
+                        </Button>
+                      ))}
+                      <span className="text-sm text-muted-foreground font-medium ml-1">par page</span>
+                    </div>
+
+                    {/* Range info */}
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      <span className="text-charcoal">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{' '}
+                      <span className="text-charcoal">{totalResults}</span>
+                    </p>
+
+                    {/* Page navigation */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center gap-1">
+                        {page > 1 && (
+                          <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                            <Link href={buildUrl({ page: String(page - 1) })}>
+                              <ChevronLeft className="w-4 h-4" />
+                            </Link>
+                          </Button>
+                        )}
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                          let pageNum = i + 1
+                          if (totalPages > 5 && page > 3) {
+                            pageNum = page - 2 + i
+                            if (pageNum > totalPages) pageNum = totalPages - (4 - i)
+                          }
+                          return (
+                            <Button
+                              key={pageNum}
+                              asChild
+                              variant={pageNum === page ? 'default' : 'ghost'}
+                              size="sm"
+                              className={pageNum === page
+                                ? 'w-9 bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                                : 'w-9 hover:bg-dust-grey hover:text-pine-teal font-semibold'}
+                            >
+                              <Link href={buildUrl({ page: String(pageNum) })}>{pageNum}</Link>
+                            </Button>
+                          )
+                        })}
+                        {page < totalPages && (
+                          <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                            <Link href={buildUrl({ page: String(page + 1) })}>
+                              <ChevronRight className="w-4 h-4" />
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>

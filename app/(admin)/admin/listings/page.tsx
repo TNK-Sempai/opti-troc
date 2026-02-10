@@ -6,7 +6,8 @@ import { PremiumButton } from '@/components/ui/premium-button'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, Layers, Eye, Search, Building2, CheckCircle, ShoppingBag } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Package, Layers, Eye, Search, Building2, CheckCircle, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,7 @@ interface SearchParams {
   search?: string
   type?: string
   page?: string
+  pageSize?: string
 }
 
 export default async function AdminListingsPage({
@@ -24,7 +26,7 @@ export default async function AdminListingsPage({
   const params = await searchParams
 
   const page = parseInt(params.page || '1')
-  const pageSize = 24
+  const pageSize = Math.min(parseInt(params.pageSize || '25') || 25, 100)
   const offset = (page - 1) * pageSize
 
   let query = supabaseAdmin
@@ -289,32 +291,71 @@ export default async function AdminListingsPage({
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalResults > 0 && (
           <Card className="shadow-xl border-dry-sage/40 backdrop-blur-sm bg-off-white">
             <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground font-semibold">
-                  {offset + 1}-{Math.min(offset + pageSize, totalResults)} sur {totalResults} annonces
-                </p>
-                <div className="flex items-center gap-3">
-                  {page > 1 && (
-                    <PremiumButton asChild variant="outline" size="sm" className="border-2">
-                      <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}>
-                        <span>← Précédent</span>
-                      </Link>
-                    </PremiumButton>
-                  )}
-                  <span className="text-sm font-bold bg-pine-teal/10 text-pine-teal px-4 py-2 rounded-lg">
-                    Page {page} / {totalPages}
-                  </span>
-                  {page < totalPages && (
-                    <PremiumButton asChild gradient="primary" size="sm">
-                      <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}>
-                        <span>Suivant →</span>
-                      </Link>
-                    </PremiumButton>
-                  )}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                {/* PageSize selector */}
+                <div className="flex items-center gap-2">
+                  {[25, 50, 100].map(size => (
+                    <Button
+                      key={size}
+                      asChild
+                      variant={pageSize === size ? 'default' : 'outline'}
+                      size="sm"
+                      className={pageSize === size
+                        ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                        : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'}
+                    >
+                      <Link href={`/admin/listings?${new URLSearchParams({ ...params, pageSize: String(size), page: '1' } as Record<string, string>).toString()}`}>{size}</Link>
+                    </Button>
+                  ))}
+                  <span className="text-sm text-muted-foreground font-medium ml-1">par page</span>
                 </div>
+
+                <p className="text-sm text-muted-foreground font-semibold">
+                  <span className="text-charcoal">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{' '}
+                  <span className="text-charcoal">{totalResults}</span> annonces
+                </p>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {page > 1 && (
+                      <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                        <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}>
+                          <ChevronLeft className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                    )}
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNum = i + 1
+                      if (totalPages > 5 && page > 3) {
+                        pageNum = page - 2 + i
+                        if (pageNum > totalPages) pageNum = totalPages - (4 - i)
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          asChild
+                          variant={pageNum === page ? 'default' : 'ghost'}
+                          size="sm"
+                          className={pageNum === page
+                            ? 'w-9 bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                            : 'w-9 hover:bg-dust-grey hover:text-pine-teal font-semibold'}
+                        >
+                          <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(pageNum) } as Record<string, string>).toString()}`}>{pageNum}</Link>
+                        </Button>
+                      )
+                    })}
+                    {page < totalPages && (
+                      <Button asChild variant="outline" size="sm" className="border-dry-sage hover:border-fern hover:text-pine-teal font-semibold">
+                        <Link href={`/admin/listings?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}>
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

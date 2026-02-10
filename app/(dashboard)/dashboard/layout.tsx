@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { DashboardNav } from '@/components/dashboard/nav'
 import Footer from '@/components/layout/Footer'
@@ -16,7 +17,7 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select('status, role, company_name, first_name, last_name')
     .eq('id', user.id)

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ListingCard } from '@/components/shop/ListingCard'
@@ -17,7 +18,7 @@ export default async function MarketplacePage() {
   let isValidated = false
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)

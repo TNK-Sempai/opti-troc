@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import { StatCard } from '@/components/ui/stat-card'
 import { PremiumButton } from '@/components/ui/premium-button'
 import Link from 'next/link'
-import { PlusCircle, Package, Eye, TrendingUp, Sparkles } from 'lucide-react'
+import { PlusCircle, Package, CheckCircle, Search, TrendingUp, Sparkles } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Récupérer le profil
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select('*')
     .eq('id', user?.id)
@@ -28,6 +29,17 @@ export default async function DashboardPage() {
 
   const { count: totalListings } = await supabase
     .from('listings')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user?.id)
+
+  const { count: soldListings } = await supabase
+    .from('listings')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user?.id)
+    .eq('status', 'sold')
+
+  const { count: activeWanted } = await supabase
+    .from('wanted_items')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user?.id)
 
@@ -107,7 +119,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Statistiques */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <StatCard
             icon={<Package className="w-5 h-5" />}
             label="Annonces actives"
@@ -121,10 +133,16 @@ export default async function DashboardPage() {
             gradient="success"
           />
           <StatCard
-            icon={<Eye className="w-5 h-5" />}
-            label="Vues totales"
-            value={0}
+            icon={<CheckCircle className="w-5 h-5" />}
+            label="Annonces vendues"
+            value={soldListings || 0}
             gradient="purple"
+          />
+          <StatCard
+            icon={<Search className="w-5 h-5" />}
+            label="Recherches actives"
+            value={activeWanted || 0}
+            gradient="primary"
           />
         </div>
 

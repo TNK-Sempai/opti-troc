@@ -155,6 +155,34 @@ export async function archiveUser(userId: string, reason?: string) {
 }
 
 /**
+ * Supprime définitivement un utilisateur (admin seulement)
+ * Pour nettoyer les comptes test ou les entrées orphelines
+ */
+export async function forceDeleteUser(userId: string) {
+  const auth = await requireAdmin()
+  if (!auth.success) {
+    return { success: false, error: auth.error }
+  }
+
+  // Supprimer le profil d'abord (s'il existe)
+  await supabaseAdmin
+    .from('user_profiles')
+    .delete()
+    .eq('id', userId)
+
+  // Supprimer l'utilisateur de auth.users
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/users')
+
+  return { success: true }
+}
+
+/**
  * Supprime définitivement un utilisateur archivé (admin seulement)
  * À utiliser uniquement après expiration de la période d'archivage (5 ans)
  */

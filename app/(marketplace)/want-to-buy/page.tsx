@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
@@ -17,7 +18,7 @@ export default async function WantToBuyPage() {
 
   if (user) {
     currentUserId = user.id
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)
@@ -26,7 +27,7 @@ export default async function WantToBuyPage() {
     isValidated = profile?.status === 'validated' || profile?.role === 'admin'
   }
 
-  const { data: wantedItems, error } = await supabase
+  const { data: wantedItems, error } = await supabaseAdmin
     .from('wanted_items')
     .select(`
       *,
@@ -209,6 +210,9 @@ export default async function WantToBuyPage() {
           </div>
         </div>
       </section>
+
+      {/* Séparation dorée */}
+      <div className="h-1 bg-gold" />
     </div>
   )
 }

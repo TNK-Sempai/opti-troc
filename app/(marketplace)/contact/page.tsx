@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { submitContactMessage } from "@/app/actions/contact";
 import { useState } from "react";
+import { event as gtagEvent } from "@/lib/gtag";
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,15 @@ export default function ContactPage() {
         message:
           "Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.",
       });
+
       form.reset();
+
+      // GA4 event
+      gtagEvent({
+        action: 'contact_click',
+        category: 'contact_form',
+        label: formData.get('subject')?.toString() || 'Sans sujet',
+      });
     } else {
       setSubmitStatus({
         success: false,
@@ -52,6 +61,7 @@ export default function ContactPage() {
       });
     }
   }
+
   return (
     <div className="min-h-screen bg-dust-grey">
       <div className="container mx-auto px-4 py-12">

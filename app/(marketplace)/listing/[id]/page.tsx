@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,7 +42,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   let userStatus = null
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)
@@ -68,7 +69,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   }
 
   // Récupérer le vendeur
-  const { data: seller } = await supabase
+  const { data: seller } = await supabaseAdmin
     .from('user_profiles')
     .select('company_name, city')
     .eq('id', listing.user_id)

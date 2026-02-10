@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ interface SearchParams {
   maxPrice?: string;
   view?: string;
   page?: string;
+  pageSize?: string;
 }
 
 export default async function ShopPage({
@@ -38,7 +40,7 @@ export default async function ShopPage({
   let isValidated = false;
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('status, role')
       .eq('id', user.id)
@@ -48,7 +50,7 @@ export default async function ShopPage({
   }
 
   const page = parseInt(params.page || "1");
-  const pageSize = 40;
+  const pageSize = Math.min(parseInt(params.pageSize || "25") || 25, 100);
   const offset = (page - 1) * pageSize;
 
   // Construire la requête de base
@@ -372,17 +374,35 @@ export default async function ShopPage({
                 )}
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {totalResults > 0 && (
                   <Card className="border border-light-grey bg-off-white hover:shadow-card-hover transition-shadow">
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between flex-wrap gap-4">
+                        {/* PageSize selector */}
+                        <div className="flex items-center gap-2">
+                          {[25, 50, 100].map(size => (
+                            <Button
+                              key={size}
+                              asChild
+                              variant={pageSize === size ? 'default' : 'outline'}
+                              size="sm"
+                              className={pageSize === size
+                                ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                                : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'}
+                            >
+                              <Link href={`/shop?${new URLSearchParams({ ...params, pageSize: String(size), page: '1' }).toString()}`}>{size}</Link>
+                            </Button>
+                          ))}
+                          <span className="text-sm text-muted-foreground font-medium ml-1">par page</span>
+                        </div>
+
                         <p className="text-sm font-semibold text-muted-foreground">
                           <span className="text-charcoal font-semibold">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{" "}
                           <span className="text-charcoal font-semibold">{totalResults}</span> résultats
                         </p>
 
                         <div className="flex items-center gap-2">
-                          {page > 1 && (
+                          {totalPages > 1 && page > 1 && (
                             <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
                               <Link
                                 href={`/shop?${new URLSearchParams({
@@ -395,7 +415,7 @@ export default async function ShopPage({
                             </Button>
                           )}
 
-                          {Array.from(
+                          {totalPages > 1 && Array.from(
                             { length: Math.min(totalPages, 5) },
                             (_, i) => {
                               let pageNum = i + 1;
@@ -430,7 +450,7 @@ export default async function ShopPage({
                             }
                           )}
 
-                          {page < totalPages && (
+                          {totalPages > 1 && page < totalPages && (
                             <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
                               <Link
                                 href={`/shop?${new URLSearchParams({
