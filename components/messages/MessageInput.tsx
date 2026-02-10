@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Send, Loader2 } from 'lucide-react'
@@ -19,20 +18,19 @@ export function MessageInput({
 }: MessageInputProps) {
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
-  const supabase = createClient()
 
   async function handleSend() {
     if (!content.trim()) return
 
     setSending(true)
 
-    const { error } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_id: currentUserId,
-      content: content.trim(),
+    const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content.trim() }),
     })
 
-    if (!error) {
+    if (res.ok) {
       setContent('')
       onMessageSent?.()
     }

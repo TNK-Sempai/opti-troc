@@ -41,19 +41,56 @@ export async function GET(
     .eq('id', id)
     .single()
 
-  // Charger les participants avec profils
-  const { data: participants } = await supabaseAdmin
+  // Charger les participants (manual join — FK inference unreliable)
+  const { data: rawParticipants } = await supabaseAdmin
     .from('conversation_participants')
-    .select(`
-      user_id,
-      user_profiles (
-        first_name,
-        last_name,
-        company_name,
-        role
-      )
-    `)
+    .select('user_id')
     .eq('conversation_id', id)
 
+  const participantIds = (rawParticipants || []).map(p => p.user_id)
+  let participants: any[] = []
+
+  if (participantIds.length > 0) {
+    const { data: profiles } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, first_name, last_name, company_name, profile_photo_url, role')
+      .in('id', participantIds)
+
+    participants = (rawParticipants || []).map(p => ({
+      user_id: p.user_id,
+      user_profiles: profiles?.find(pr => pr.id === p.user_id) || null,
+    }))
+  }
+
   return NextResponse.json({ conversation, participants })
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { action } = await request.json()
+
+  if (action === 'archive') {
+    const { error } = await supabaseAdmin
+      .from('conversation_participants')
+      .update({ is_archived: true })
+      .eq('conversation_id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    return NextResponse.json({ success: true })
+  }
+
+  return NextResponse.json({ error: 'Action inconnue' }, { status: 400 })
 }

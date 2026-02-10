@@ -1,39 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
-import { upsertParticipants, sendMessage } from '@/lib/messaging/conversation-helpers'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+
+function getAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
+
     if (!user) {
-      return NextResponse.json(
-        { error: 'Non authentifié' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
+    const admin = getAdmin()
     const { wantedItemId, message } = await request.json()
 
     if (!wantedItemId || !message?.trim()) {
-      return NextResponse.json(
-        { error: 'Wanted item ID et message requis' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Wanted item ID et message requis' }, { status: 400 })
     }
 
-    const { data: wantedItem, error: wantedItemError } = await supabase
+    const { data: wantedItem, error: wantedItemError } = await admin
       .from('wanted_items')
       .select('id, user_id, brand, model, reference')
       .eq('id', wantedItemId)
       .single()
 
     if (wantedItemError || !wantedItem) {
-      return NextResponse.json(
-        { error: 'Wanted item non trouvé' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Wanted item non trouvé' }, { status: 404 })
     }
 
     if (wantedItem.user_id === user.id) {
@@ -44,16 +44,13 @@ export async function POST(request: NextRequest) {
     }
 
     const recipientId = wantedItem.user_id
-
-    // Construire le sujet pour identifier la conversation
     const itemTitle = [wantedItem.brand, wantedItem.model, wantedItem.reference]
       .filter(Boolean)
       .join(' ')
     const subject = `Recherche: ${itemTitle}`
 
-    // Chercher une conversation existante entre ces 2 utilisateurs
-    // avec le même sujet (pas de wanted_item_id sur la table conversations)
-    const { data: myParticipations } = await supabase
+    // Chercher une conversation existante
+    const { data: myParticipations } = await admin
       .from('conversation_participants')
       .select('conversation_id')
       .eq('user_id', user.id)
@@ -63,8 +60,7 @@ export async function POST(request: NextRequest) {
     if (myParticipations && myParticipations.length > 0) {
       const myConvIds = myParticipations.map(p => p.conversation_id)
 
-      // Trouver les conversations partagées avec le destinataire
-      const { data: recipientParticipations } = await supabase
+      const { data: recipientParticipations } = await admin
         .from('conversation_participants')
         .select('conversation_id')
         .eq('user_id', recipientId)
@@ -73,8 +69,7 @@ export async function POST(request: NextRequest) {
       if (recipientParticipations && recipientParticipations.length > 0) {
         const sharedConvIds = recipientParticipations.map(p => p.conversation_id)
 
-        // Parmi celles-ci, trouver celle avec le même sujet (sans listing_id)
-        const { data: matchingConvs } = await supabase
+        const { data: matchingConvs } = await admin
           .from('conversations')
           .select('id')
           .in('id', sharedConvIds)
@@ -89,24 +84,23 @@ export async function POST(request: NextRequest) {
     }
 
     if (existingConvId) {
-      const { error: messageError } = await sendMessage(supabase, existingConvId, user.id, message)
-
-      if (messageError) {
-        console.error('Error creating message:', messageError)
-        return NextResponse.json(
-          { error: 'Erreur lors de l\'envoi du message' },
-          { status: 500 }
-        )
-      }
-
-      return NextResponse.json({
-        conversationId: existingConvId,
-        success: true,
+      const { error: msgError } = await admin.from('messages').insert({
+        conversation_id: existingConvId,
+        sender_id: user.id,
+        content: message.trim(),
       })
+      if (msgError) throw msgError
+
+      await admin
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', existingConvId)
+
+      return NextResponse.json({ conversationId: existingConvId, success: true })
     }
 
-    // Créer une nouvelle conversation (listing_id = null pour les wanted items)
-    const { data: conversation, error: convError } = await supabase
+    // Créer une nouvelle conversation
+    const { data: conversation, error: convError } = await admin
       .from('conversations')
       .insert({
         subject,
@@ -116,46 +110,32 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (convError) {
-      console.error('Error creating conversation:', convError)
-      return NextResponse.json(
-        { error: 'Erreur lors de la création de la conversation' },
-        { status: 500 }
+    if (convError) throw convError
+
+    const { error: partError } = await admin
+      .from('conversation_participants')
+      .upsert(
+        [
+          { conversation_id: conversation.id, user_id: user.id },
+          { conversation_id: conversation.id, user_id: recipientId },
+        ],
+        { onConflict: 'conversation_id,user_id', ignoreDuplicates: true }
       )
-    }
 
-    const { error: partError } = await upsertParticipants(
-      supabase,
-      conversation.id,
-      [user.id, recipientId]
-    )
+    if (partError) throw partError
 
-    if (partError) {
-      console.error('Error adding participants:', partError)
-      return NextResponse.json(
-        { error: 'Erreur lors de l\'ajout des participants' },
-        { status: 500 }
-      )
-    }
-
-    const { error: messageError } = await sendMessage(supabase, conversation.id, user.id, message)
-
-    if (messageError) {
-      console.error('Error creating message:', messageError)
-      return NextResponse.json(
-        { error: 'Erreur lors de l\'envoi du message' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      conversationId: conversation.id,
-      success: true,
+    const { error: msgError } = await admin.from('messages').insert({
+      conversation_id: conversation.id,
+      sender_id: user.id,
+      content: message.trim(),
     })
-  } catch (error) {
+    if (msgError) throw msgError
+
+    return NextResponse.json({ conversationId: conversation.id, success: true })
+  } catch (error: any) {
     console.error('Error in start-wanted conversation:', error)
     return NextResponse.json(
-      { error: 'Une erreur est survenue' },
+      { error: error.message || 'Une erreur est survenue' },
       { status: 500 }
     )
   }
