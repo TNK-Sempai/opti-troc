@@ -1,5 +1,5 @@
+import { getValidatedUser } from '@/lib/auth-helpers'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ListingCard } from '@/components/shop/ListingCard'
@@ -11,21 +11,11 @@ import { FeatureCards } from '@/components/homepage/FeatureCards'
 export const dynamic = 'force-dynamic'
 
 export default async function MarketplacePage() {
-  const supabase = await createClient()
-
-  // Verifier le statut de l'utilisateur
-  const { data: { user } } = await supabase.auth.getUser()
-  let isValidated = false
-
-  if (user) {
-    const { data: profile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('status, role')
-      .eq('id', user.id)
-      .single()
-
-    isValidated = profile?.status === 'validated' || profile?.role === 'admin'
-  }
+  const [validatedUser, supabase] = await Promise.all([
+    getValidatedUser(),
+    createClient(),
+  ])
+  const isValidated = validatedUser?.isValidated ?? false
 
   // Recuperer les annonces pour les differentes sections
   const { data: allListings } = await supabase

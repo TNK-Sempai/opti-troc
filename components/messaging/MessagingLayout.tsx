@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { logError } from '@/lib/logger'
 import { MessageSquare } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ConversationsList } from './ConversationsList'
@@ -11,12 +12,10 @@ import type { ConversationData } from './types'
 
 interface MessagingLayoutProps {
   currentUserId: string
-  isAdmin: boolean
 }
 
 export function MessagingLayout({
   currentUserId,
-  isAdmin,
 }: MessagingLayoutProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -36,15 +35,16 @@ export function MessagingLayout({
         setConversations(data.conversations || [])
       } else {
         const err = await res.json().catch(() => ({}))
-        console.error('API /api/conversations error:', res.status, err)
+        logError('MessagingLayout', { status: res.status, error: err })
       }
     } catch (e) {
-      console.error('Error loading conversations:', e)
+      logError('MessagingLayout', e)
     }
     setLoading(false)
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadConversations()
   }, [loadConversations])
 
@@ -124,7 +124,6 @@ export function MessagingLayout({
         isOpen={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         onDelete={handleDelete}
-        currentUserId={currentUserId}
       />
     </div>
   )

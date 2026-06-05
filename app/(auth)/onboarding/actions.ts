@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
+import { logError } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -56,7 +57,7 @@ export async function completeOnboarding(data: OnboardingData) {
     const { error: updateError } = await supabaseAdmin
       .from('user_profiles')
       .update({
-        status: 'pending', // Passe de 'incomplete' à 'pending'
+        status: 'awaiting_payment', // Passe de 'incomplete' à 'awaiting_payment' (paiement requis avant validation admin)
         company_name: data.companyName,
         country: data.country,
         company_number: data.companyNumber,
@@ -74,7 +75,7 @@ export async function completeOnboarding(data: OnboardingData) {
       .eq('id', userId)
 
     if (updateError) {
-      console.error('Profile update error:', updateError)
+      logError('completeOnboarding', updateError)
       throw new Error('Erreur lors de la mise à jour du profil')
     }
 
@@ -89,7 +90,7 @@ export async function completeOnboarding(data: OnboardingData) {
       })
 
     if (docError) {
-      console.error('Document creation error:', docError)
+      logError('completeOnboarding', docError)
       throw new Error('Erreur lors de l\'enregistrement du document')
     }
 
@@ -103,7 +104,7 @@ export async function completeOnboarding(data: OnboardingData) {
     // Envoyer email de confirmation
     try {
       await resend.emails.send({
-        from: 'Opti-troc <onboarding@resend.dev>',
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
         to: user.email!,
         subject: 'Votre profil est en cours de validation - Opti-troc',
         html: `
@@ -155,7 +156,7 @@ export async function completeOnboarding(data: OnboardingData) {
         `,
       })
     } catch (emailError) {
-      console.error('Email error:', emailError)
+      logError('completeOnboarding', emailError)
       // Pas bloquant
     }
 
@@ -164,7 +165,7 @@ export async function completeOnboarding(data: OnboardingData) {
       isEarlyAdopter,
     }
   } catch (error) {
-    console.error('Onboarding error:', error)
+    logError('completeOnboarding', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Une erreur est survenue',

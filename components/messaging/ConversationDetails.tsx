@@ -15,7 +15,6 @@ import {
   Trash2,
   Ban,
   Image as ImageIcon,
-  User,
 } from 'lucide-react'
 import type { ConversationData } from './types'
 
@@ -24,7 +23,6 @@ interface ConversationDetailsProps {
   isOpen: boolean
   onClose: () => void
   onDelete: () => void
-  currentUserId: string
 }
 
 function getListingInfo(conv: ConversationData) {
@@ -62,7 +60,6 @@ export function ConversationDetails({
   isOpen,
   onClose,
   onDelete,
-  currentUserId,
 }: ConversationDetailsProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 

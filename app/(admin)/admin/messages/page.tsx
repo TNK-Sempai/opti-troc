@@ -1,9 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { validateMessageStatus } from '@/lib/validations/query-params'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ChevronLeft, ChevronRight, Mail, MailOpen, CheckCircle, Search, Inbox, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Mail, MailOpen, CheckCircle, Search, Inbox } from 'lucide-react'
 import { MessageQuickActions } from '@/components/admin/message-quick-actions'
 import Link from 'next/link'
 
@@ -28,8 +29,9 @@ export default async function AdminMessagesPage({
     .select('*')
     .order('created_at', { ascending: false })
 
-  if (params.status && params.status !== 'all') {
-    query = query.eq('status', params.status)
+  const validStatus = validateMessageStatus(params.status);
+  if (validStatus) {
+    query = query.eq('status', validStatus)
   }
 
   const { data: messages } = await query

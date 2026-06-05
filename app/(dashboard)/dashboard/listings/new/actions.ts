@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logError, logInfo } from '@/lib/logger'
 
 export async function createUnitListing(data: {
   brand: string
@@ -46,7 +47,7 @@ export async function createUnitListing(data: {
     // ========================================
 
     // 1. Vérifier/créer la marque
-    let { data: existingBrand } = await supabase
+    const { data: existingBrand } = await supabase
       .from('brands')
       .select('id')
       .ilike('name', data.brand) // Insensible à la casse
@@ -63,19 +64,19 @@ export async function createUnitListing(data: {
         .single()
 
       if (brandError || !newBrand) {
-        console.error('Brand creation error:', brandError)
+        logError('createUnitListing.brand', brandError)
         return { success: false, error: 'Erreur lors de la création de la marque' }
       }
 
       brandId = newBrand.id
-      console.log('✅ Nouvelle marque créée:', data.brand)
+      logInfo('createUnitListing', 'Nouvelle marque créée:', data.brand)
     } else {
       brandId = existingBrand.id
-      console.log('✓ Marque existante:', data.brand)
+      logInfo('createUnitListing', 'Marque existante:', data.brand)
     }
 
     // 2. Vérifier/créer le modèle
-    let { data: existingModel } = await supabase
+    const { data: existingModel } = await supabase
       .from('models')
       .select('id')
       .eq('brand_id', brandId)
@@ -101,20 +102,20 @@ export async function createUnitListing(data: {
         .single()
 
       if (modelError || !newModel) {
-        console.error('Model creation error:', modelError)
+        logError('createUnitListing.model', modelError)
         return { success: false, error: 'Erreur lors de la création du modèle' }
       }
 
       modelId = newModel.id
-      console.log('✅ Nouveau modèle créé:', data.model)
+      logInfo('createUnitListing', 'Nouveau modèle créé:', data.model)
     } else {
       modelId = existingModel.id
-      console.log('✓ Modèle existant:', data.model)
+      logInfo('createUnitListing', 'Modèle existant:', data.model)
     }
 
     // 3. Vérifier/créer la référence (si fournie ET avec détails)
     if (data.reference && (data.colorFrame || data.colorLens || data.sizeLens)) {
-      let { data: existingRef } = await supabase
+      const { data: existingRef } = await supabase
         .from('product_references')
         .select('id')
         .eq('model_id', modelId)
@@ -138,10 +139,10 @@ export async function createUnitListing(data: {
           })
 
         if (!refError) {
-          console.log('✅ Nouvelle référence créée:', data.reference)
+          logInfo('createUnitListing', 'Nouvelle référence créée:', data.reference)
         }
       } else {
-        console.log('✓ Référence existante:', data.reference)
+        logInfo('createUnitListing', 'Référence existante:', data.reference)
       }
     }
 
@@ -214,7 +215,7 @@ export async function createUnitListing(data: {
 
     return { success: true }
   } catch (error) {
-    console.error('createUnitListing error:', error)
+    logError('createUnitListing', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur lors de la création',
@@ -327,7 +328,7 @@ export async function createLotListing(data: {
 
     return { success: true }
   } catch (error) {
-    console.error('createLotListing error:', error)
+    logError('createLotListing', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur lors de la création',

@@ -28,9 +28,7 @@ export async function updateSession(request: NextRequest) {
   )
 
   // IMPORTANT: Ne pas utiliser auth.getUser() dans le middleware pour éviter les redirections infinies
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  await supabase.auth.getUser()
 
   return supabaseResponse
 }

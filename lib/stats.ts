@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { logError } from '@/lib/logger'
 
 export async function getPlatformStats() {
   const supabase = await createClient()
@@ -7,7 +8,7 @@ export async function getPlatformStats() {
     .rpc('get_platform_stats')
 
   if (error) {
-    console.error('Stats error:', error)
+    logError('getPlatformStats', error)
     return {
       professionals: 0,
       listings: 0,

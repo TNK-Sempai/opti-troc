@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary'
+import { logError } from '@/lib/logger'
 
 // Configuration Cloudinary
 cloudinary.config({
@@ -45,7 +46,7 @@ export async function uploadToCloudinary(
       uploadStream.end(buffer)
     })
   } catch (error) {
-    console.error('Cloudinary upload error:', error)
+    logError('uploadToCloudinary', error)
     throw new Error('Erreur lors de l\'upload du fichier')
   }
 }

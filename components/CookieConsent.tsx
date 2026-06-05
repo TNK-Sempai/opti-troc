@@ -10,6 +10,7 @@ export default function CookieConsent() {
 
   useEffect(() => {
     const stored = localStorage.getItem('cookie_consent')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setConsent(stored === 'accepted')
   }, [])
 
@@ -22,11 +23,6 @@ export default function CookieConsent() {
     localStorage.setItem('cookie_consent', 'refused')
     setConsent(false)
   }
-
-  const resetConsent = () => {
-  localStorage.removeItem('cookie_consent')
-  window.location.reload()
-}
 
   return (
     <>

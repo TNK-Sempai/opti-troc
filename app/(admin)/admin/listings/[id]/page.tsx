@@ -49,6 +49,8 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
   const photos = listing.listing_photos || []
   const primaryPhoto = photos.find((p: any) => p.is_primary)
   const seller = listing.user_profiles
+  // eslint-disable-next-line react-hooks/purity
+  const daysOnline = Math.floor((Date.now() - new Date(listing.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -169,7 +171,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">En ligne</span>
                 <span className="font-bold">
-                  {Math.floor((Date.now() - new Date(listing.created_at).getTime()) / (1000 * 60 * 60 * 24))}j
+                  {daysOnline}j
                 </span>
               </div>
             </CardContent>

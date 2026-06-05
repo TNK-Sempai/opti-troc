@@ -17,7 +17,7 @@ export default function MentionsPage() {
             <p><strong className="text-charcoal">Raison sociale :</strong> Opti-Troc SAS</p>
             <p><strong className="text-charcoal">Siège social :</strong> [Adresse à compléter]</p>
             <p><strong className="text-charcoal">SIRET :</strong> [À compléter]</p>
-            <p><strong className="text-charcoal">Email :</strong> contact@opti-troc.fr</p>
+            <p><strong className="text-charcoal">Email :</strong> contact@opti-troc.com</p>
           </CardContent>
         </Card>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from "next/link"
 import Image from "next/image"
@@ -30,13 +30,32 @@ interface HeaderClientProps {
 export function HeaderClient({ user, profile }: HeaderClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const pathname = usePathname()
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!user) return
+    try {
+      const res = await fetch('/api/conversations/unread-count', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setUnreadCount(data.count || 0)
+      }
+    } catch {}
+  }, [user])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [fetchUnreadCount])
 
   const navLinks = [
     { href: '/shop', label: 'Marketplace' },
@@ -142,9 +161,16 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/messages" className="cursor-pointer">
-                        <Mail className="w-4 h-4 mr-2" />
-                        Messagerie
+                      <Link href="/dashboard/messages" className="cursor-pointer flex items-center justify-between">
+                        <span className="flex items-center">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Messagerie
+                        </span>
+                        {unreadCount > 0 && (
+                          <span className="min-w-[18px] h-[18px] bg-pine-teal text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -253,10 +279,17 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                       <Link
                         href="/dashboard/messages"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-3 rounded-md hover:bg-dust-grey/50 text-dark-grey font-medium"
+                        className="flex items-center justify-between px-3 py-3 rounded-md hover:bg-dust-grey/50 text-dark-grey font-medium"
                       >
-                        <Mail className="w-5 h-5 text-medium-grey" />
-                        Messagerie
+                        <span className="flex items-center gap-3">
+                          <Mail className="w-5 h-5 text-medium-grey" />
+                          Messagerie
+                        </span>
+                        {unreadCount > 0 && (
+                          <span className="min-w-[18px] h-[18px] bg-pine-teal text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
                       </Link>
                     </nav>
                   </div>

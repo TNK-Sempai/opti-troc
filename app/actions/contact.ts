@@ -1,6 +1,7 @@
 'use server'
 
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logError } from '@/lib/logger'
 
 export async function submitContactMessage(formData: FormData) {
 
@@ -22,7 +23,7 @@ export async function submitContactMessage(formData: FormData) {
     .insert([data])
 
   if (error) {
-    console.error('Contact message error:', error)
+    logError('submitContactMessage', error)
     return { success: false, error: 'Erreur lors de l\'envoi du message' }
   }
 

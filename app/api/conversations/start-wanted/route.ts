@@ -1,14 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getAdmin() {
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-}
+import { logError } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    const admin = getAdmin()
+    const admin = supabaseAdmin
     const { wantedItemId, message } = await request.json()
 
     if (!wantedItemId || !message?.trim()) {
@@ -133,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ conversationId: conversation.id, success: true })
   } catch (error: any) {
-    console.error('Error in start-wanted conversation:', error)
+    logError('POST /api/conversations/start-wanted', error)
     return NextResponse.json(
       { error: error.message || 'Une erreur est survenue' },
       { status: 500 }

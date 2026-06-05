@@ -1,8 +1,8 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
+import { logError, logInfo } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -49,7 +49,7 @@ export async function registerUser(data: RegistrationData) {
       }
 
       // Utilisateur existe mais pas le profil, on va le créer
-      console.log('User exists but profile missing, creating profile...')
+      logInfo('registerUser', 'User exists but profile missing, creating profile...')
       userId = userExists.id
     } else {
       // Créer un nouvel utilisateur
@@ -107,11 +107,11 @@ export async function registerUser(data: RegistrationData) {
       })
 
     if (profileError) {
-      console.error('Profile creation error:', profileError)
+      logError('registerUser', profileError)
       throw new Error(`Erreur création profil: ${profileError.message}`)
     }
 
-    console.log('✅ Profile created successfully for user:', userId)
+    logInfo('registerUser', 'Profile created successfully for user:', userId)
 
     // 6. Créer l'entrée pour le document officiel
     const { error: docError } = await supabaseAdmin
@@ -124,16 +124,16 @@ export async function registerUser(data: RegistrationData) {
       })
 
     if (docError) {
-      console.error('Document creation error:', docError)
+      logError('registerUser', docError)
       throw new Error(`Erreur création document: ${docError.message}`)
     }
 
-    console.log('✅ Document created successfully for user:', userId)
+    logInfo('registerUser', 'Document created successfully for user:', userId)
 
     // 7. Envoyer email de confirmation
     try {
       await resend.emails.send({
-        from: 'Opti-troc <onboarding@resend.dev>',
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
         to: data.email,
         subject: 'Confirmez votre inscription - Opti-troc',
         html: `
@@ -185,9 +185,9 @@ export async function registerUser(data: RegistrationData) {
           </html>
         `,
       })
-      console.log('✅ Email sent to:', data.email)
+      logInfo('registerUser', 'Email sent to:', data.email)
     } catch (emailError) {
-      console.error('Email error:', emailError)
+      logError('registerUser', emailError)
     }
 
     return {
@@ -198,7 +198,7 @@ export async function registerUser(data: RegistrationData) {
         : 'Inscription réussie !',
     }
   } catch (error) {
-    console.error('Registration error:', error)
+    logError('registerUser', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Une erreur est survenue',

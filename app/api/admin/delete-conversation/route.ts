@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { logError } from '@/lib/logger'
 
 export async function DELETE(request: NextRequest) {
   const supabase = await createClient()
@@ -46,7 +47,7 @@ export async function DELETE(request: NextRequest) {
     .eq('id', conversationId)
 
   if (error) {
-    console.error('Error deleting conversation:', error)
+    logError('DELETE /api/admin/delete-conversation', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

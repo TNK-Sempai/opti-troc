@@ -1,8 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logError } from '@/lib/logger'
+import { validateListingType } from '@/lib/validations/query-params'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { PremiumButton } from '@/components/ui/premium-button'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -39,22 +40,16 @@ export default async function AdminListingsPage({
       seller:user_profiles!listings_user_id_fkey(company_name, city)
     `, { count: 'exact' })
 
-  if (params.type && params.type !== 'all') {
-    query = query.eq('listing_type', params.type)
+  const validType = validateListingType(params.type);
+  if (validType) {
+    query = query.eq('listing_type', validType)
   }
 
-  const { data: allListings, count, error } = await query.order('created_at', { ascending: false })
+  const { data: allListings, error } = await query.order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching listings:', error)
+    logError('AdminListingsPage', error)
   }
-
-  // Debug: log les résultats
-  console.log('[Admin Listings] Query result:', {
-    dataLength: allListings?.length ?? 'null',
-    count,
-    error: error?.message || null
-  })
 
   // Utiliser un tableau vide si pas de données
   const listings = allListings || []

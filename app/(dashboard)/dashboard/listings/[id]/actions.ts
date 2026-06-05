@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { v2 as cloudinary } from 'cloudinary'
+import { logError, logInfo } from '@/lib/logger'
 
 // Configuration Cloudinary
 cloudinary.config({
@@ -45,9 +46,9 @@ export async function deleteListing(formData: FormData) {
       
       try {
         await cloudinary.api.delete_resources(publicIds)
-        console.log('✅ Photos supprimées de Cloudinary:', publicIds.length)
+        logInfo('deleteListing', 'Photos supprimées de Cloudinary:', publicIds.length)
       } catch (cloudinaryError) {
-        console.error('⚠️ Erreur suppression Cloudinary:', cloudinaryError)
+        logError('deleteListing.cloudinary', cloudinaryError)
         // On ne bloque pas si Cloudinary échoue
       }
     }
@@ -55,7 +56,7 @@ export async function deleteListing(formData: FormData) {
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/listings')
   } catch (error) {
-    console.error('Delete error:', error)
+    logError('deleteListing', error)
     throw new Error('Erreur lors de la suppression')
   }
 

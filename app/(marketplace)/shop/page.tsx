@@ -1,15 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { X, Package } from "lucide-react";
-import { MarketplaceFilters } from "@/components/shop/MarketplaceFilters";
-import { ViewControls } from "@/components/shop/ViewControls";
-import { ListingCard } from "@/components/shop/ListingCard";
+import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { validateListingType } from '@/lib/validations/query-params';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { X, Package } from 'lucide-react';
+import { MarketplaceFilters } from '@/components/shop/MarketplaceFilters';
+import { ViewControls } from '@/components/shop/ViewControls';
+import { ListingCard } from '@/components/shop/ListingCard';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 interface SearchParams {
   search?: string;
@@ -27,16 +28,14 @@ interface SearchParams {
   pageSize?: string;
 }
 
-export default async function ShopPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const supabase = await createClient();
 
   // Vérifier le statut de l'utilisateur
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   let isValidated = false;
 
   if (user) {
@@ -49,13 +48,13 @@ export default async function ShopPage({
     isValidated = profile?.status === 'validated' || profile?.role === 'admin';
   }
 
-  const page = parseInt(params.page || "1");
-  const pageSize = Math.min(parseInt(params.pageSize || "25") || 25, 100);
+  const page = parseInt(params.page || '1');
+  const pageSize = Math.min(parseInt(params.pageSize || '25') || 25, 100);
   const offset = (page - 1) * pageSize;
 
   // Construire la requête de base
   let query = supabase
-    .from("listings")
+    .from('listings')
     .select(
       `
       *,
@@ -63,12 +62,13 @@ export default async function ShopPage({
       lot_listings(*),
       listing_photos(*)
     `,
-      { count: "exact" }
+      { count: 'exact' }
     )
-    .eq("status", "active");
+    .eq('status', 'active');
 
-  if (params.type && params.type !== "all") {
-    query = query.eq("listing_type", params.type);
+  const validType = validateListingType(params.type);
+  if (validType) {
+    query = query.eq('listing_type', validType);
   }
 
   const { data: allListings, count } = await query;
@@ -79,10 +79,15 @@ export default async function ShopPage({
   let enrichedListings = allListings.map((listing) => {
     // IMPORTANT: unit_listings et lot_listings sont des TABLEAUX
     const details =
-      listing.listing_type === "unit"
-        ? (Array.isArray(listing.unit_listings) ? listing.unit_listings[0] : listing.unit_listings)
-        : (Array.isArray(listing.lot_listings) ? listing.lot_listings[0] : listing.lot_listings);
-    const photo = listing.listing_photos?.find((p: any) => p.is_primary) || listing.listing_photos?.[0];
+      listing.listing_type === 'unit'
+        ? Array.isArray(listing.unit_listings)
+          ? listing.unit_listings[0]
+          : listing.unit_listings
+        : Array.isArray(listing.lot_listings)
+          ? listing.lot_listings[0]
+          : listing.lot_listings;
+    const photo =
+      listing.listing_photos?.find((p: any) => p.is_primary) || listing.listing_photos?.[0];
     return { ...listing, details, photo };
   });
 
@@ -91,7 +96,7 @@ export default async function ShopPage({
   const modelsMap: Record<string, Set<string>> = {};
 
   enrichedListings.forEach((listing) => {
-    if (listing.listing_type === "unit" && listing.details) {
+    if (listing.listing_type === 'unit' && listing.details) {
       const brand = listing.details.brand;
       const model = listing.details.model;
 
@@ -117,52 +122,44 @@ export default async function ShopPage({
   if (params.search) {
     const searchLower = params.search.toLowerCase();
     enrichedListings = enrichedListings.filter((listing) => {
-      if (listing.listing_type === "unit" && listing.details) {
+      if (listing.listing_type === 'unit' && listing.details) {
         return (
           listing.details.brand?.toLowerCase().includes(searchLower) ||
           listing.details.model?.toLowerCase().includes(searchLower) ||
           listing.details.reference?.toLowerCase().includes(searchLower)
         );
-      } else if (listing.listing_type === "lot" && listing.details) {
+      } else if (listing.listing_type === 'lot' && listing.details) {
         return listing.details.description?.toLowerCase().includes(searchLower);
       }
       return false;
     });
   }
 
-  if (params.brand && params.brand !== "all") {
+  if (params.brand && params.brand !== 'all') {
     enrichedListings = enrichedListings.filter(
-      (listing) =>
-        listing.listing_type === "unit" &&
-        listing.details?.brand === params.brand
+      (listing) => listing.listing_type === 'unit' && listing.details?.brand === params.brand
     );
   }
 
-  if (params.model && params.model !== "all") {
+  if (params.model && params.model !== 'all') {
     enrichedListings = enrichedListings.filter(
-      (listing) =>
-        listing.listing_type === "unit" &&
-        listing.details?.model === params.model
+      (listing) => listing.listing_type === 'unit' && listing.details?.model === params.model
     );
   }
 
-  if (params.gender && params.gender !== "all") {
+  if (params.gender && params.gender !== 'all') {
     enrichedListings = enrichedListings.filter(
-      (listing) =>
-        listing.listing_type === "unit" &&
-        listing.details?.gender === params.gender
+      (listing) => listing.listing_type === 'unit' && listing.details?.gender === params.gender
     );
   }
 
-  if (params.category && params.category !== "all") {
+  if (params.category && params.category !== 'all') {
     enrichedListings = enrichedListings.filter(
-      (listing) =>
-        listing.listing_type === "unit" &&
-        listing.details?.category === params.category
+      (listing) => listing.listing_type === 'unit' && listing.details?.category === params.category
     );
   }
 
-  if (params.state && params.state !== "all") {
+  if (params.state && params.state !== 'all') {
     enrichedListings = enrichedListings.filter(
       (listing) => listing.details?.state === params.state
     );
@@ -172,7 +169,7 @@ export default async function ShopPage({
     const minPrice = parseFloat(params.minPrice);
     enrichedListings = enrichedListings.filter((listing) => {
       const price =
-        listing.listing_type === "unit"
+        listing.listing_type === 'unit'
           ? parseFloat(listing.details?.price || 0)
           : parseFloat(listing.details?.total_price || 0);
       return price >= minPrice;
@@ -183,7 +180,7 @@ export default async function ShopPage({
     const maxPrice = parseFloat(params.maxPrice);
     enrichedListings = enrichedListings.filter((listing) => {
       const price =
-        listing.listing_type === "unit"
+        listing.listing_type === 'unit'
           ? parseFloat(listing.details?.price || 0)
           : parseFloat(listing.details?.total_price || 0);
       return price <= maxPrice;
@@ -191,36 +188,33 @@ export default async function ShopPage({
   }
 
   // Tri
-  const sortBy = params.sort || "recent";
-  if (sortBy === "recent") {
+  const sortBy = params.sort || 'recent';
+  if (sortBy === 'recent') {
     enrichedListings.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
-  } else if (sortBy === "views") {
-    enrichedListings.sort(
-      (a, b) => (b.views_count || 0) - (a.views_count || 0)
-    );
-  } else if (sortBy === "price_asc") {
+  } else if (sortBy === 'views') {
+    enrichedListings.sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+  } else if (sortBy === 'price_asc') {
     enrichedListings.sort((a, b) => {
       const priceA =
-        a.listing_type === "unit"
+        a.listing_type === 'unit'
           ? parseFloat(a.details?.price || 0)
           : parseFloat(a.details?.total_price || 0);
       const priceB =
-        b.listing_type === "unit"
+        b.listing_type === 'unit'
           ? parseFloat(b.details?.price || 0)
           : parseFloat(b.details?.total_price || 0);
       return priceA - priceB;
     });
-  } else if (sortBy === "price_desc") {
+  } else if (sortBy === 'price_desc') {
     enrichedListings.sort((a, b) => {
       const priceA =
-        a.listing_type === "unit"
+        a.listing_type === 'unit'
           ? parseFloat(a.details?.price || 0)
           : parseFloat(a.details?.total_price || 0);
       const priceB =
-        b.listing_type === "unit"
+        b.listing_type === 'unit'
           ? parseFloat(b.details?.price || 0)
           : parseFloat(b.details?.total_price || 0);
       return priceB - priceA;
@@ -234,41 +228,35 @@ export default async function ShopPage({
 
   // Filtres actifs
   const activeFilters = [
-    params.search && { key: "search", label: `"${params.search}"` },
+    params.search && { key: 'search', label: `"${params.search}"` },
     params.type &&
-      params.type !== "all" && {
-        key: "type",
-        label: params.type === "unit" ? "Unitaire" : "Lot",
+      params.type !== 'all' && {
+        key: 'type',
+        label: params.type === 'unit' ? 'Unitaire' : 'Lot',
       },
-    params.brand &&
-      params.brand !== "all" && { key: "brand", label: params.brand },
-    params.model &&
-      params.model !== "all" && { key: "model", label: params.model },
-    params.gender &&
-      params.gender !== "all" && { key: "gender", label: params.gender },
-    params.category &&
-      params.category !== "all" && { key: "category", label: params.category },
+    params.brand && params.brand !== 'all' && { key: 'brand', label: params.brand },
+    params.model && params.model !== 'all' && { key: 'model', label: params.model },
+    params.gender && params.gender !== 'all' && { key: 'gender', label: params.gender },
+    params.category && params.category !== 'all' && { key: 'category', label: params.category },
     params.state &&
-      params.state !== "all" && {
-        key: "state",
-        label: params.state.replace("_", " "),
+      params.state !== 'all' && {
+        key: 'state',
+        label: params.state.replace('_', ' '),
       },
     (params.minPrice || params.maxPrice) && {
-      key: "price",
-      label: `${params.minPrice || "0"}€ - ${params.maxPrice || "∞"}€`,
+      key: 'price',
+      label: `${params.minPrice || '0'}€ - ${params.maxPrice || '∞'}€`,
     },
   ].filter(Boolean) as { key: string; label: string }[];
 
-  const viewMode = (params.view || "grid") as "grid" | "list";
+  const viewMode = (params.view || 'grid') as 'grid' | 'list';
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-serif text-3xl md:text-4xl text-pine-teal mb-3">
-            Marketplace
-          </h1>
+          <h1 className="font-serif text-3xl md:text-4xl text-pine-teal mb-3">Marketplace</h1>
           <p className="text-lg text-muted-foreground font-medium">
             Découvrez {totalResults} annonce{totalResults > 1 ? 's' : ''} de professionnels vérifiés
           </p>
@@ -311,10 +299,7 @@ export default async function ShopPage({
                           href={`/shop?${new URLSearchParams(
                             Object.fromEntries(
                               Object.entries(params).filter(
-                                ([k]) =>
-                                  k !== filter.key &&
-                                  k !== "minPrice" &&
-                                  k !== "maxPrice"
+                                ([k]) => k !== filter.key && k !== 'minPrice' && k !== 'maxPrice'
                               )
                             )
                           ).toString()}`}
@@ -351,7 +336,11 @@ export default async function ShopPage({
                     <p className="text-muted-foreground mb-8 text-lg">
                       Essayez de modifier vos critères de recherche
                     </p>
-                    <Button asChild size="lg" className="bg-pine-teal text-white hover:bg-hunter-green shadow-card hover:shadow-card-hover transition-shadow">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="bg-pine-teal text-white hover:bg-hunter-green shadow-card hover:shadow-card-hover transition-shadow"
+                    >
                       <Link href="/shop">Réinitialiser les filtres</Link>
                     </Button>
                   </div>
@@ -359,16 +348,26 @@ export default async function ShopPage({
               </Card>
             ) : (
               <>
-                {viewMode === "grid" ? (
+                {viewMode === 'grid' ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {paginatedListings.map((listing) => (
-                      <ListingCard key={listing.id} listing={listing} isValidated={isValidated} variant="grid" />
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isValidated={isValidated}
+                        variant="grid"
+                      />
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {paginatedListings.map((listing) => (
-                      <ListingCard key={listing.id} listing={listing} isValidated={isValidated} variant="list" />
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isValidated={isValidated}
+                        variant="list"
+                      />
                     ))}
                   </div>
                 )}
@@ -380,30 +379,46 @@ export default async function ShopPage({
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         {/* PageSize selector */}
                         <div className="flex items-center gap-2">
-                          {[25, 50, 100].map(size => (
+                          {[25, 50, 100].map((size) => (
                             <Button
                               key={size}
                               asChild
                               variant={pageSize === size ? 'default' : 'outline'}
                               size="sm"
-                              className={pageSize === size
-                                ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
-                                : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'}
+                              className={
+                                pageSize === size
+                                  ? 'bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                                  : 'border-dry-sage hover:border-fern hover:text-pine-teal font-semibold'
+                              }
                             >
-                              <Link href={`/shop?${new URLSearchParams({ ...params, pageSize: String(size), page: '1' }).toString()}`}>{size}</Link>
+                              <Link
+                                href={`/shop?${new URLSearchParams({ ...params, pageSize: String(size), page: '1' }).toString()}`}
+                              >
+                                {size}
+                              </Link>
                             </Button>
                           ))}
-                          <span className="text-sm text-muted-foreground font-medium ml-1">par page</span>
+                          <span className="text-sm text-muted-foreground font-medium ml-1">
+                            par page
+                          </span>
                         </div>
 
                         <p className="text-sm font-semibold text-muted-foreground">
-                          <span className="text-charcoal font-semibold">{offset + 1}-{Math.min(offset + pageSize, totalResults)}</span> sur{" "}
-                          <span className="text-charcoal font-semibold">{totalResults}</span> résultats
+                          <span className="text-charcoal font-semibold">
+                            {offset + 1}-{Math.min(offset + pageSize, totalResults)}
+                          </span>{' '}
+                          sur <span className="text-charcoal font-semibold">{totalResults}</span>{' '}
+                          résultats
                         </p>
 
                         <div className="flex items-center gap-2">
                           {totalPages > 1 && page > 1 && (
-                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold"
+                            >
                               <Link
                                 href={`/shop?${new URLSearchParams({
                                   ...params,
@@ -415,26 +430,23 @@ export default async function ShopPage({
                             </Button>
                           )}
 
-                          {totalPages > 1 && Array.from(
-                            { length: Math.min(totalPages, 5) },
-                            (_, i) => {
+                          {totalPages > 1 &&
+                            Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                               let pageNum = i + 1;
                               if (totalPages > 5 && page > 3) {
                                 pageNum = page - 2 + i;
-                                if (pageNum > totalPages)
-                                  pageNum = totalPages - (4 - i);
+                                if (pageNum > totalPages) pageNum = totalPages - (4 - i);
                               }
                               return (
                                 <Button
                                   key={pageNum}
                                   asChild
-                                  variant={
-                                    pageNum === page ? "default" : "ghost"
-                                  }
+                                  variant={pageNum === page ? 'default' : 'ghost'}
                                   size="sm"
-                                  className={pageNum === page
-                                    ? "w-10 shadow-card bg-pine-teal text-white hover:bg-hunter-green font-bold"
-                                    : "w-10 hover:bg-dust-grey/50 hover:text-pine-teal transition-shadow font-semibold"
+                                  className={
+                                    pageNum === page
+                                      ? 'w-10 shadow-card bg-pine-teal text-white hover:bg-hunter-green font-bold'
+                                      : 'w-10 hover:bg-dust-grey/50 hover:text-pine-teal transition-shadow font-semibold'
                                   }
                                 >
                                   <Link
@@ -447,11 +459,15 @@ export default async function ShopPage({
                                   </Link>
                                 </Button>
                               );
-                            }
-                          )}
+                            })}
 
                           {totalPages > 1 && page < totalPages && (
-                            <Button asChild variant="outline" size="sm" className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold">
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="shadow-sm hover:shadow-card-hover hover:border-pine-teal hover:text-pine-teal transition-shadow font-semibold"
+                            >
                               <Link
                                 href={`/shop?${new URLSearchParams({
                                   ...params,

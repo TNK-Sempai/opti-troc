@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
+import { logError } from '@/lib/logger'
 
 export async function GET(
   request: NextRequest,
@@ -103,7 +104,7 @@ export async function POST(
     })
 
   if (msgError) {
-    console.error('Error sending message:', msgError)
+    logError('POST /api/conversations/[id]/messages', msgError)
     return NextResponse.json({ error: msgError.message }, { status: 500 })
   }
 

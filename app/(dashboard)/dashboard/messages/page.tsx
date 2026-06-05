@@ -1,6 +1,5 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { MessagingLayout } from '@/components/messaging/MessagingLayout'
 import { Loader2 } from 'lucide-react'
@@ -23,17 +22,9 @@ export default async function MessagesPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabaseAdmin
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  const isAdmin = profile?.role === 'admin'
-
   return (
     <Suspense fallback={<MessagingFallback />}>
-      <MessagingLayout currentUserId={user.id} isAdmin={isAdmin} />
+      <MessagingLayout currentUserId={user.id} />
     </Suspense>
   )
 }

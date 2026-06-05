@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logError } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
@@ -38,7 +39,7 @@ export default async function WantToBuyPage() {
     .limit(100)
 
   if (error) {
-    console.error('Error fetching wanted items:', error)
+    logError('WantToBuyPage', error)
   }
 
   const groupedByBrand = wantedItems?.reduce((acc: any, item: any) => {

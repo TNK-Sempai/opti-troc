@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { validateListingStatus, validateListingType } from '@/lib/validations/query-params'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -7,9 +8,11 @@ import { PremiumButton } from '@/components/ui/premium-button'
 import { StatCard } from '@/components/ui/stat-card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { PlusCircle, Package, Eye, Grid3x3, List, Search, Filter, CheckCircle, Pause, ShoppingBag, Layers, ChevronLeft, ChevronRight } from 'lucide-react'
+import { PlusCircle, Package, Eye, Grid3x3, List, Search, Filter, CheckCircle, Pause, ShoppingBag, Layers, ChevronLeft, ChevronRight, Lock, CreditCard } from 'lucide-react'
 import ListingsGrid from './listings-grid'
 import ListingsList from './listings-list'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { SubscriptionGate } from '@/components/subscription/SubscriptionGate'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +38,16 @@ export default async function MyListingsPage({
     return <div>Non authentifié</div>
   }
 
+  // Vérifier le statut d'abonnement (admins exemptés)
+  const { data: profile } = await supabaseAdmin
+    .from('user_profiles')
+    .select('role, subscription_status')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
+  const subscriptionActive = isAdmin || profile?.subscription_status === 'active'
+
   // Construire la requête avec filtres
   let query = supabase
     .from('listings')
@@ -42,13 +55,15 @@ export default async function MyListingsPage({
     .eq('user_id', user.id)
 
   // Filtre par statut
-  if (params.status && params.status !== 'all') {
-    query = query.eq('status', params.status)
+  const validStatus = validateListingStatus(params.status);
+  if (validStatus) {
+    query = query.eq('status', validStatus)
   }
 
   // Filtre par type
-  if (params.type && params.type !== 'all') {
-    query = query.eq('listing_type', params.type)
+  const validType = validateListingType(params.type);
+  if (validType) {
+    query = query.eq('listing_type', validType)
   }
 
   const { data: listings } = await query.order('created_at', { ascending: false })
@@ -79,14 +94,18 @@ export default async function MyListingsPage({
     .eq('is_primary', true)
 
   // Combiner les données
+  const photosByListingId = new Map(photos?.map(p => [p.listing_id, p]) ?? [])
+  const unitListingsByListingId = new Map(unitListings?.map(u => [u.listing_id, u]) ?? [])
+  const lotListingsByListingId = new Map(lotListings?.map(l => [l.listing_id, l]) ?? [])
+
   let enrichedListings = listings.map(listing => {
-    const photo = photos?.find(p => p.listing_id === listing.id)
+    const photo = photosByListingId.get(listing.id)
 
     if (listing.listing_type === 'unit') {
-      const details = unitListings?.find(u => u.listing_id === listing.id)
+      const details = unitListingsByListingId.get(listing.id)
       return { ...listing, details, photo }
     } else {
-      const details = lotListings?.find(l => l.listing_id === listing.id)
+      const details = lotListingsByListingId.get(listing.id)
       return { ...listing, details, photo }
     }
   })
@@ -138,6 +157,23 @@ export default async function MyListingsPage({
   return (
     <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
+        {/* Subscription inactive banner */}
+        {!subscriptionActive && (
+          <div className="mb-6 flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <Lock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-amber-800">Abonnement inactif</p>
+              <p className="text-sm text-amber-700">Renouvelez votre abonnement pour créer de nouvelles annonces.</p>
+            </div>
+            <Button asChild size="sm" className="bg-pine-teal hover:bg-hunter-green text-white border-0 shrink-0">
+              <Link href="/inscription/plans">
+                <CreditCard className="w-4 h-4 mr-1.5" />
+                Renouveler
+              </Link>
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
@@ -151,12 +187,19 @@ export default async function MyListingsPage({
               {stats.active} active{stats.active > 1 ? 's' : ''} sur {stats.total} au total
             </p>
           </div>
-          <PremiumButton asChild size="lg" gradient="secondary" glow className="text-base h-14 px-8 shadow-xl">
-            <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
-              <PlusCircle className="w-5 h-5" />
+          {subscriptionActive ? (
+            <PremiumButton asChild size="lg" gradient="secondary" glow className="text-base h-14 px-8 shadow-xl">
+              <Link href="/dashboard/listings/new" className="inline-flex items-center gap-2">
+                <PlusCircle className="w-5 h-5" />
+                <span>Nouvelle annonce</span>
+              </Link>
+            </PremiumButton>
+          ) : (
+            <Button disabled size="lg" className="text-base h-14 px-8 opacity-40 cursor-not-allowed">
+              <Lock className="w-5 h-5 mr-2" />
               <span>Nouvelle annonce</span>
-            </Link>
-          </PremiumButton>
+            </Button>
+          )}
         </div>
 
         {/* Stats */}

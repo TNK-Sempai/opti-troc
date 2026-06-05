@@ -2,7 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logError, logInfo } from '@/lib/logger'
+import { v2 as cloudinary } from 'cloudinary'
+
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+})
 
 export async function updateUnitListing(data: {
   listingId: string
@@ -87,8 +95,17 @@ export async function updateUnitListing(data: {
 
       if (deleteError) throw deleteError
 
-      // TODO: Supprimer de Cloudinary
-      // await cloudinary.api.delete_resources(photosToDelete.map(p => p.cloudinary_public_id))
+      // Supprimer de Cloudinary
+      const publicIds = photosToDelete.map(p => p.cloudinary_public_id).filter(Boolean)
+      if (publicIds.length > 0) {
+        try {
+          await cloudinary.api.delete_resources(publicIds)
+          logInfo('updateUnitListing', 'Photos supprimées de Cloudinary:', publicIds.length)
+        } catch (cloudinaryError) {
+          logError('updateUnitListing.cloudinary', cloudinaryError)
+          // On ne bloque pas la mise à jour si Cloudinary échoue
+        }
+      }
     }
 
     // Ajouter les nouvelles photos
@@ -124,7 +141,7 @@ export async function updateUnitListing(data: {
 
     return { success: true }
   } catch (error) {
-    console.error('updateUnitListing error:', error)
+    logError('updateUnitListing', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour',
@@ -183,10 +200,12 @@ export async function updateLotListing(data: {
 
     // 2. Gérer les items du lot
     // Supprimer tous les anciens items
-    await supabase
+    const { error: deleteItemsError } = await supabase
       .from('lot_items')
       .delete()
       .eq('lot_id', data.listingId)
+
+    if (deleteItemsError) throw deleteItemsError
 
     // Insérer les nouveaux items
     const itemsToInsert = data.items.map((item, index) => ({
@@ -214,10 +233,24 @@ export async function updateLotListing(data: {
     const photosToDelete = allPhotos?.filter(p => !data.existingPhotoIds.includes(p.id)) || []
 
     if (photosToDelete.length > 0) {
-      await supabase
+      const { error: deletePhotosError } = await supabase
         .from('listing_photos')
         .delete()
         .in('id', photosToDelete.map(p => p.id))
+
+      if (deletePhotosError) throw deletePhotosError
+
+      // Supprimer de Cloudinary
+      const publicIds = photosToDelete.map(p => p.cloudinary_public_id).filter(Boolean)
+      if (publicIds.length > 0) {
+        try {
+          await cloudinary.api.delete_resources(publicIds)
+          logInfo('updateLotListing', 'Photos supprimées de Cloudinary:', publicIds.length)
+        } catch (cloudinaryError) {
+          logError('updateLotListing.cloudinary', cloudinaryError)
+          // On ne bloque pas la mise à jour si Cloudinary échoue
+        }
+      }
     }
 
     if (data.newPhotosUrls.length > 0) {
@@ -250,7 +283,7 @@ export async function updateLotListing(data: {
 
     return { success: true }
   } catch (error) {
-    console.error('updateLotListing error:', error)
+    logError('updateLotListing', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour',

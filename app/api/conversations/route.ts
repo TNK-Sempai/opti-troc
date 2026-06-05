@@ -1,15 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-// Create admin client lazily inside the handler (avoids module-level env timing issues)
-function getAdmin() {
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-}
+import { logError } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -20,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const admin = getAdmin()
+    const admin = supabaseAdmin
 
     // Step 1: Get participations (no .or() — filter is_archived in JS)
     const { data: rawParticipations, error: partError } = await admin
@@ -29,7 +21,7 @@ export async function GET() {
       .eq('user_id', user.id)
 
     if (partError) {
-      console.error('[conversations] participations error:', partError)
+      logError('GET /api/conversations', partError)
       return NextResponse.json({ error: partError.message }, { status: 500 })
     }
 
@@ -53,7 +45,7 @@ export async function GET() {
       .order('last_message_at', { ascending: false })
 
     if (convError) {
-      console.error('[conversations] conversations error:', convError)
+      logError('GET /api/conversations', convError)
       return NextResponse.json({ error: convError.message }, { status: 500 })
     }
 
@@ -141,7 +133,7 @@ export async function GET() {
             unreadCount,
           }
         } catch (enrichError) {
-          console.error(`[conversations] enrich error for ${conv.id}:`, enrichError)
+          logError('GET /api/conversations', enrichError)
           return {
             ...conv,
             listings: conv.listing_id ? (listingsMap[conv.listing_id] || null) : null,
@@ -155,7 +147,7 @@ export async function GET() {
 
     return NextResponse.json({ conversations: enriched })
   } catch (error) {
-    console.error('[conversations] unhandled error:', error)
+    logError('GET /api/conversations', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }

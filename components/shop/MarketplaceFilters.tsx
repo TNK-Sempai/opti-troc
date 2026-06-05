@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,14 +41,11 @@ function FilterForm({
 }) {
   const searchParams = useSearchParams()
   const [selectedBrand, setSelectedBrand] = useState(searchParams.get('brand') || 'all')
-  const [availableModels, setAvailableModels] = useState<string[]>([])
-
-  useEffect(() => {
+  const availableModels = useMemo(() => {
     if (selectedBrand && selectedBrand !== 'all' && models[selectedBrand]) {
-      setAvailableModels(models[selectedBrand])
-    } else {
-      setAvailableModels([])
+      return models[selectedBrand]
     }
+    return []
   }, [selectedBrand, models])
 
   return (

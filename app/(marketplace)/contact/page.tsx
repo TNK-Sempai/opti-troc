@@ -1,12 +1,12 @@
 'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Mail,
   Phone,
@@ -16,10 +16,10 @@ import {
   HelpCircle,
   User,
   CheckCircle,
-} from "lucide-react";
-import { submitContactMessage } from "@/app/actions/contact";
-import { useState } from "react";
-import { event as gtagEvent } from "@/lib/gtag";
+} from 'lucide-react';
+import { submitContactMessage } from '@/app/actions/contact';
+import { useState } from 'react';
+import { event as gtagEvent } from '@/lib/gtag';
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,8 +42,7 @@ export default function ContactPage() {
     if (result.success) {
       setSubmitStatus({
         success: true,
-        message:
-          "Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.",
+        message: 'Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.',
       });
 
       form.reset();
@@ -68,9 +67,7 @@ export default function ContactPage() {
         {/* Hero */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-pine-teal text-white">Contact</Badge>
-          <h1 className="text-4xl font-serif font-bold mb-4 text-pine-teal">
-            Contactez-nous
-          </h1>
+          <h1 className="text-4xl font-serif font-bold mb-4 text-pine-teal">Contactez-nous</h1>
           <div className="w-12 h-1 bg-gold mx-auto mb-4" />
           <p className="text-xl text-dark-grey max-w-2xl mx-auto">
             Une question ? Notre équipe est là pour vous aider
@@ -90,16 +87,14 @@ export default function ContactPage() {
                   <div
                     className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
                       submitStatus.success
-                        ? "bg-fern/10 border border-fern/30"
-                        : "bg-error/10 border border-error/30"
+                        ? 'bg-fern/10 border border-fern/30'
+                        : 'bg-error/10 border border-error/30'
                     }`}
                   >
-                    {submitStatus.success && (
-                      <CheckCircle className="w-5 h-5 text-fern mt-0.5" />
-                    )}
+                    {submitStatus.success && <CheckCircle className="w-5 h-5 text-fern mt-0.5" />}
                     <p
                       className={`text-sm ${
-                        submitStatus.success ? "text-hunter-green" : "text-error"
+                        submitStatus.success ? 'text-hunter-green' : 'text-error'
                       }`}
                     >
                       {submitStatus.message}
@@ -208,7 +203,7 @@ export default function ContactPage() {
                     disabled={isSubmitting}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
+                    {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
                   </Button>
                 </form>
               </CardContent>
@@ -228,9 +223,7 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <Mail className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-medium-grey mb-0.5">
-                        Email
-                      </div>
+                      <div className="text-xs text-medium-grey mb-0.5">Email</div>
                       <a
                         href="mailto:tanuki.corporation@gmail.com"
                         className="text-pine-teal hover:underline"
@@ -243,14 +236,9 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <Phone className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-medium-grey mb-0.5">
-                        Téléphone
-                      </div>
-                      <a
-                        href="tel:+32465186866"
-                        className="text-pine-teal hover:underline"
-                      >
-                        0465 18 68 66
+                      <div className="text-xs text-medium-grey mb-0.5">Téléphone</div>
+                      <a href="tel:+32465186866" className="text-pine-teal hover:underline">
+                        +32 465 18 68 66
                       </a>
                     </div>
                   </div>
@@ -258,13 +246,9 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 text-medium-grey mt-0.5" />
                     <div>
-                      <div className="text-xs text-medium-grey mb-0.5">
-                        Adresse
-                      </div>
+                      <div className="text-xs text-medium-grey mb-0.5">Adresse</div>
                       <p className="text-sm text-dark-grey">
-                        Avenue de l'indépendance belge 131 (APT 4.02)
-                        <br />
-                        1081 Bruxelles, Belgique
+                        1081 Koekelberg, Belgique
                       </p>
                     </div>
                   </div>
@@ -281,9 +265,7 @@ export default function ContactPage() {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-medium-grey">
-                      Lundi - Vendredi
-                    </span>
+                    <span className="text-medium-grey">Lundi - Vendredi</span>
                     <span className="font-medium text-charcoal">9h - 18h</span>
                   </div>
                   <div className="flex justify-between">
@@ -311,8 +293,8 @@ export default function ContactPage() {
                       Comment vendre sur Opti-Troc ?
                     </h4>
                     <p className="text-xs text-medium-grey">
-                      Créez un compte professionnel, publiez vos annonces et
-                      gérez vos ventes depuis votre tableau de bord.
+                      Créez un compte professionnel, publiez vos annonces et gérez vos ventes depuis
+                      votre tableau de bord.
                     </p>
                   </div>
 
@@ -323,8 +305,7 @@ export default function ContactPage() {
                       Qui peut s'inscrire ?
                     </h4>
                     <p className="text-xs text-medium-grey">
-                      Uniquement les professionnels de l'optique avec un numéro
-                      SIRET valide.
+                      Uniquement les professionnels de l'optique avec un numéro SIRET valide.
                     </p>
                   </div>
 
@@ -335,8 +316,7 @@ export default function ContactPage() {
                       Les paiements sont-ils sécurisés ?
                     </h4>
                     <p className="text-xs text-medium-grey">
-                      Oui, toutes les transactions sont protégées et les
-                      vendeurs sont vérifiés.
+                      Oui, toutes les transactions sont protégées et les vendeurs sont vérifiés.
                     </p>
                   </div>
                 </div>

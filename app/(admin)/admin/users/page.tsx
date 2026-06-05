@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { Card, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
+import { validateUserStatus } from '@/lib/validations/query-params'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { PremiumButton } from '@/components/ui/premium-button'
@@ -29,8 +30,9 @@ export default async function AdminUsersPage({
     .select('*')
     .order('created_at', { ascending: false })
 
-  if (params.status && params.status !== 'all') {
-    query = query.eq('status', params.status)
+  const validStatus = validateUserStatus(params.status);
+  if (validStatus) {
+    query = query.eq('status', validStatus)
   }
 
   const { data: users } = await query

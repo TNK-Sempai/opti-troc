@@ -1,14 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-function getAdmin() {
-  return createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-}
+import { logError } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -19,7 +12,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const admin = getAdmin()
+    const admin = supabaseAdmin
     const { listingId, message } = await request.json()
 
     if (!listingId) {
@@ -55,15 +48,20 @@ export async function POST(request: NextRequest) {
 
     let existingConvId = null
     if (existingConvs && existingConvs.length > 0) {
-      for (const conv of existingConvs) {
-        const { data: parts } = await admin
-          .from('conversation_participants')
-          .select('user_id')
-          .eq('conversation_id', conv.id)
+      const participantResults = await Promise.all(
+        existingConvs.map(conv =>
+          admin
+            .from('conversation_participants')
+            .select('user_id')
+            .eq('conversation_id', conv.id)
+            .then(({ data }) => ({ convId: conv.id, parts: data || [] }))
+        )
+      )
 
-        const participantIds = (parts || []).map(p => p.user_id)
+      for (const { convId, parts } of participantResults) {
+        const participantIds = parts.map(p => p.user_id)
         if (participantIds.includes(user.id) && participantIds.includes(recipientId)) {
-          existingConvId = conv.id
+          existingConvId = convId
           break
         }
       }
@@ -126,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ conversationId: conversation.id })
   } catch (error: any) {
-    console.error('Error starting conversation:', error)
+    logError('POST /api/conversations/start', error)
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

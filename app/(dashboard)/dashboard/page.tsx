@@ -82,12 +82,15 @@ export default async function DashboardPage() {
       .in('listing_id', lotIds.length > 0 ? lotIds : ['00000000-0000-0000-0000-000000000000'])
 
     // Combiner les données
+    const unitListingsByListingId = new Map(unitListings?.map(u => [u.listing_id, u]) ?? [])
+    const lotListingsByListingId = new Map(lotListings?.map(l => [l.listing_id, l]) ?? [])
+
     enrichedListings = recentListings.map(listing => {
       if (listing.listing_type === 'unit') {
-        const details = unitListings?.find(u => u.listing_id === listing.id)
+        const details = unitListingsByListingId.get(listing.id)
         return { ...listing, details }
       } else {
-        const details = lotListings?.find(l => l.listing_id === listing.id)
+        const details = lotListingsByListingId.get(listing.id)
         return { ...listing, details }
       }
     })

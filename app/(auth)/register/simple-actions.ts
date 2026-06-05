@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { SimpleRegistrationForm } from '@/lib/validations/auth'
+import { logError } from '@/lib/logger'
 
 export async function registerSimple(data: SimpleRegistrationForm) {
   try {
@@ -34,7 +35,7 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       }, { onConflict: 'id' })
 
     if (upsertError) {
-      console.error('Profile upsert error:', upsertError)
+      logError('registerSimple', upsertError)
       throw new Error('Erreur lors de la création du profil')
     }
 
@@ -49,7 +50,7 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       })
 
       if (signInError) {
-        console.error('Auto sign-in error:', signInError)
+        logError('registerSimple', signInError)
       }
     }
 
@@ -60,7 +61,7 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       autoSignedIn: !currentUser,
     }
   } catch (error) {
-    console.error('Registration error:', error)
+    logError('registerSimple', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Une erreur est survenue',

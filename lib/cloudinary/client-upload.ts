@@ -1,5 +1,7 @@
 'use client'
 
+import { logError } from '@/lib/logger'
+
 interface UploadResult {
   url: string
   publicId: string
@@ -27,7 +29,7 @@ export async function uploadFileToCloudinary(
 
   if (!response.ok) {
     const errorData = await response.json()
-    console.error('Cloudinary error:', errorData)
+    logError('uploadFileToCloudinary', errorData)
     throw new Error(errorData.error?.message || 'Erreur lors de l\'upload')
   }
 

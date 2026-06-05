@@ -186,6 +186,7 @@ function WantedItemCard({ item }: { item: any }) {
   }
 
   const config = statusConfig[item.status as keyof typeof statusConfig] || statusConfig.active
+  // eslint-disable-next-line react-hooks/purity
   const daysAgo = Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
   return (

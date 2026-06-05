@@ -56,9 +56,10 @@ export async function GET(
       .select('id, first_name, last_name, company_name, profile_photo_url, role')
       .in('id', participantIds)
 
+    const profilesById = new Map(profiles?.map(pr => [pr.id, pr]) ?? [])
     participants = (rawParticipants || []).map(p => ({
       user_id: p.user_id,
-      user_profiles: profiles?.find(pr => pr.id === p.user_id) || null,
+      user_profiles: profilesById.get(p.user_id) || null,
     }))
   }
 

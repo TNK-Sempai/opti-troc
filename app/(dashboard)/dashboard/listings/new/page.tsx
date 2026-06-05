@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { ArrowLeft, Package, Layers, Loader2 } from 'lucide-react'
 import UnitListingForm from './unit-form'
 import LotListingForm from './lot-form'
+import { SubscriptionGate } from '@/components/subscription/SubscriptionGate'
 
 export default function NewListingPage() {
   const router = useRouter()
@@ -17,14 +18,11 @@ export default function NewListingPage() {
   const [selectedType, setSelectedType] = useState<'unit' | 'lot' | null>(null)
   const [isChecking, setIsChecking] = useState(true)
   const [canCreate, setCanCreate] = useState(false)
-
-  useEffect(() => {
-    checkAccess()
-  }, [])
+  const [subscriptionActive, setSubscriptionActive] = useState(true)
 
   async function checkAccess() {
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) {
       router.push('/login')
       return
@@ -32,19 +30,28 @@ export default function NewListingPage() {
 
     const { data: profile } = await supabase
       .from('user_profiles')
-      .select('status, role')
+      .select('status, role, subscription_status')
       .eq('id', user.id)
       .single()
 
+    const isAdmin = profile?.role === 'admin'
+    const isValidated = profile?.status === 'validated'
+    const hasActiveSub = profile?.subscription_status === 'active'
 
-    if (profile?.status === 'validated' || profile?.role === 'admin') {
+    if (isAdmin || isValidated) {
       setCanCreate(true)
+      setSubscriptionActive(isAdmin || hasActiveSub)
     } else {
       setCanCreate(false)
     }
 
     setIsChecking(false)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAccess()
+  }, [])
 
   if (isChecking) {
     return (
@@ -76,6 +83,41 @@ export default function NewListingPage() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  if (!subscriptionActive) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-6">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/dashboard">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour au dashboard
+            </Link>
+          </Button>
+        </div>
+        <SubscriptionGate isActive={false} featureName="la création d'annonces">
+          <div className="grid md:grid-cols-2 gap-6 opacity-50 pointer-events-none select-none">
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-pine-teal/10 rounded-full flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-pine-teal" />
+                </div>
+                <CardTitle>Vente unitaire</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-fern/10 rounded-full flex items-center justify-center mb-4">
+                  <Layers className="w-8 h-8 text-fern" />
+                </div>
+                <CardTitle>Vente par lot</CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        </SubscriptionGate>
       </div>
     )
   }

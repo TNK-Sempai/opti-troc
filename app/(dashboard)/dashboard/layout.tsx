@@ -23,11 +23,18 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  if (profile?.status !== 'validated') {
+  // Les admins bypasse la vérification de statut
+  if (profile?.role !== 'admin' && profile?.status !== 'validated') {
     if (profile?.status === 'pending') {
       redirect('/dashboard/pending')
     } else if (profile?.status === 'incomplete') {
       redirect('/onboarding')
+    } else if (profile?.status === 'awaiting_payment') {
+      redirect('/inscription/plans')
+    } else if (profile?.status === 'rejected') {
+      redirect('/dashboard/rejected')
+    } else if (profile?.status === 'suspended') {
+      redirect('/dashboard/suspended')
     }
   }
 

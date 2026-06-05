@@ -1,64 +1,66 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
-import { loginSchema, type LoginForm } from '@/lib/validations/auth'
-import { login } from './actions'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { loginSchema, type LoginForm } from '@/lib/validations/auth';
+import { login } from './actions';
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const onSubmit = async (data: LoginForm) => {
-    setIsSubmitting(true)
-    setError(null)
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      const result = await login(data.email, data.password)
+      const result = await login(data.email, data.password);
 
       if (!result.success) {
-        throw new Error(result.error)
+        throw new Error(result.error);
       }
 
       // Rediriger selon le rôle et le statut
       if (result.role === 'admin') {
-        router.push('/admin')
+        router.push('/admin');
       } else if (result.status === 'incomplete') {
-        router.push('/onboarding')
+        router.push('/onboarding');
+      } else if (result.status === 'awaiting_payment') {
+        router.push('/inscription/plans');
       } else if (result.status === 'pending') {
-        router.push('/dashboard/pending')
+        router.push('/dashboard/pending');
       } else if (result.status === 'validated') {
-        router.push('/dashboard')
+        router.push('/dashboard');
       } else if (result.status === 'rejected') {
-        router.push('/dashboard/rejected')
+        router.push('/dashboard/rejected');
       } else if (result.status === 'suspended') {
-        router.push('/dashboard/suspended')
+        router.push('/dashboard/suspended');
       } else {
-        router.push('/dashboard')
+        router.push('/dashboard');
       }
 
-      router.refresh()
+      router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-dvh bg-dust-grey flex items-center justify-center p-4 py-8 md:py-12 relative">
@@ -112,9 +114,7 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
                 {form.formState.errors.email && (
-                  <p className="text-sm text-error mt-1">
-                    {form.formState.errors.email.message}
-                  </p>
+                  <p className="text-sm text-error mt-1">{form.formState.errors.email.message}</p>
                 )}
               </div>
 
@@ -135,15 +135,16 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <Link
-                  href="/forgot-password"
-                  className="text-fern hover:underline"
-                >
+                <Link href="/forgot-password" className="text-fern hover:underline">
                   Mot de passe oublié ?
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full bg-gold hover:bg-gold-hover text-charcoal font-semibold border-0" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full bg-gold hover:bg-gold-hover text-charcoal font-semibold border-0"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -166,5 +167,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

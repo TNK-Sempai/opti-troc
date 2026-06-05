@@ -1,10 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardTitle, CardDescription } from '@/components/ui/card'
 import { StatCard } from '@/components/ui/stat-card'
 import { Badge } from '@/components/ui/badge'
 import { PremiumButton } from '@/components/ui/premium-button'
 import Link from 'next/link'
-import { FileText, User, Building2, MapPin, Calendar, Users, Package, Mail, TrendingUp, Shield } from 'lucide-react'
+import { User, Building2, MapPin, Calendar, Users, Package, Mail, TrendingUp, Shield } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 

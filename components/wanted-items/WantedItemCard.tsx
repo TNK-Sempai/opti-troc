@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Clock, User, Lock } from 'lucide-react'
@@ -14,7 +15,11 @@ interface WantedItemCardProps {
 
 export function WantedItemCard({ item, isValidated, currentUserId }: WantedItemCardProps) {
   const profile = item.user_profiles
-  const daysAgo = Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24))
+  const daysAgo = useMemo(
+    // eslint-disable-next-line react-hooks/purity
+    () => Math.floor((Date.now() - new Date(item.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+    [item.created_at]
+  )
 
   const isOwnItem = currentUserId === item.user_id
   const buyerName = profile?.company_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'l\'acheteur'

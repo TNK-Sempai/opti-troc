@@ -13,11 +13,8 @@ import {
   Trash2,
   ExternalLink,
   Clock,
-  TrendingUp,
   CheckCircle,
   PauseCircle,
-  ShoppingBag,
-  Calendar
 } from 'lucide-react'
 import { deleteListing } from './[id]/actions'
 

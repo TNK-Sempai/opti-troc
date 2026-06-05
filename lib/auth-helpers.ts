@@ -49,3 +49,22 @@ export async function requireAdmin(): Promise<AdminAuthResult> {
 
   return { success: true, userId: authResult.userId, isAdmin: true }
 }
+
+/**
+ * Vérifie si l'utilisateur courant est validé (ou admin).
+ * Safe pour les pages publiques — pas de redirect, retourne null si non connecté.
+ */
+export async function getValidatedUser(): Promise<{ userId: string; isValidated: boolean } | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabaseAdmin
+    .from('user_profiles')
+    .select('status, role')
+    .eq('id', user.id)
+    .single()
+
+  const isValidated = profile?.status === 'validated' || profile?.role === 'admin'
+  return { userId: user.id, isValidated }
+}

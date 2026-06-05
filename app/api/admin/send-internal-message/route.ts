@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { upsertParticipants, sendMessage } from '@/lib/messaging/conversation-helpers'
 import { NextRequest, NextResponse } from 'next/server'
+import { logError } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
       message: 'Conversation créée et message envoyé'
     })
   } catch (error: any) {
-    console.error('Error sending internal message:', error)
+    logError('POST /api/admin/send-internal-message', error)
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

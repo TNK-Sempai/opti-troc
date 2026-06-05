@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth-helpers'
 import { Resend } from 'resend'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { logError } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -42,7 +43,7 @@ export async function validateUser(formData: FormData) {
     // 3. Envoyer email de validation
     if (authUser.user?.email) {
       await resend.emails.send({
-        from: 'Opti-troc <onboarding@resend.dev>',
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
         to: authUser.user.email,
         subject: '✅ Votre compte Opti-troc est validé !',
         html: `
@@ -99,7 +100,7 @@ export async function validateUser(formData: FormData) {
     revalidatePath('/admin')
     redirect('/admin')
   } catch (error) {
-    console.error('Validation error:', error)
+    logError('validateUser', error)
     throw error
   }
 }
@@ -137,7 +138,7 @@ export async function updateAccountType(formData: FormData) {
     revalidatePath(`/admin/users/${userId}`)
     return { success: true }
   } catch (error) {
-    console.error('Update account type error:', error)
+    logError('updateAccountType', error)
     return { success: false, error: 'Erreur lors de la mise à jour' }
   }
 }
@@ -174,7 +175,7 @@ export async function rejectUser(formData: FormData) {
     // 3. Envoyer email de rejet
     if (authUser.user?.email) {
       await resend.emails.send({
-        from: 'Opti-troc <onboarding@resend.dev>',
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
         to: authUser.user.email,
         subject: 'Votre demande Opti-troc',
         html: `
@@ -209,7 +210,7 @@ export async function rejectUser(formData: FormData) {
     revalidatePath('/admin')
     redirect('/admin')
   } catch (error) {
-    console.error('Rejection error:', error)
+    logError('rejectUser', error)
     throw error
   }
 }
@@ -236,7 +237,7 @@ export async function requestMoreInfo(formData: FormData) {
     // Envoyer email demandant plus d'infos
     if (authUser.user?.email) {
       await resend.emails.send({
-        from: 'Opti-troc <onboarding@resend.dev>',
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
         to: authUser.user.email,
         subject: 'Opti-troc - Informations complémentaires requises',
         html: `
@@ -284,7 +285,7 @@ export async function requestMoreInfo(formData: FormData) {
     revalidatePath('/admin')
     redirect('/admin')
   } catch (error) {
-    console.error('Request info error:', error)
+    logError('requestMoreInfo', error)
     throw error
   }
 }

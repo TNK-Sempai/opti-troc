@@ -123,8 +123,8 @@ export default function OnboardingPage() {
         label: 'Onboarding terminé',
       })
 
-      // 7. Redirection vers page de succès
-      router.push('/onboarding/success')
+      // 7. Redirection vers sélection du plan d'abonnement
+      router.push('/inscription/plans')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {

@@ -14,7 +14,7 @@ import {
 import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck, Search, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface DashboardNavProps {
   isAdmin?: boolean
@@ -30,6 +30,41 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
   const pathname = usePathname()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/conversations/unread-count', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setUnreadCount(data.count || 0)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUnreadCount()
+
+    // Listen for new messages to update badge
+    const supabase = createClient()
+    const channel = supabase
+      .channel('nav-unread')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        () => { fetchUnreadCount() }
+      )
+      .subscribe()
+
+    // Refresh every 30s as fallback
+    const interval = setInterval(fetchUnreadCount, 30000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(interval)
+    }
+  }, [fetchUnreadCount])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -81,20 +116,26 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                const showBadge = item.href === '/dashboard/messages' && unreadCount > 0
                 return (
                   <Button
                     key={item.href}
                     asChild
                     variant={isActive ? 'default' : 'ghost'}
                     size="sm"
-                    className={isActive
+                    className={`relative ${isActive
                       ? 'bg-hunter-green text-white hover:bg-fern'
                       : 'text-dry-sage hover:text-white hover:bg-hunter-green'
-                    }
+                    }`}
                   >
                     <Link href={item.href}>
                       <Icon className="w-4 h-4 mr-2" />
                       {item.label}
+                      {showBadge && (
+                        <span className="ml-1.5 min-w-[18px] h-[18px] bg-gold text-pine-teal text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                   </Button>
                 )
@@ -172,9 +213,16 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/messages">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Messagerie
+                  <Link href="/dashboard/messages" className="flex items-center justify-between">
+                    <span className="flex items-center">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Messagerie
+                    </span>
+                    {unreadCount > 0 && (
+                      <span className="min-w-[18px] h-[18px] bg-pine-teal text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -202,6 +250,7 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const showBadge = item.href === '/dashboard/messages' && unreadCount > 0
               return (
                 <Button
                   key={item.href}
@@ -214,9 +263,16 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Link href={item.href}>
-                    <Icon className="w-4 h-4 mr-2" />
-                    {item.label}
+                  <Link href={item.href} className="flex items-center justify-between w-full">
+                    <span className="flex items-center">
+                      <Icon className="w-4 h-4 mr-2" />
+                      {item.label}
+                    </span>
+                    {showBadge && (
+                      <span className="min-w-[18px] h-[18px] bg-gold text-pine-teal text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 </Button>
               )

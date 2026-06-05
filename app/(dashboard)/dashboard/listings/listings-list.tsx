@@ -9,15 +9,12 @@ import {
   Package,
   Layers,
   Eye,
-  Calendar,
   Edit,
   Trash2,
   ExternalLink,
   CheckCircle,
   PauseCircle,
-  ShoppingBag,
   Clock,
-  TrendingUp
 } from 'lucide-react'
 import { deleteListing } from './[id]/actions'
 

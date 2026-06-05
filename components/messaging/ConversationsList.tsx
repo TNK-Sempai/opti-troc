@@ -1,41 +1,39 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { formatDistanceToNow } from 'date-fns'
-import { fr } from 'date-fns/locale'
-import { Search, MessageSquare } from 'lucide-react'
-import type { ConversationData } from './types'
+import { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Search, MessageSquare } from 'lucide-react';
+import type { ConversationData } from './types';
 
 interface ConversationsListProps {
-  conversations: ConversationData[]
-  selectedId: string | null
-  onSelect: (id: string) => void
-  loading: boolean
-  currentUserId: string
+  conversations: ConversationData[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  loading: boolean;
+  currentUserId: string;
 }
 
 function getInitials(profile: ConversationData['otherParticipant']): string {
-  if (!profile) return '?'
-  return (
-    `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '?'
-  )
+  if (!profile) return '?';
+  return `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '?';
 }
 
 function getListingInfo(conv: ConversationData) {
-  if (!conv.listings) return { title: null, photo: null }
-  const listing = conv.listings
+  if (!conv.listings) return { title: null, photo: null };
+  const listing = conv.listings;
   if (listing.listing_type === 'unit') {
-    const unit = listing.unit_listings?.[0]
+    const unit = listing.unit_listings?.[0];
     return {
       title: unit ? `${unit.brand} ${unit.model}`.trim() : null,
       photo: unit?.photos?.[0] || null,
-    }
+    };
   }
-  const lot = listing.lot_listings?.[0]
+  const lot = listing.lot_listings?.[0];
   return {
-    title: lot ? (lot.description?.slice(0, 40) || 'Lot') : null,
+    title: lot ? lot.description?.slice(0, 40) || 'Lot' : null,
     photo: lot?.photos?.[0] || null,
-  }
+  };
 }
 
 export function ConversationsList({
@@ -45,21 +43,21 @@ export function ConversationsList({
   loading,
   currentUserId,
 }: ConversationsListProps) {
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState('');
 
   const filtered = search
     ? conversations.filter((c) => {
         const name = c.otherParticipant
           ? `${c.otherParticipant.first_name} ${c.otherParticipant.last_name}`
-          : ''
-        const lowerSearch = search.toLowerCase()
+          : '';
+        const lowerSearch = search.toLowerCase();
         return (
           name.toLowerCase().includes(lowerSearch) ||
           c.subject?.toLowerCase().includes(lowerSearch) ||
           c.lastMessage?.content?.toLowerCase().includes(lowerSearch)
-        )
+        );
       })
-    : conversations
+    : conversations;
 
   // Skeleton loading state
   if (loading) {
@@ -82,7 +80,7 @@ export function ConversationsList({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -116,10 +114,10 @@ export function ConversationsList({
         ) : (
           <div>
             {filtered.map((conv) => {
-              const isSelected = conv.id === selectedId
-              const hasUnread = conv.unreadCount > 0
-              const participant = conv.otherParticipant
-              const { title: listingTitle, photo: listingPhoto } = getListingInfo(conv)
+              const isSelected = conv.id === selectedId;
+              const hasUnread = conv.unreadCount > 0;
+              const participant = conv.otherParticipant;
+              const { title: listingTitle, photo: listingPhoto } = getListingInfo(conv);
 
               return (
                 <button
@@ -156,13 +154,12 @@ export function ConversationsList({
                       <div className="flex items-center justify-between mb-0.5">
                         <p
                           className={`text-sm truncate ${
-                            hasUnread
-                              ? 'font-bold text-charcoal'
-                              : 'font-semibold text-dark-grey'
+                            hasUnread ? 'font-bold text-charcoal' : 'font-semibold text-dark-grey'
                           }`}
                         >
                           {participant
-                            ? (participant.company_name || `${participant.first_name} ${participant.last_name}`)
+                            ? participant.company_name ||
+                              `${participant.first_name} ${participant.last_name}`
                             : 'Utilisateur'}
                         </p>
                         <span className="text-[11px] text-medium-grey/70 flex-shrink-0 ml-2 font-medium">
@@ -183,17 +180,13 @@ export function ConversationsList({
                       {/* Last message preview */}
                       <p
                         className={`text-xs truncate ${
-                          hasUnread
-                            ? 'text-charcoal font-medium'
-                            : 'text-medium-grey'
+                          hasUnread ? 'text-charcoal font-medium' : 'text-medium-grey'
                         }`}
                       >
                         {conv.lastMessage?.sender_id === currentUserId && (
                           <span className="text-dry-sage">Vous : </span>
                         )}
-                        {conv.lastMessage?.content ||
-                          conv.subject ||
-                          'Nouvelle conversation'}
+                        {conv.lastMessage?.content || conv.subject || 'Nouvelle conversation'}
                       </p>
 
                       {/* Listing mini-preview */}
@@ -230,11 +223,11 @@ export function ConversationsList({
                     )}
                   </div>
                 </button>
-              )
+              );
             })}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

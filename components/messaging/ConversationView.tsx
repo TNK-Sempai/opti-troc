@@ -1,68 +1,57 @@
-'use client'
+'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { format, isToday, isYesterday } from 'date-fns'
-import { fr } from 'date-fns/locale'
-import {
-  ArrowLeft,
-  Info,
-  Send,
-  Loader2,
-  ShieldCheck,
-  Image as ImageIcon,
-} from 'lucide-react'
-import { MessageBubble } from './MessageBubble'
-import type { ConversationData, MessageData } from './types'
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { logError } from '@/lib/logger';
+import { format, isToday, isYesterday } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { ArrowLeft, Info, Send, Loader2, ShieldCheck, Image as ImageIcon } from 'lucide-react';
+import { MessageBubble } from './MessageBubble';
+import type { ConversationData, MessageData } from './types';
 
 interface ConversationViewProps {
-  conversation: ConversationData
-  currentUserId: string
-  onInfoClick: () => void
-  onBack: () => void
-  onMessageActivity: () => void
+  conversation: ConversationData;
+  currentUserId: string;
+  onInfoClick: () => void;
+  onBack: () => void;
+  onMessageActivity: () => void;
 }
 
-function getInitials(
-  profile: ConversationData['otherParticipant']
-): string {
-  if (!profile) return '?'
-  return (
-    `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() ||
-    '?'
-  )
+function getInitials(profile: ConversationData['otherParticipant']): string {
+  if (!profile) return '?';
+  return `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '?';
 }
 
 function getListingInfo(conv: ConversationData) {
-  if (!conv.listings) return { title: null, photo: null }
+  if (!conv.listings) return { title: null, photo: null };
   if (conv.listings.listing_type === 'unit') {
-    const unit = conv.listings.unit_listings?.[0]
+    const unit = conv.listings.unit_listings?.[0];
     return {
       title: unit ? `${unit.brand} ${unit.model}`.trim() : null,
       photo: unit?.photos?.[0] || null,
       reference: unit?.reference || null,
-    }
+    };
   }
-  const lot = conv.listings.lot_listings?.[0]
+  const lot = conv.listings.lot_listings?.[0];
   return {
     title: lot?.description?.slice(0, 60) || 'Lot',
     photo: lot?.photos?.[0] || null,
     reference: null,
-  }
+  };
 }
 
 function formatDateSeparator(date: Date): string {
-  if (isToday(date)) return "Aujourd'hui"
-  if (isYesterday(date)) return 'Hier'
-  return format(date, 'EEEE d MMMM yyyy', { locale: fr })
+  if (isToday(date)) return "Aujourd'hui";
+  if (isYesterday(date)) return 'Hier';
+  return format(date, 'EEEE d MMMM yyyy', { locale: fr });
 }
 
 interface GroupedItem {
-  type: 'date' | 'message'
-  date?: Date
-  message?: MessageData
-  showAvatar: boolean
-  showTimestamp: boolean
+  type: 'date' | 'message';
+  date?: Date;
+  message?: MessageData;
+  showAvatar: boolean;
+  showTimestamp: boolean;
 }
 
 export function ConversationView({
@@ -72,40 +61,42 @@ export function ConversationView({
   onBack,
   onMessageActivity,
 }: ConversationViewProps) {
-  const [messages, setMessages] = useState<MessageData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [content, setContent] = useState('')
-  const [sending, setSending] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-  const supabase = createClient()
+  const [messages, setMessages] = useState<MessageData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState('');
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const supabase = createClient();
 
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [])
+  }, []);
 
   const loadMessages = useCallback(async () => {
     try {
-      const res = await fetch(`/api/conversations/${conversation.id}/messages`, { credentials: 'include' })
+      const res = await fetch(`/api/conversations/${conversation.id}/messages`, {
+        credentials: 'include',
+      });
       if (res.ok) {
-        const data = await res.json()
-        setMessages(data.messages || [])
+        const data = await res.json();
+        setMessages(data.messages || []);
       } else {
-        console.error('Error loading messages:', res.status)
+        logError('ConversationView', res.status);
       }
     } catch (e) {
-      console.error('Error loading messages:', e)
+      logError('ConversationView', e);
     }
-    setLoading(false)
-  }, [conversation.id])
+    setLoading(false);
+  }, [conversation.id]);
 
   // Load messages + subscribe to real-time
   useEffect(() => {
-    setLoading(true)
-    setMessages([])
-    loadMessages()
+    setLoading(true);
+    setMessages([]);
+    loadMessages();
 
     const channel = supabase
       .channel(`conv-view:${conversation.id}`)
@@ -118,42 +109,42 @@ export function ConversationView({
           filter: `conversation_id=eq.${conversation.id}`,
         },
         () => {
-          loadMessages()
-          onMessageActivity()
+          loadMessages();
+          onMessageActivity();
         }
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversation.id])
+  }, [conversation.id]);
 
   // Auto-scroll when messages change
   useEffect(() => {
     if (!loading) {
-      setTimeout(scrollToBottom, 60)
+      setTimeout(scrollToBottom, 60);
     }
-  }, [messages, loading, scrollToBottom])
+  }, [messages, loading, scrollToBottom]);
 
   // Auto-resize textarea
   function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    setContent(e.target.value)
-    const el = e.target
-    el.style.height = 'auto'
-    el.style.height = Math.min(el.scrollHeight, 128) + 'px'
+    setContent(e.target.value);
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 128) + 'px';
   }
 
   async function handleSend() {
-    if (!content.trim() || sending) return
-    setSending(true)
-    const messageContent = content.trim()
-    setContent('')
+    if (!content.trim() || sending) return;
+    setSending(true);
+    const messageContent = content.trim();
+    setContent('');
 
     // Reset textarea height
     if (inputRef.current) {
-      inputRef.current.style.height = 'auto'
+      inputRef.current.style.height = 'auto';
     }
 
     const res = await fetch(`/api/conversations/${conversation.id}/messages`, {
@@ -161,60 +152,60 @@ export function ConversationView({
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: messageContent }),
-    })
+    });
 
     if (!res.ok) {
-      setContent(messageContent)
+      setContent(messageContent);
     } else {
-      await loadMessages()
-      onMessageActivity()
+      await loadMessages();
+      onMessageActivity();
     }
-    setSending(false)
-    inputRef.current?.focus()
+    setSending(false);
+    inputRef.current?.focus();
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
   }
 
-  const participant = conversation.otherParticipant
-  const { title: listingTitle, photo: listingPhoto, reference } = getListingInfo(conversation)
+  const participant = conversation.otherParticipant;
+  const { title: listingTitle, photo: listingPhoto, reference } = getListingInfo(conversation);
 
   // Group messages by date and sender
-  const grouped: GroupedItem[] = []
-  let lastDate: string | null = null
-  let lastSenderId: string | null = null
+  const grouped: GroupedItem[] = [];
+  let lastDate: string | null = null;
+  let lastSenderId: string | null = null;
 
   messages.forEach((msg, i) => {
-    const msgDate = new Date(msg.created_at)
-    const dateStr = format(msgDate, 'yyyy-MM-dd')
+    const msgDate = new Date(msg.created_at);
+    const dateStr = format(msgDate, 'yyyy-MM-dd');
 
     if (dateStr !== lastDate) {
-      grouped.push({ type: 'date', date: msgDate, showAvatar: false, showTimestamp: false })
-      lastDate = dateStr
-      lastSenderId = null
+      grouped.push({ type: 'date', date: msgDate, showAvatar: false, showTimestamp: false });
+      lastDate = dateStr;
+      lastSenderId = null;
     }
 
-    const nextMsg = messages[i + 1]
+    const nextMsg = messages[i + 1];
     const isLastInGroup =
       !nextMsg ||
       nextMsg.sender_id !== msg.sender_id ||
-      new Date(nextMsg.created_at).getTime() - msgDate.getTime() > 5 * 60 * 1000
+      new Date(nextMsg.created_at).getTime() - msgDate.getTime() > 5 * 60 * 1000;
 
-    const isFirstInGroup = msg.sender_id !== lastSenderId
+    const isFirstInGroup = msg.sender_id !== lastSenderId;
 
     grouped.push({
       type: 'message',
       message: msg,
       showAvatar: isFirstInGroup,
       showTimestamp: isLastInGroup,
-    })
+    });
 
-    lastSenderId = msg.sender_id
-  })
+    lastSenderId = msg.sender_id;
+  });
 
   return (
     <div className="h-full flex flex-col bg-dust-grey/20">
@@ -242,7 +233,7 @@ export function ConversationView({
         <div className="flex-1 min-w-0">
           <p className="font-bold text-charcoal text-sm truncate">
             {participant
-              ? (participant.company_name || `${participant.first_name} ${participant.last_name}`)
+              ? participant.company_name || `${participant.first_name} ${participant.last_name}`
               : 'Conversation'}
           </p>
           {participant?.company_name && (
@@ -280,9 +271,7 @@ export function ConversationView({
                 {listingTitle || conversation.subject || 'Annonce'}
               </p>
               {reference && (
-                <p className="text-[11px] text-medium-grey font-mono">
-                  Réf: {reference}
-                </p>
+                <p className="text-[11px] text-medium-grey font-mono">Réf: {reference}</p>
               )}
             </div>
             <div className="text-right flex-shrink-0">
@@ -308,9 +297,7 @@ export function ConversationView({
             <div className="w-16 h-16 bg-pine-teal/8 rounded-2xl flex items-center justify-center mb-4">
               <Send className="w-7 h-7 text-pine-teal/30 -rotate-45" />
             </div>
-            <p className="text-medium-grey font-medium text-sm mb-1">
-              Aucun message
-            </p>
+            <p className="text-medium-grey font-medium text-sm mb-1">Aucun message</p>
             <p className="text-medium-grey/60 text-xs">
               Envoyez le premier message pour commencer la conversation
             </p>
@@ -325,12 +312,12 @@ export function ConversationView({
                       {formatDateSeparator(item.date!)}
                     </span>
                   </div>
-                )
+                );
               }
 
-              const msg = item.message!
-              const isOwn = msg.sender_id === currentUserId
-              const sender = msg.sender || participant
+              const msg = item.message!;
+              const isOwn = msg.sender_id === currentUserId;
+              const sender = msg.sender || participant;
 
               return (
                 <MessageBubble
@@ -351,7 +338,7 @@ export function ConversationView({
                   showAvatar={item.showAvatar}
                   showTimestamp={item.showTimestamp}
                 />
-              )
+              );
             })}
           </div>
         )}
@@ -391,5 +378,5 @@ export function ConversationView({
         </p>
       </div>
     </div>
-  )
+  );
 }
