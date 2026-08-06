@@ -71,7 +71,7 @@ export async function validateUser(formData: FormData) {
               ${profile?.is_early_adopter ? `
                 <div class="promo-box">
                   <strong style="color: #f59e0b;">🎉 Rappel Early Adopter</strong>
-                  <p style="margin: 10px 0;">Vous bénéficiez de <strong>1€/mois pendant 3 mois</strong> !</p>
+                  <p style="margin: 10px 0;">Vous bénéficiez de l'offre de lancement : <strong>3€ pour 3 mois</strong> !</p>
                 </div>
               ` : ''}
               

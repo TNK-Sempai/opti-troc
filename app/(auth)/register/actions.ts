@@ -188,7 +188,7 @@ export async function registerUser(data: RegistrationData) {
               ${isEarlyAdopter ? `
                 <div class="promo-box">
                   <strong style="color: #f59e0b; font-size: 18px;">🎉 Félicitations !</strong>
-                  <p style="margin: 10px 0;">Vous faites partie des 2000 premiers inscrits et bénéficiez de l'offre de lancement : <strong>1€/mois pendant 3 mois</strong> !</p>
+                  <p style="margin: 10px 0;">Vous faites partie des 2000 places de l'offre de lancement : <strong>3€ pour 3 mois</strong> (1 par établissement) !</p>
                 </div>
               ` : ''}
               

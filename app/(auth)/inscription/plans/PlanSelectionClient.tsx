@@ -24,9 +24,9 @@ const PLANS: Plan[] = [
   {
     id: 'early_bird',
     name: 'Early Bird',
-    price: '3 €',
-    period: '/ 3 mois',
-    description: 'Offre de lancement exclusive pour les 2000 premiers inscrits',
+    price: '3€',
+    period: 'pour 3 mois',
+    description: 'Offre de lancement — 1 par établissement, 2000 places',
     features: [
       'Accès complet à la marketplace',
       'Annonces illimitées',

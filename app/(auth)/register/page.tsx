@@ -78,8 +78,7 @@ export default function RegisterPage() {
         <div className="mb-6 p-4 bg-gold-light border border-gold/30 rounded-xl text-center">
           <p className="text-sm font-semibold text-gold-hover mb-1">Offre de lancement</p>
           <p className="text-xs text-dark-grey">
-            <span className="font-bold">1€/mois pendant 3 mois</span> - Limité aux 2000 premiers
-            inscrits
+            <span className="font-bold">3€ pour 3 mois</span> — 1 par établissement, 2000 places
           </p>
         </div>
 

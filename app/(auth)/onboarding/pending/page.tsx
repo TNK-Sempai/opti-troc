@@ -67,7 +67,7 @@ export default async function OnboardingPendingPage() {
                 🎉 Early Adopter
               </p>
               <p className="text-xs text-charcoal">
-                Vous bénéficiez de l&apos;offre 1€/mois pendant 3 mois
+                Vous bénéficiez de l&apos;offre de lancement : 3€ pour 3 mois
               </p>
             </div>
           )}
