@@ -53,8 +53,6 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
-
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {

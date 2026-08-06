@@ -57,6 +57,15 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
     return () => clearInterval(interval)
   }, [fetchUnreadCount])
 
+  // Le profil peut être absent (ligne user_profiles manquante) alors que la
+  // session est valide : on ne conditionne plus l'état connecté à sa présence.
+  const displayName = profile?.company_name ?? profile?.first_name ?? user?.email
+  const shortName = profile?.first_name ?? user?.email
+  const initials =
+    `${profile?.first_name?.[0] ?? ''}${profile?.last_name?.[0] ?? ''}` ||
+    user?.email?.[0]?.toUpperCase() ||
+    '?'
+
   const navLinks = [
     { href: '/shop', label: 'Marketplace' },
     { href: '/want-to-buy', label: 'Want to Buy' },
@@ -109,7 +118,7 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
 
           {/* Actions — Droite */}
           <div className="flex items-center gap-3">
-            {user && profile ? (
+            {user ? (
               <>
                 {/* CTA Or — le seul element dore */}
                 <Button
@@ -129,17 +138,17 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                     <Button variant="ghost" size="sm" className="h-10 px-2 md:px-3 hover:bg-hunter-green transition-colors duration-200">
                       <div className="w-8 h-8 bg-hunter-green rounded-full flex items-center justify-center">
                         <span className="text-dry-sage text-sm font-semibold">
-                          {profile.first_name?.[0]}{profile.last_name?.[0]}
+                          {initials}
                         </span>
                       </div>
                       <span className="hidden md:inline ml-2 font-medium text-sm text-dust-grey">
-                        {profile.first_name}
+                        {shortName}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2 border-b border-light-grey">
-                      <p className="text-sm font-semibold text-charcoal">{profile.company_name}</p>
+                      <p className="text-sm font-semibold text-charcoal">{displayName}</p>
                       <p className="text-xs text-medium-grey">{user.email}</p>
                     </div>
                     <DropdownMenuItem asChild>
@@ -255,10 +264,10 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                   </div>
                 )}
 
-                {user && profile && (
+                {user && (
                   <div className="mt-6 pt-6 border-t border-light-grey">
                     <div className="px-3 py-3 bg-dust-grey/50 rounded-md mb-4">
-                      <p className="text-sm font-semibold text-charcoal">{profile.company_name}</p>
+                      <p className="text-sm font-semibold text-charcoal">{displayName}</p>
                       <p className="text-xs text-medium-grey">{user.email}</p>
                     </div>
                     <Button asChild className="w-full h-10 bg-gold hover:bg-gold-hover text-pine-teal font-medium mb-3">
