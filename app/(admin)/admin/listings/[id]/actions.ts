@@ -28,9 +28,16 @@ export async function suspendListing(listingId: string) {
     return { success: false, error: auth.error }
   }
 
+  // Récupéré avant l'update pour connaître le propriétaire à prévenir.
+  const { data: listing } = await supabaseAdmin
+    .from('listings')
+    .select('user_id, title')
+    .eq('id', listingId)
+    .single()
+
   const { error } = await supabaseAdmin
     .from('listings')
-    .update({ 
+    .update({
       status: 'suspended',
       suspended_at: new Date().toISOString(),
       suspended_by: auth.userId
@@ -41,9 +48,85 @@ export async function suspendListing(listingId: string) {
     return { success: false, error: error.message }
   }
 
+  // Notification non bloquante : la suspension est déjà appliquée.
+  if (listing?.user_id) {
+    try {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
+        listing.user_id
+      )
+      const recipientEmail = authUser?.user?.email
+
+      if (recipientEmail) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+        const supportEmail = process.env.EMAIL_FROM ?? 'contact@opti-troc.com'
+
+        await resend.emails.send({
+          from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
+          to: recipientEmail,
+          subject: 'Votre annonce a été suspendue sur Opti-Troc',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { text-align: center; padding: 20px 0; }
+                .notice { background: #fff7ed; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c; }
+                .cta-box { text-align: center; margin: 28px 0; }
+                .cta { display: inline-block; background: #1a2332; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; }
+                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1 style="color: #1a2332;">Votre annonce a été suspendue</h1>
+                </div>
+
+                <p>Bonjour,</p>
+                <p>
+                  Votre annonce${listing.title ? ` <strong>${escapeHtml(listing.title)}</strong>` : ''}
+                  a été temporairement retirée de la marketplace Opti-Troc par notre
+                  équipe de modération.
+                </p>
+
+                <div class="notice">
+                  <strong>Cette suspension est temporaire.</strong><br>
+                  Votre annonce n'est pas supprimée : elle est simplement masquée le temps
+                  que notre équipe termine ses vérifications. Elle peut être remise en
+                  ligne une fois la situation clarifiée.
+                </div>
+
+                <p>
+                  Pour comprendre le motif de cette suspension ou demander une remise en
+                  ligne, écrivez-nous à
+                  <a href="mailto:${supportEmail}">${supportEmail}</a> — nous vous
+                  répondrons dans les meilleurs délais.
+                </p>
+
+                <div class="cta-box">
+                  <a href="${appUrl}/dashboard/listings" class="cta">Voir mes annonces</a>
+                </div>
+
+                <div class="footer">
+                  <p>Opti-troc - Marketplace B2B pour opticiens professionnels</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
+        })
+      }
+    } catch (emailError) {
+      logError('suspendListing.email', emailError)
+    }
+  }
+
   revalidatePath('/admin/listings')
   revalidatePath(`/admin/listings/${listingId}`)
-  
+
   return { success: true }
 }
 

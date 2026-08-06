@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { logError } from '@/lib/logger'
+import { notifyNewMessage } from '@/lib/messaging/notify'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -81,6 +82,14 @@ export async function POST(request: NextRequest) {
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', existingConvId)
 
+      after(() =>
+        notifyNewMessage({
+          conversationId: existingConvId,
+          senderId: user.id,
+          content: message.trim(),
+        })
+      )
+
       return NextResponse.json({ conversationId: existingConvId })
     }
 
@@ -121,6 +130,14 @@ export async function POST(request: NextRequest) {
       content: message.trim(),
     })
     if (msgError) throw msgError
+
+    after(() =>
+      notifyNewMessage({
+        conversationId: conversation.id,
+        senderId: user.id,
+        content: message.trim(),
+      })
+    )
 
     return NextResponse.json({ conversationId: conversation.id })
   } catch (error: any) {
