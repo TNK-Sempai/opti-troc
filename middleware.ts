@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
     const url = new URL(path, request.url)
     const redirectResponse = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value)
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
     })
     return redirectResponse
   }
@@ -103,14 +103,14 @@ export async function middleware(request: NextRequest) {
         return redirectTo('/dashboard')
       }
 
-      // Si rejeté → /dashboard/rejected
-      if (profile?.status === 'rejected' && !pathname.startsWith('/dashboard/rejected')) {
-        return redirectTo('/dashboard/rejected')
+      // Si rejeté → /auth/rejected
+      if (profile?.status === 'rejected' && !pathname.startsWith('/auth/rejected')) {
+        return redirectTo('/auth/rejected')
       }
 
-      // Si suspendu → /dashboard/suspended
-      if (profile?.status === 'suspended' && !pathname.startsWith('/dashboard/suspended')) {
-        return redirectTo('/dashboard/suspended')
+      // Si suspendu → /auth/suspended
+      if (profile?.status === 'suspended' && !pathname.startsWith('/auth/suspended')) {
+        return redirectTo('/auth/suspended')
       }
 
       // Bloquer l'accès à /admin pour les non-admins

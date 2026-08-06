@@ -17,8 +17,8 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {
-            // Server Component - ignore
+          } catch (error) {
+            console.error('[Supabase] Failed to set cookie during token rotation:', error)
           }
         },
       },
