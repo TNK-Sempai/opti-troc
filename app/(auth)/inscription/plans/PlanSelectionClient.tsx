@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -81,7 +80,6 @@ interface PlanSelectionClientProps {
 }
 
 export function PlanSelectionClient({ isEarlyAdopter, displayName }: PlanSelectionClientProps) {
-  const router = useRouter()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -104,7 +102,9 @@ export function PlanSelectionClient({ isEarlyAdopter, displayName }: PlanSelecti
       }
 
       if (data.url) {
-        router.push(data.url)
+        // URL externe (checkout.stripe.com) : navigation hors app, le router
+        // Next ne gère que les routes internes.
+        window.location.href = data.url
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')

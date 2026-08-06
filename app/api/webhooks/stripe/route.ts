@@ -52,6 +52,9 @@ export async function POST(req: NextRequest) {
 
         if (error) {
           logError('stripe-webhook.updateProfile', error)
+          // Remonte au catch global → 500 → Stripe rejoue. Sans ça, un client
+          // débité resterait bloqué en 'awaiting_payment' indéfiniment.
+          throw new Error(`Failed to activate profile ${userId}: ${error.message}`)
         }
 
         break
@@ -127,8 +130,18 @@ export async function POST(req: NextRequest) {
         logInfo('stripe-webhook', `Unhandled event type: ${event.type}`)
     }
   } catch (error) {
-    logError('stripe-webhook.handler', error)
-    // Return 200 to avoid Stripe retrying — log and investigate separately
+    // console.error et non logError : ce dernier est silencieux en production
+    // (lib/logger.ts), or un 500 sans trace est indébuggable côté Vercel.
+    console.error(
+      `[stripe-webhook.handler] event=${event.type} id=${event.id}`,
+      error
+    )
+    // 500 → Stripe rejoue l'événement. Un échec d'écriture DB laissait sinon
+    // un client débité bloqué en 'awaiting_payment' sans aucune reprise.
+    return NextResponse.json(
+      { error: 'Webhook handler failed', eventId: event.id },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ received: true })

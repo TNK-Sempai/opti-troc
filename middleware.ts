@@ -93,6 +93,14 @@ export async function middleware(request: NextRequest) {
         return redirectTo('/onboarding')
       }
 
+      // Si paiement en attente → /inscription/plans
+      // NB: on laisse passer tout /inscription/* (plans, succes, annule) car le
+      // retour de Stripe arrive souvent avant que le webhook ait changé le statut.
+      // Les routes /api/* sortent déjà plus haut via isPublicRoute.
+      if (profile?.status === 'awaiting_payment' && !pathname.startsWith('/inscription')) {
+        return redirectTo('/inscription/plans')
+      }
+
       // Si en attente → /dashboard/pending
       if (profile?.status === 'pending' && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/pending')) {
         return redirectTo('/dashboard/pending')

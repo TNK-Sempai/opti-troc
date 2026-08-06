@@ -24,7 +24,34 @@ interface RegistrationData {
   shopPhotosUrls?: string[]
 }
 
+/**
+ * Garde-fou de registerUser (voir ci-dessous).
+ *
+ * Typé `boolean` et non `true` volontairement : avec le type littéral, TS
+ * marquerait tout le corps de la fonction comme unreachable, y perdrait son
+ * control-flow narrowing et le typecheck échouerait sur ~6 accès nullables.
+ */
+const REGISTER_USER_DISABLED: boolean = true
+
+/**
+ * @deprecated NE PAS UTILISER — court-circuite la facturation.
+ *
+ * Cette fonction écrit `status: 'pending'` directement (voir plus bas), ce qui
+ * fait sauter entièrement l'étape de paiement. Le parcours valide est :
+ * registerSimple -> onboarding (awaiting_payment) -> Stripe -> webhook (pending)
+ * -> validation admin (validated).
+ *
+ * Conservée pour référence uniquement — le formulaire d'inscription utilise
+ * registerSimple() dans ./simple-actions.ts.
+ *
+ * Le throw est placé AVANT le try/catch : à l'intérieur, le catch existant le
+ * convertirait en `{ success: false }` et l'appel accidentel passerait inaperçu.
+ */
 export async function registerUser(data: RegistrationData) {
+  if (REGISTER_USER_DISABLED) {
+    throw new Error('registerUser is deprecated. Use registerSimple instead.')
+  }
+
   try {
     let userId: string
 

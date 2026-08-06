@@ -1,9 +1,25 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { CheckCircle2, Clock, Mail, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-export default function InscriptionSuccesPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function InscriptionSuccesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>
+}) {
+  const { session_id: sessionId } = await searchParams
+
+  // Sans session_id, la page n'a pas été atteinte depuis un retour Stripe :
+  // on ne confirme rien. L'activation réelle du compte reste faite par le
+  // webhook (app/api/webhooks/stripe/route.ts), seule source de vérité.
+  if (!sessionId) {
+    redirect('/inscription/plans')
+  }
+
   return (
     <div className="min-h-screen bg-dust-grey flex items-center justify-center p-4">
       <Card className="max-w-md w-full border-t-4 border-t-fern shadow-xl">
