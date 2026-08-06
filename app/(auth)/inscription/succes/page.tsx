@@ -72,7 +72,7 @@ export default async function InscriptionSuccesPage({
 
           <div className="flex flex-col gap-2 pt-2">
             <Button asChild className="w-full bg-pine-teal hover:bg-hunter-green text-white border-0">
-              <Link href="/dashboard/pending">
+              <Link href="/onboarding/pending">
                 Voir mon tableau de bord
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>

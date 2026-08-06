@@ -3,6 +3,20 @@
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-helpers'
 import { revalidatePath } from 'next/cache'
+import { Resend } from 'resend'
+import { logError } from '@/lib/logger'
+
+const resend = new Resend(process.env.RESEND_API_KEY!)
+
+/** Le titre et la raison sont saisis par des humains : on échappe avant injection HTML. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
 /**
  * Suspend un listing (admin seulement)
@@ -72,6 +86,13 @@ export async function banListing(listingId: string, reason?: string) {
     return { success: false, error: auth.error }
   }
 
+  // Récupéré avant l'update pour connaître le propriétaire à prévenir.
+  const { data: listing } = await supabaseAdmin
+    .from('listings')
+    .select('user_id, title')
+    .eq('id', listingId)
+    .single()
+
   const { error } = await supabaseAdmin
     .from('listings')
     .update({
@@ -86,9 +107,81 @@ export async function banListing(listingId: string, reason?: string) {
     return { success: false, error: error.message }
   }
 
+  // Notification du propriétaire — non bloquante : le bannissement est déjà
+  // appliqué, un échec d'email ne doit pas le faire remonter comme une erreur.
+  if (listing?.user_id) {
+    try {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
+        listing.user_id
+      )
+      const recipientEmail = authUser?.user?.email
+
+      if (recipientEmail) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+        await resend.emails.send({
+          from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
+          to: recipientEmail,
+          subject: 'Votre annonce a été suspendue',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { text-align: center; padding: 20px 0; }
+                .reason { background: #fef2f2; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626; }
+                .cta-box { text-align: center; margin: 28px 0; }
+                .cta { display: inline-block; background: #1a2332; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; }
+                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1 style="color: #1a2332;">Votre annonce a été suspendue</h1>
+                </div>
+
+                <p>Bonjour,</p>
+                <p>
+                  Votre annonce${listing.title ? ` <strong>${escapeHtml(listing.title)}</strong>` : ''}
+                  a été retirée de la marketplace Opti-Troc par notre équipe de modération.
+                </p>
+
+                <div class="reason">
+                  <strong>Motif :</strong><br>
+                  ${reason ? escapeHtml(reason) : 'Non-respect des conditions d\'utilisation de la plateforme.'}
+                </div>
+
+                <p>
+                  Si vous pensez qu'il s'agit d'une erreur, répondez à cet email ou
+                  écrivez-nous à
+                  <a href="mailto:${process.env.EMAIL_FROM}">${process.env.EMAIL_FROM}</a>.
+                </p>
+
+                <div class="cta-box">
+                  <a href="${appUrl}/dashboard/listings" class="cta">Voir mes annonces</a>
+                </div>
+
+                <div class="footer">
+                  <p>Opti-troc - Marketplace B2B pour opticiens professionnels</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
+        })
+      }
+    } catch (emailError) {
+      logError('banListing.email', emailError)
+    }
+  }
+
   revalidatePath('/admin/listings')
   revalidatePath(`/admin/listings/${listingId}`)
-  
+
   return { success: true }
 }
 

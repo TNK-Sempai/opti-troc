@@ -101,9 +101,9 @@ export async function middleware(request: NextRequest) {
         return redirectTo('/inscription/plans')
       }
 
-      // Si en attente → /dashboard/pending
-      if (profile?.status === 'pending' && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/pending')) {
-        return redirectTo('/dashboard/pending')
+      // Si en attente → /onboarding/pending (hors du groupe dashboard)
+      if (profile?.status === 'pending' && pathname.startsWith('/dashboard')) {
+        return redirectTo('/onboarding/pending')
       }
 
       // Si validé et sur /dashboard/pending → /dashboard

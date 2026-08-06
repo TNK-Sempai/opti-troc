@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { logError } from '@/lib/logger'
+import { notifyNewMessage } from '@/lib/messaging/notify'
 
 export async function GET(
   request: NextRequest,
@@ -113,6 +114,16 @@ export async function POST(
     .from('conversations')
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', id)
+
+  // Notification email après la réponse : n'ajoute pas la latence Resend
+  // au temps d'envoi d'un message.
+  after(() =>
+    notifyNewMessage({
+      conversationId: id,
+      senderId: user.id,
+      content: content.trim(),
+    })
+  )
 
   return NextResponse.json({ success: true })
 }

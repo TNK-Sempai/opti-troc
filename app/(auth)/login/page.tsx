@@ -43,13 +43,13 @@ export default function LoginPage() {
       } else if (result.status === 'awaiting_payment') {
         router.push('/inscription/plans');
       } else if (result.status === 'pending') {
-        router.push('/dashboard/pending');
+        router.push('/onboarding/pending');
       } else if (result.status === 'validated') {
         router.push('/dashboard');
       } else if (result.status === 'rejected') {
-        router.push('/dashboard/rejected');
+        router.push('/auth/rejected');
       } else if (result.status === 'suspended') {
-        router.push('/dashboard/suspended');
+        router.push('/auth/suspended');
       } else {
         router.push('/dashboard');
       }
