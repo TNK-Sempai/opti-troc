@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { logError } from '@/lib/logger'
+import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
 
 const PLAN_PRICES: Record<string, string | undefined> = {
   early_bird: process.env.STRIPE_PRICE_EARLY_BIRD,
@@ -12,6 +13,18 @@ const PLAN_PRICES: Record<string, string | undefined> = {
 
 export async function POST(req: NextRequest) {
   try {
+    // 3 sessions / 10 min : créer une session Stripe est coûteux et une
+    // rafale produit des abonnements en double.
+    const ip = getClientIp(req.headers)
+    const limit = rateLimit(`checkout:${ip}`, 3, 10 * 60 * 1000)
+
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: tooManyRequestsMessage(limit.retryAfterSeconds) },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+      )
+    }
+
     const supabase = await createClient()
     const {
       data: { user },

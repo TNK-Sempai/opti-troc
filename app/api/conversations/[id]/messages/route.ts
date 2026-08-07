@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse, after } from 'next/server'
 import { logError } from '@/lib/logger'
 import { notifyNewMessage } from '@/lib/messaging/notify'
+import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
 
 export async function GET(
   request: NextRequest,
@@ -70,6 +71,18 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  // 30 messages / min : laisse une conversation normale respirer, coupe le flood.
+  const ip = getClientIp(request.headers)
+  const limit = rateLimit(`messages:${ip}`, 30, 60 * 1000)
+
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: tooManyRequestsMessage(limit.retryAfterSeconds) },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+    )
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

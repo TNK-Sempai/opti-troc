@@ -1,11 +1,25 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
 import type { SimpleRegistrationForm } from '@/lib/validations/auth'
 
 export async function registerSimple(data: SimpleRegistrationForm) {
   try {
+    // 5 inscriptions / 10 min par IP. Pas de route /api/auth : l'inscription
+    // est une Server Action, les headers viennent donc de next/headers.
+    const ip = getClientIp(await headers())
+    const limit = rateLimit(`register:${ip}`, 5, 10 * 60 * 1000)
+
+    if (!limit.success) {
+      return {
+        success: false,
+        error: tooManyRequestsMessage(limit.retryAfterSeconds),
+      }
+    }
+
     // 1. Créer le compte Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
