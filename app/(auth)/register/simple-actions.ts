@@ -20,12 +20,14 @@ export async function registerSimple(data: SimpleRegistrationForm) {
     const userId = authData.user.id
 
     // 2. Créer ou mettre à jour le profil utilisateur
-    // Utilise upsert pour être robuste même si le trigger DB ne crée pas le profil
+    // Utilise upsert pour être robuste même si le trigger DB ne crée pas le profil.
+    // account_type est NOT NULL sans valeur par défaut : sans lui, l'INSERT échoue
+    // en 23502 dès que le trigger n'a pas déjà créé la ligne.
     const { error: upsertError } = await supabaseAdmin
       .from('user_profiles')
       .upsert({
         id: userId,
-        email: data.email,
+        account_type: 'shop',
         civility: data.civility,
         first_name: data.firstName,
         last_name: data.lastName,
@@ -35,7 +37,28 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       }, { onConflict: 'id' })
 
     if (upsertError) {
-      logError('registerSimple', upsertError)
+      // console.error et non logError : ce dernier est silencieux en production
+      // (lib/logger.ts), or c'est précisément en prod qu'il faut voir la cause.
+      console.error('[registerSimple] Échec upsert user_profiles', {
+        userId,
+        code: upsertError.code,
+        message: upsertError.message,
+        details: upsertError.details,
+        hint: upsertError.hint,
+      })
+
+      // Rollback : un compte Auth sans profil est inutilisable ET bloque toute
+      // nouvelle tentative avec le même email (createUser renverrait
+      // « already registered »), sans aucun moyen de reprise côté utilisateur.
+      const { error: rollbackError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+
+      if (rollbackError) {
+        console.error(
+          '[registerSimple] Rollback impossible — compte Auth orphelin à supprimer manuellement',
+          { userId, message: rollbackError.message }
+        )
+      }
+
       throw new Error('Erreur lors de la création du profil')
     }
 
