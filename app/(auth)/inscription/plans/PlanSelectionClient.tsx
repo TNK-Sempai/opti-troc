@@ -84,6 +84,11 @@ export function PlanSelectionClient({ isEarlyAdopter, displayName }: PlanSelecti
   const [error, setError] = useState<string | null>(null)
 
   async function handleSelectPlan(planId: string) {
+    // Garde en plus du `disabled` des boutons : ferme la fenêtre entre le clic
+    // et le re-rendu qui les désactive. Une session Stripe créée en double est
+    // un paiement en double.
+    if (loadingPlan !== null) return
+
     setLoadingPlan(planId)
     setError(null)
 
