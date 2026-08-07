@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { UserCog } from 'lucide-react'
 import { ProfileForm } from './profile-form'
+import { SubscriptionSection } from './subscription-section'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -17,10 +18,13 @@ export default async function ProfilPage() {
   const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select(
-      'civility, first_name, last_name, phone, company_name, shop_address, city, postal_code, country, vat_number, opening_hours, profile_photo_url, shop_photos'
+      'civility, first_name, last_name, phone, company_name, shop_address, city, postal_code, country, vat_number, opening_hours, profile_photo_url, shop_photos, role, subscription_status, promo_end_date, is_early_adopter'
     )
     .eq('id', user.id)
     .single()
+
+  // Les admins ne sont pas facturés : pas de section abonnement pour eux.
+  const isAdmin = profile?.role === 'admin'
 
   return (
     <div className="min-h-screen bg-dust-grey">
@@ -38,6 +42,16 @@ export default async function ProfilPage() {
         </div>
 
         <ProfileForm profile={profile} email={user.email ?? ''} />
+
+        {!isAdmin && (
+          <div className="mt-6">
+            <SubscriptionSection
+              subscriptionStatus={profile?.subscription_status ?? null}
+              promoEndDate={profile?.promo_end_date ?? null}
+              isEarlyAdopter={profile?.is_early_adopter ?? false}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
