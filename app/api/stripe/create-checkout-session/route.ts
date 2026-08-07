@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     // Vérifier le statut et les infos du profil
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
-      .select('status, is_early_adopter, vat_number, stripe_customer_id')
+      .select('status, subscription_status, is_early_adopter, vat_number, stripe_customer_id')
       .eq('id', user.id)
       .single()
 
@@ -47,6 +47,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Statut invalide pour le paiement' },
         { status: 403 }
+      )
+    }
+
+    // Un abonnement existant interdit d'en créer un second : le contrôle de
+    // `status` ci-dessus ne suffit pas, il reste à 'awaiting_payment' tant que
+    // le webhook n'a pas basculé le compte.
+    if (profile.subscription_status === 'active') {
+      return NextResponse.json(
+        { error: 'Vous avez déjà un abonnement actif.' },
+        { status: 400 }
+      )
+    }
+
+    if (profile.subscription_status === 'past_due') {
+      return NextResponse.json(
+        {
+          error:
+            'Un problème de paiement existe sur votre abonnement. Gérez-le depuis votre profil.',
+        },
+        { status: 400 }
       )
     }
 
