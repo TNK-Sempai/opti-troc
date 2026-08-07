@@ -28,9 +28,16 @@ export function UserActionButtons({ userId, status }: UserActionButtonsProps) {
   }
 
   async function handleReject() {
-    if (!confirm('Rejeter cet utilisateur ? Cette action est définitive.')) return
+    // prompt() plutôt que confirm() : son OK/Annuler vaut confirmation, et le
+    // motif saisi part dans l'email envoyé à l'utilisateur.
+    const reason = prompt(
+      'Rejeter cet utilisateur ? Cette action est définitive.\n\n' +
+        "Motif (optionnel) — il sera inclus dans l'email envoyé à l'utilisateur :"
+    )
+    if (reason === null) return
+
     setIsLoading(true)
-    const result = await rejectUser(userId)
+    const result = await rejectUser(userId, reason.trim())
     if (result.success) {
       router.refresh()
     } else {
