@@ -449,10 +449,10 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
                     <button
                       type="button"
                       onClick={() => removeCurrentShopPhoto(index)}
-                      className="absolute top-1 right-1 p-1 bg-charcoal/70 hover:bg-charcoal rounded transition-colors"
+                      className="absolute top-0 right-0 min-w-[44px] min-h-[44px] flex items-center justify-center bg-charcoal/60 hover:bg-charcoal rounded-bl-lg transition-colors"
                       aria-label={`Supprimer la photo ${index + 1}`}
                     >
-                      <X className="w-3.5 h-3.5 text-white" />
+                      <X className="w-4 h-4 text-white" />
                     </button>
                   </div>
                 ))}

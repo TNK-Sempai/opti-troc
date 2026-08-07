@@ -187,11 +187,11 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                 {userProfile && (
                   <>
                     <div className="px-2 py-1.5">
-                      <p className="text-sm font-semibold text-charcoal">
+                      <p className="text-sm font-semibold text-charcoal break-words">
                         {userProfile.company_name}
                       </p>
                       {userEmail && (
-                        <p className="text-xs text-medium-grey">
+                        <p className="text-xs text-medium-grey break-all">
                           {userEmail}
                         </p>
                       )}

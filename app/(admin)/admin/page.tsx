@@ -56,7 +56,7 @@ export default async function AdminPage() {
           <p className="text-lg text-muted-foreground font-medium">Statistiques de la plateforme</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           <StatCard
             icon={<Users className="w-5 h-5" />}
             label="Utilisateurs"

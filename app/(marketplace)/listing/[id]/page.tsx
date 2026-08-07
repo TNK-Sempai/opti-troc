@@ -232,7 +232,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 {isUnit && details ? (
                   <>
                     {/* Caractéristiques */}
-                    <div className="grid grid-cols-3 gap-3 mb-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                       <div className="text-center p-4 bg-off-white rounded-xl border border-light-grey">
                         <Tag className="w-5 h-5 mx-auto mb-2 text-pine-teal" />
                         <div className="text-xs text-muted-foreground mb-1 font-semibold">Genre</div>
@@ -257,7 +257,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     </div>
 
                     {(details.frame_color || details.material) && (
-                      <div className="grid grid-cols-2 gap-3 mb-5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                         {details.frame_color && (
                           <div className="text-center p-4 bg-off-white rounded-xl border border-light-grey">
                             <Palette className="w-5 h-5 mx-auto mb-2 text-gold" />

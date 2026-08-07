@@ -166,7 +166,7 @@ export function ProductCarousel({
           {displayedProducts.map((product, index) => (
             <div
               key={product.id}
-              className="flex-shrink-0 w-[280px] md:w-[300px] snap-start"
+              className="flex-shrink-0 w-[85vw] max-w-[280px] md:w-[300px] md:max-w-none snap-start"
             >
               <ProductCardModern
                 {...product}

@@ -66,7 +66,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 max-w-5xl relative">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-8">
           <div className="flex items-center gap-4">
             <Button asChild variant="ghost" size="sm" className="hover:bg-white/80 hover:shadow-md transition-all duration-300 border border-light-grey">
               <Link href="/admin/users">
@@ -109,7 +109,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-pine-teal font-bold uppercase tracking-wide">Email</p>
-                    <p className="text-sm font-medium">{displayEmail || <span className="text-medium-grey italic">—</span>}</p>
+                    <p className="text-sm font-medium break-all">{displayEmail || <span className="text-medium-grey italic">—</span>}</p>
                   </div>
                   {userProfile.phone && (
                     <div className="space-y-1">
@@ -132,15 +132,15 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                 <div className="grid md:grid-cols-2 gap-5">
                   <div className="space-y-1">
                     <p className="text-xs text-fern font-bold uppercase tracking-wide">Nom de l'entreprise</p>
-                    <p className="font-bold text-lg">{userProfile.company_name}</p>
+                    <p className="font-bold text-lg break-words">{userProfile.company_name}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-fern font-bold uppercase tracking-wide">N° TVA</p>
-                    <p className="text-sm font-mono font-bold">{userProfile.vat_number}</p>
+                    <p className="text-sm font-mono font-bold break-all">{userProfile.vat_number}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-fern font-bold uppercase tracking-wide">Adresse</p>
-                    <p className="text-sm font-medium">{userProfile.address}</p>
+                    <p className="text-sm font-medium break-words">{userProfile.address}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-fern font-bold uppercase tracking-wide">Ville</p>
@@ -178,7 +178,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
                       <img
                         src={officialDoc.document_url}
                         alt="Document officiel"
-                        className="max-h-64 rounded-lg border border-light-grey object-contain hover:opacity-80 transition-opacity"
+                        className="max-h-64 max-w-full rounded-lg border border-light-grey object-contain hover:opacity-80 transition-opacity"
                       />
                     </a>
                   )}

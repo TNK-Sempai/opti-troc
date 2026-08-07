@@ -300,7 +300,7 @@ export default function EditUnitListingForm({ listing, details, photos }: EditUn
             {/* Dimensions */}
             <div>
               <Label className="mb-2 block">Dimensions (mm)</Label>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="sizeLens" className="text-xs text-medium-grey">Verres</Label>
                   <Input id="sizeLens" {...form.register('sizeLens')} placeholder="52" />

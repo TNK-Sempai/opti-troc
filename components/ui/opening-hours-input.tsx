@@ -75,7 +75,7 @@ export function OpeningHoursInput({ value = [], onChange }: OpeningHoursInputPro
       )}
 
       {/* Formulaire d'ajout */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Select value={newDay} onValueChange={setNewDay}>
           <SelectTrigger className="flex-1">
             <SelectValue placeholder="Jour" />

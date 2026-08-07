@@ -159,7 +159,7 @@ export default async function MyListingsPage({
       <div className="container mx-auto px-4 py-8 relative">
         {/* Subscription inactive banner */}
         {!subscriptionActive && (
-          <div className="mb-6 flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <div className="mb-6 flex items-center flex-wrap gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
             <Lock className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div className="flex-1">
               <p className="font-semibold text-sm text-amber-800">Abonnement inactif</p>

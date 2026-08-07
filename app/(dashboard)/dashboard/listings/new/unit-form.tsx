@@ -469,7 +469,7 @@ export default function UnitListingForm({ onBack }: UnitListingFormProps) {
                 {/* 3 champs de taille séparés */}
                 <div>
                   <Label className="mb-2 block">Dimensions (mm)</Label>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="sizeLens" className="text-xs text-medium-grey">Verres</Label>
                       <Input

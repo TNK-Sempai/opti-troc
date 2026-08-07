@@ -54,7 +54,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="sm">
             <Link href="/admin/listings">
@@ -130,7 +130,7 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
                         <p className="font-mono text-sm">{details.reference}</p>
                       </div>
                     )}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Prix</p>
                         <p className="text-xl font-bold text-primary">{parseFloat(details.price).toFixed(2)}€</p>
@@ -164,11 +164,11 @@ export default async function AdminListingDetailPage({ params }: PageProps) {
               <CardTitle className="text-sm">Statistiques</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <span className="text-xs text-muted-foreground">Vues</span>
                 <span className="font-bold">{listing.views_count || 0}</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <span className="text-xs text-muted-foreground">En ligne</span>
                 <span className="font-bold">
                   {daysOnline}j

@@ -237,7 +237,7 @@ export default async function AdminMessagesPage({
                             </div>
 
                             <div className="flex items-center gap-3 flex-shrink-0">
-                              <span className="text-xs text-muted-foreground whitespace-nowrap font-semibold bg-dust-grey px-3 py-1.5 rounded-lg">
+                              <span className="text-xs text-muted-foreground font-semibold bg-dust-grey px-3 py-1.5 rounded-lg">
                                 {new Date(message.created_at).toLocaleDateString('fr-FR', {
                                   day: 'numeric',
                                   month: 'short',

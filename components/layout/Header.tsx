@@ -148,8 +148,8 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2 border-b border-light-grey">
-                      <p className="text-sm font-semibold text-charcoal">{displayName}</p>
-                      <p className="text-xs text-medium-grey">{user.email}</p>
+                      <p className="text-sm font-semibold text-charcoal break-words">{displayName}</p>
+                      <p className="text-xs text-medium-grey break-all">{user.email}</p>
                     </div>
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard" className="cursor-pointer">
@@ -267,8 +267,8 @@ export function HeaderClient({ user, profile }: HeaderClientProps) {
                 {user && (
                   <div className="mt-6 pt-6 border-t border-light-grey">
                     <div className="px-3 py-3 bg-dust-grey/50 rounded-md mb-4">
-                      <p className="text-sm font-semibold text-charcoal">{displayName}</p>
-                      <p className="text-xs text-medium-grey">{user.email}</p>
+                      <p className="text-sm font-semibold text-charcoal break-words">{displayName}</p>
+                      <p className="text-xs text-medium-grey break-all">{user.email}</p>
                     </div>
                     <Button asChild className="w-full h-10 bg-gold hover:bg-gold-hover text-pine-teal font-medium mb-3">
                       <Link href="/dashboard/listings/new" onClick={() => setMobileMenuOpen(false)}>
