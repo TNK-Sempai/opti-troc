@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { logError, logInfo } from '@/lib/logger'
+import { notifyAdminNewUser } from '@/lib/notifications/discord'
 
 export const runtime = 'nodejs'
 
@@ -56,6 +57,11 @@ export async function POST(req: NextRequest) {
           // débité resterait bloqué en 'awaiting_payment' indéfiniment.
           throw new Error(`Failed to activate profile ${userId}: ${error.message}`)
         }
+
+        // Le compte vient de passer en 'pending' : les admins ont quelque chose
+        // à valider. after() garde la latence Discord hors de la réponse à
+        // Stripe, qui coupe au bout de ~10 s et rejouerait l'événement.
+        after(() => notifyAdminNewUser({ userId, plan }))
 
         break
       }

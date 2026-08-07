@@ -34,17 +34,51 @@ export async function completeOnboarding(data: OnboardingData) {
 
     const userId = user.id
 
-    // Vérifier le compteur early adopters
-    const { data: promoData } = await supabaseAdmin
+    // Vérifier le compteur early adopters.
+    // maybeSingle() et non single() : ce dernier renvoie une erreur quand la
+    // table est vide, alors qu'ici l'absence de ligne est un cas légitime.
+    let { data: promoData } = await supabaseAdmin
       .from('promo_counter')
       .select('early_adopters_count, max_early_adopters')
-      .single()
+      .maybeSingle()
+
+    // Première utilisation : on amorce le compteur.
+    if (!promoData) {
+      const { data: created, error: createError } = await supabaseAdmin
+        .from('promo_counter')
+        .insert({ early_adopters_count: 0, max_early_adopters: 2000 })
+        .select('early_adopters_count, max_early_adopters')
+        .single()
+
+      if (createError) {
+        console.error('[completeOnboarding] Échec init promo_counter', {
+          code: createError.code,
+          message: createError.message,
+          details: createError.details,
+          hint: createError.hint,
+        })
+      } else {
+        promoData = created
+      }
+    }
 
     const isEarlyAdopter = (promoData?.early_adopters_count || 0) < (promoData?.max_early_adopters || 2000)
 
     // Incrémenter le compteur si éligible
     if (isEarlyAdopter) {
-      await supabaseAdmin.rpc('increment_early_adopters')
+      const { error: rpcError } = await supabaseAdmin.rpc('increment_early_adopters')
+
+      // Non bloquant, mais un compteur qui n'avance jamais fausse l'éligibilité
+      // de tous les inscrits suivants : il faut le voir passer.
+      if (rpcError) {
+        console.error('[completeOnboarding] Échec rpc increment_early_adopters', {
+          userId,
+          code: rpcError.code,
+          message: rpcError.message,
+          details: rpcError.details,
+          hint: rpcError.hint,
+        })
+      }
     }
 
     // Calculer la date de fin de promo (3 mois)
