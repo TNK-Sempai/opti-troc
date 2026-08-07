@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LayoutDashboard, Package, Mail, LogOut, Menu, User, ShieldCheck, Search, PlusCircle } from 'lucide-react'
+import { LayoutDashboard, Package, Mail, LogOut, Menu, User, UserCog, ShieldCheck, Search, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
@@ -92,6 +92,11 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
       href: '/dashboard/messages',
       label: 'Messagerie',
       icon: Mail,
+    },
+    {
+      href: '/dashboard/profil',
+      label: 'Mon profil',
+      icon: UserCog,
     },
   ]
 
@@ -223,6 +228,12 @@ export function DashboardNav({ isAdmin = false, userProfile, userEmail }: Dashbo
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/profil">
+                    <UserCog className="w-4 h-4 mr-2" />
+                    Mon profil
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
