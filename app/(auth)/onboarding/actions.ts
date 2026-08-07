@@ -35,18 +35,22 @@ export async function completeOnboarding(data: OnboardingData) {
     const userId = user.id
 
     // Vérifier le compteur early adopters.
+    // La ligne id=1 est le singleton ciblé par le RPC increment_early_adopters
+    // (WHERE id = 1) : on lit et on écrit exactement cette ligne, sinon le RPC
+    // s'exécuterait sans erreur en n'affectant aucune ligne.
     // maybeSingle() et non single() : ce dernier renvoie une erreur quand la
-    // table est vide, alors qu'ici l'absence de ligne est un cas légitime.
+    // ligne est absente, alors qu'ici c'est un cas légitime.
     let { data: promoData } = await supabaseAdmin
       .from('promo_counter')
       .select('early_adopters_count, max_early_adopters')
+      .eq('id', 1)
       .maybeSingle()
 
     // Première utilisation : on amorce le compteur.
     if (!promoData) {
       const { data: created, error: createError } = await supabaseAdmin
         .from('promo_counter')
-        .insert({ early_adopters_count: 0, max_early_adopters: 2000 })
+        .insert({ id: 1, early_adopters_count: 0, max_early_adopters: 2000 })
         .select('early_adopters_count, max_early_adopters')
         .single()
 
