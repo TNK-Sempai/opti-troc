@@ -50,6 +50,19 @@ export async function notifyAdminNewUser({
 
     const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
 
+    // Le reste du code écrit et lit 'official' (onboarding/actions.ts,
+    // register/actions.ts, admin/users/[id]/page.tsx). 'company_proof' est
+    // accepté en plus pour ne pas casser si le libellé change côté base.
+    const { data: documents } = await supabaseAdmin
+      .from('user_documents')
+      .select('document_url')
+      .eq('user_id', userId)
+      .in('document_type', ['official', 'company_proof'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const documentUrl = documents?.[0]?.document_url
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const adminLink = `${appUrl}/admin/users/${userId}`
 
@@ -88,6 +101,14 @@ export async function notifyAdminNewUser({
                 name: 'Plan souscrit',
                 value: plan ? PLAN_LABELS[plan] || plan : '—',
                 inline: true,
+              },
+              {
+                name: 'Document',
+                // Lien masqué : supporté dans les champs d'embed Discord.
+                value: documentUrl
+                  ? `[Voir le document](${documentUrl})`
+                  : 'Aucun document uploadé',
+                inline: false,
               },
             ],
             footer: { text: 'Opti-Troc' },
