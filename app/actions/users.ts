@@ -263,7 +263,7 @@ export async function rejectUser(userId: string, reason: string = '') {
 /**
  * Suspend un utilisateur validé (admin seulement)
  */
-export async function suspendUser(userId: string) {
+export async function suspendUser(userId: string, reason: string = '') {
   // Vérification d'autorisation admin
   const auth = await requireAdmin()
   if (!auth.success) {
@@ -309,6 +309,7 @@ export async function suspendUser(userId: string) {
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
               .header { text-align: center; padding: 20px 0; }
               .notice { background: #fff7ed; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c; }
+              .reason { background: #f4f4f4; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #1a2332; }
               .cta-box { text-align: center; margin: 28px 0; }
               .cta { display: inline-block; background: #1a2332; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; }
               .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
@@ -333,8 +334,15 @@ export async function suspendUser(userId: string) {
                 rétabli une fois la situation clarifiée avec notre équipe.
               </div>
 
+              ${reason.trim() ? `
+                <div class="reason">
+                  <strong>Motif :</strong><br>
+                  ${escapeHtml(reason.trim())}
+                </div>
+              ` : ''}
+
               <p>
-                Pour connaître le motif de cette suspension ou demander le
+                Pour ${reason.trim() ? 'échanger sur cette décision' : 'connaître le motif de cette suspension'} ou demander le
                 rétablissement de votre accès, contactez-nous à
                 <a href="mailto:${supportEmail}">${supportEmail}</a>.
               </p>
@@ -393,6 +401,86 @@ export async function reactivateUser(userId: string) {
 
   if (error) {
     return { success: false, error: error.message }
+  }
+
+  // Email de réactivation — non bloquant : la réactivation est déjà enregistrée.
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('first_name, contact_name, company_name')
+      .eq('id', userId)
+      .single()
+
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const recipientEmail = authUser?.user?.email
+
+    if (recipientEmail) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+      await resend.emails.send({
+        from: `Opti-Troc <${process.env.EMAIL_FROM}>`,
+        to: recipientEmail,
+        subject: '✅ Votre compte Opti-Troc a été réactivé',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { text-align: center; padding: 20px 0; background: #22c55e; color: white; border-radius: 8px; margin-bottom: 20px; }
+              .notice { background: #f0fdf4; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e; }
+              .cta-box { text-align: center; margin: 28px 0; }
+              .cta { display: inline-block; background: #1a2332; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1 style="margin: 0;">✅ Compte réactivé</h1>
+              </div>
+
+              <p>Bonjour ${profile?.first_name || profile?.contact_name || ''},</p>
+              <p>
+                Bonne nouvelle : l'accès au compte
+                ${profile?.company_name ? `<strong>${profile.company_name}</strong>` : 'de votre établissement'}
+                sur Opti-Troc a été rétabli.
+              </p>
+
+              <div class="notice">
+                <strong>Votre accès est de nouveau actif.</strong><br>
+                Vos annonces et vos conversations sont intactes : vous retrouvez votre
+                compte tel que vous l'aviez laissé.
+              </div>
+
+              <div class="cta-box">
+                <a href="${appUrl}/dashboard" class="cta">
+                  Accéder à mon tableau de bord
+                </a>
+              </div>
+
+              <p>À très bientôt sur Opti-Troc !<br><strong>L'équipe Opti-Troc</strong></p>
+
+              <div class="footer">
+                <p>Opti-troc - Marketplace B2B pour opticiens professionnels</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      })
+    } else {
+      console.error('[reactivateUser] Aucun email trouvé pour le compte réactivé', {
+        userId,
+      })
+    }
+  } catch (emailError) {
+    console.error('[reactivateUser] Envoi email de réactivation échoué', {
+      userId,
+      message: emailError instanceof Error ? emailError.message : String(emailError),
+    })
   }
 
   revalidatePath('/admin/users')

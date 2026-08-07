@@ -47,9 +47,16 @@ export function UserActionButtons({ userId, status }: UserActionButtonsProps) {
   }
 
   async function handleSuspend() {
-    if (!confirm('Suspendre cet utilisateur ? Il ne pourra plus se connecter.')) return
+    // prompt() plutôt que confirm() : son OK/Annuler vaut confirmation, et le
+    // motif saisi part dans l'email envoyé à l'utilisateur.
+    const reason = prompt(
+      'Suspendre cet utilisateur ? Il ne pourra plus se connecter.\n\n' +
+        "Motif (optionnel) — il sera inclus dans l'email envoyé à l'utilisateur :"
+    )
+    if (reason === null) return
+
     setIsLoading(true)
-    const result = await suspendUser(userId)
+    const result = await suspendUser(userId, reason.trim())
     if (result.success) {
       router.refresh()
     } else {
