@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { SimpleRegistrationForm } from '@/lib/validations/auth'
-import { logError } from '@/lib/logger'
 
 export async function registerSimple(data: SimpleRegistrationForm) {
   try {
@@ -73,7 +72,14 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       })
 
       if (signInError) {
-        logError('registerSimple', signInError)
+        // Non bloquant : le compte et le profil existent, seule la session
+        // automatique a échoué. L'utilisateur peut se connecter manuellement.
+        console.error('[registerSimple] Auto-sign-in échoué', {
+          userId,
+          code: signInError.code,
+          message: signInError.message,
+          status: signInError.status,
+        })
       }
     }
 
@@ -84,7 +90,25 @@ export async function registerSimple(data: SimpleRegistrationForm) {
       autoSignedIn: !currentUser,
     }
   } catch (error) {
-    logError('registerSimple', error)
+    // L'erreur peut venir de GoTrue (AuthError : code/status) ou de PostgREST
+    // (PostgrestError : code/details/hint) — on extrait ce qui est présent.
+    const err = error as {
+      code?: string
+      message?: string
+      details?: string
+      hint?: string
+      status?: number
+    }
+
+    console.error('[registerSimple] Échec de l\'inscription', {
+      email: data.email,
+      code: err?.code,
+      message: err?.message ?? String(error),
+      details: err?.details,
+      hint: err?.hint,
+      status: err?.status,
+    })
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Une erreur est survenue',
