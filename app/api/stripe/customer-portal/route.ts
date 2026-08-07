@@ -1,13 +1,25 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { logError } from '@/lib/logger'
+import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
+    // 3 ouvertures de portail / 10 min : chaque appel crée une session Stripe.
+    const ip = getClientIp(req.headers)
+    const limit = rateLimit(`customer-portal:${ip}`, 3, 10 * 60 * 1000)
+
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: tooManyRequestsMessage(limit.retryAfterSeconds) },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+      )
+    }
+
     const supabase = await createClient()
     const {
       data: { user },
