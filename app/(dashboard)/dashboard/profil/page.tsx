@@ -16,10 +16,10 @@ export default async function ProfilPage() {
     redirect('/login')
   }
 
-  // select('*') volontaire : types/database.types.ts est périmé (il ignore par
-  // exemple user_profiles.email, pourtant écrit par registerSimple). Une liste
-  // de colonnes explicite fait échouer TOUTE la requête si l'une d'elles a été
-  // renommée ou supprimée, et PostgREST renvoie alors data: null.
+  // select('*') volontaire : une liste de colonnes explicite fait échouer TOUTE
+  // la requête si l'une d'elles est renommée ou supprimée, et PostgREST renvoie
+  // alors data: null — soit un formulaire vide sans message d'erreur.
+  // Seuls les champs nécessaires sont ensuite transmis au composant client.
   const { data: profile, error } = await supabaseAdmin
     .from('user_profiles')
     .select('*')
