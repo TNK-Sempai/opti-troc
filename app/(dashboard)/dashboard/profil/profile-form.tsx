@@ -221,7 +221,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">Prénom *</Label>
-              <Input id="firstName" {...form.register('firstName')} placeholder="Jean" />
+              <Input id="firstName" {...form.register('firstName')} placeholder="Votre prénom" />
               {form.formState.errors.firstName && (
                 <p className="text-sm text-error mt-1">
                   {form.formState.errors.firstName.message}
@@ -231,7 +231,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
 
             <div>
               <Label htmlFor="lastName">Nom *</Label>
-              <Input id="lastName" {...form.register('lastName')} placeholder="Dupont" />
+              <Input id="lastName" {...form.register('lastName')} placeholder="Votre nom" />
               {form.formState.errors.lastName && (
                 <p className="text-sm text-error mt-1">
                   {form.formState.errors.lastName.message}
@@ -286,7 +286,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
             <Input
               id="companyName"
               {...form.register('companyName')}
-              placeholder="Optique Smith"
+              placeholder="Raison sociale de votre établissement"
             />
             {form.formState.errors.companyName && (
               <p className="text-sm text-error mt-1">
@@ -300,7 +300,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
             <Input
               id="shopAddress"
               {...form.register('shopAddress')}
-              placeholder="Rue de la Loi 16"
+              placeholder="Numéro et rue"
             />
             {form.formState.errors.shopAddress && (
               <p className="text-sm text-error mt-1">
@@ -312,7 +312,7 @@ export function ProfileForm({ profile, email }: ProfileFormProps) {
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="city">Ville *</Label>
-              <Input id="city" {...form.register('city')} placeholder="Bruxelles" />
+              <Input id="city" {...form.register('city')} placeholder="Votre ville" />
               {form.formState.errors.city && (
                 <p className="text-sm text-error mt-1">
                   {form.formState.errors.city.message}
