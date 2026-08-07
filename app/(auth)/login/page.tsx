@@ -35,24 +35,33 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      // Rediriger selon le rôle et le statut
+      // Destination selon le rôle et le statut
+      let destination = '/dashboard';
       if (result.role === 'admin') {
-        router.push('/admin');
+        destination = '/admin';
       } else if (result.status === 'incomplete') {
-        router.push('/onboarding');
+        destination = '/onboarding';
       } else if (result.status === 'awaiting_payment') {
-        router.push('/inscription/plans');
+        destination = '/inscription/plans';
       } else if (result.status === 'pending') {
-        router.push('/onboarding/pending');
+        destination = '/onboarding/pending';
       } else if (result.status === 'validated') {
-        router.push('/dashboard');
+        destination = '/dashboard';
       } else if (result.status === 'rejected') {
-        router.push('/auth/rejected');
+        destination = '/auth/rejected';
       } else if (result.status === 'suspended') {
-        router.push('/auth/suspended');
-      } else {
-        router.push('/dashboard');
+        destination = '/auth/suspended';
       }
+
+      // refresh() AVANT push() : il invalide le Router Cache client, donc la
+      // destination et les layouts partagés (dont le Header) sont refetchés
+      // avec la nouvelle session. L'ordre inverse ciblait une route déjà
+      // remplacée par la navigation.
+      //
+      // Pas de `await` : refresh() renvoie void (voir AppRouterInstance), un
+      // await n'attendrait rien et laisserait croire à une garantie d'ordre.
+      router.refresh();
+      router.push(destination);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
