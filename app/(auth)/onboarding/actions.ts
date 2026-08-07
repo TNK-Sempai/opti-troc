@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
-import { logError } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -18,7 +17,7 @@ interface OnboardingData {
   city: string
   postalCode: string
   openingHours?: Array<{ day: string; hours: string }>
-  logoUrl: string
+  logoUrl?: string
   shopPhotosUrls?: string[]
 }
 
@@ -54,28 +53,46 @@ export async function completeOnboarding(data: OnboardingData) {
       : null
 
     // Mettre à jour le profil avec toutes les infos
+    const profileUpdate: Record<string, unknown> = {
+      status: 'awaiting_payment', // Passe de 'incomplete' à 'awaiting_payment' (paiement requis avant validation admin)
+      company_name: data.companyName,
+      country: data.country,
+      company_number: data.companyNumber,
+      vat_number: data.vatNumber,
+      phone: data.phone,
+      shop_address: data.shopAddress,
+      city: data.city,
+      postal_code: data.postalCode,
+      opening_hours: data.openingHours || [],
+      is_early_adopter: isEarlyAdopter,
+      promo_end_date: promoEndDate?.toISOString(),
+    }
+
+    // Les images sont optionnelles : sans nouvel upload on ne touche pas aux
+    // colonnes, plutôt que d'écraser d'éventuelles valeurs existantes par vide.
+    if (data.logoUrl) {
+      profileUpdate.profile_photo_url = data.logoUrl
+    }
+    if (data.shopPhotosUrls && data.shopPhotosUrls.length > 0) {
+      profileUpdate.shop_photos = data.shopPhotosUrls
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('user_profiles')
-      .update({
-        status: 'awaiting_payment', // Passe de 'incomplete' à 'awaiting_payment' (paiement requis avant validation admin)
-        company_name: data.companyName,
-        country: data.country,
-        company_number: data.companyNumber,
-        vat_number: data.vatNumber,
-        phone: data.phone,
-        shop_address: data.shopAddress,
-        city: data.city,
-        postal_code: data.postalCode,
-        opening_hours: data.openingHours || [],
-        profile_photo_url: data.logoUrl,
-        shop_photos: data.shopPhotosUrls || [],
-        is_early_adopter: isEarlyAdopter,
-        promo_end_date: promoEndDate?.toISOString(),
-      })
+      .update(profileUpdate)
       .eq('id', userId)
 
     if (updateError) {
-      logError('completeOnboarding', updateError)
+      // console.error et non logError : ce dernier est silencieux en production
+      // (lib/logger.ts), or c'est là que la cause doit être lisible.
+      console.error('[completeOnboarding] Échec update user_profiles', {
+        userId,
+        code: updateError.code,
+        message: updateError.message,
+        details: updateError.details,
+        hint: updateError.hint,
+        columns: Object.keys(profileUpdate),
+      })
       throw new Error('Erreur lors de la mise à jour du profil')
     }
 
@@ -90,7 +107,13 @@ export async function completeOnboarding(data: OnboardingData) {
       })
 
     if (docError) {
-      logError('completeOnboarding', docError)
+      console.error('[completeOnboarding] Échec insert user_documents', {
+        userId,
+        code: docError.code,
+        message: docError.message,
+        details: docError.details,
+        hint: docError.hint,
+      })
       throw new Error('Erreur lors de l\'enregistrement du document')
     }
 
@@ -162,8 +185,11 @@ export async function completeOnboarding(data: OnboardingData) {
         `,
       })
     } catch (emailError) {
-      logError('completeOnboarding', emailError)
-      // Pas bloquant
+      // Pas bloquant : le profil est déjà enregistré.
+      console.error('[completeOnboarding] Envoi email échoué', {
+        userId,
+        message: emailError instanceof Error ? emailError.message : String(emailError),
+      })
     }
 
     return {
@@ -171,7 +197,24 @@ export async function completeOnboarding(data: OnboardingData) {
       isEarlyAdopter,
     }
   } catch (error) {
-    logError('completeOnboarding', error)
+    // L'erreur peut venir de GoTrue (AuthError : code/status) ou de PostgREST
+    // (PostgrestError : code/details/hint) — on extrait ce qui est présent.
+    const err = error as {
+      code?: string
+      message?: string
+      details?: string
+      hint?: string
+      status?: number
+    }
+
+    console.error('[completeOnboarding] Échec de l\'onboarding', {
+      code: err?.code,
+      message: err?.message ?? String(error),
+      details: err?.details,
+      hint: err?.hint,
+      status: err?.status,
+    })
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Une erreur est survenue',
