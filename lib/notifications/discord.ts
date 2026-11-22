@@ -144,3 +144,98 @@ export async function notifyAdminNewUser({
     })
   }
 }
+
+const COUNTRY_LABELS: Record<string, string> = {
+  BE: '🇧🇪 Belgique',
+  NL: '🇳🇱 Pays-Bas',
+  LU: '🇱🇺 Luxembourg',
+  FR: '🇫🇷 France',
+  CH: '🇨🇭 Suisse',
+}
+
+interface NotifyAdminOnboardingCompletedArgs {
+  userId: string
+  companyName?: string | null
+  country?: string | null
+}
+
+/**
+ * Prévient les admins qu'un compte a fini l'onboarding et doit encore payer.
+ * Permet de repérer les inscrits qui n'arrivent jamais jusqu'à Stripe.
+ *
+ * Ne lève jamais : une notification ratée ne doit pas faire échouer
+ * l'onboarding qui l'a déclenchée.
+ */
+export async function notifyAdminOnboardingCompleted({
+  userId,
+  companyName,
+  country,
+}: NotifyAdminOnboardingCompletedArgs): Promise<void> {
+  try {
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL
+
+    if (!webhookUrl) {
+      console.error(
+        '[notifyAdminOnboardingCompleted] DISCORD_WEBHOOK_URL non définie — notification ignorée',
+        { userId }
+      )
+      return
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const adminLink = `${appUrl}/admin/users/${userId}`
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [
+          {
+            title: '🕒 Onboarding terminé, paiement en attente',
+            url: adminLink,
+            color: EMBED_COLOR,
+            fields: [
+              {
+                name: 'Entreprise',
+                value: companyName || '—',
+                inline: true,
+              },
+              {
+                name: 'Pays',
+                value: country ? COUNTRY_LABELS[country] || country : '—',
+                inline: true,
+              },
+            ],
+            footer: { text: 'Opti-Troc' },
+          },
+        ],
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                style: 5, // lien externe
+                label: 'Ouvrir dans le panel admin',
+                url: adminLink,
+              },
+            ],
+          },
+        ],
+      }),
+    })
+
+    if (!response.ok) {
+      console.error('[notifyAdminOnboardingCompleted] Discord a refusé la requête', {
+        userId,
+        status: response.status,
+        body: await response.text().catch(() => '<illisible>'),
+      })
+    }
+  } catch (error) {
+    console.error('[notifyAdminOnboardingCompleted] Envoi impossible', {
+      userId,
+      message: error instanceof Error ? error.message : String(error),
+    })
+  }
+}

@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
+import { after } from 'next/server'
+import { notifyAdminOnboardingCompleted } from '@/lib/notifications/discord'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
@@ -229,6 +231,18 @@ export async function completeOnboarding(data: OnboardingData) {
         message: emailError instanceof Error ? emailError.message : String(emailError),
       })
     }
+
+    // Statut 'awaiting_payment' écrit et document enregistré : on prévient les
+    // admins pour repérer ceux qui n'iront jamais jusqu'au paiement.
+    // after() sort la latence Discord de la réponse ; la fonction ne lève
+    // jamais, un échec Discord ne peut donc pas bloquer l'onboarding.
+    after(() =>
+      notifyAdminOnboardingCompleted({
+        userId,
+        companyName: data.companyName,
+        country: data.country,
+      })
+    )
 
     return {
       success: true,

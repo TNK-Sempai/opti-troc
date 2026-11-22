@@ -112,6 +112,10 @@ export function PlanSelectionClient({ isEarlyAdopter, displayName }: PlanSelecti
         window.location.href = data.url
       }
     } catch (err) {
+      console.error('[PlanSelection] Échec création session de paiement', {
+        plan: planId,
+        message: err instanceof Error ? err.message : String(err),
+      })
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
       setLoadingPlan(null)
     }
