@@ -13,6 +13,8 @@ import ListingsGrid from './listings-grid'
 import ListingsList from './listings-list'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { SubscriptionGate } from '@/components/subscription/SubscriptionGate'
+import { ManageBillingButton } from '@/components/subscription/ManageBillingButton'
+import { hasActiveSubscription, isPastDue } from '@/lib/subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +48,9 @@ export default async function MyListingsPage({
     .single()
 
   const isAdmin = profile?.role === 'admin'
-  const subscriptionActive = isAdmin || profile?.subscription_status === 'active'
+  // past_due garde l'accès au dashboard mais ne crée plus d'annonce.
+  const subscriptionActive = isAdmin || hasActiveSubscription(profile?.subscription_status)
+  const paymentPastDue = !isAdmin && isPastDue(profile?.subscription_status)
 
   // Construire la requête avec filtres
   let query = supabase
@@ -157,8 +161,25 @@ export default async function MyListingsPage({
   return (
     <div className="min-h-screen bg-dust-grey relative overflow-hidden">
       <div className="container mx-auto px-4 py-8 relative">
+        {/* Paiement en retard : mise à jour de la carte via le portail */}
+        {paymentPastDue && (
+          <div className="mb-6 flex items-center flex-wrap gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-amber-800">Paiement en retard</p>
+              <p className="text-sm text-amber-700">
+                Votre paiement est en retard, mettez à jour votre carte pour créer de nouvelles annonces.
+              </p>
+            </div>
+            <ManageBillingButton
+              size="sm"
+              className="bg-pine-teal hover:bg-hunter-green text-white border-0 shrink-0"
+            />
+          </div>
+        )}
+
         {/* Subscription inactive banner */}
-        {!subscriptionActive && (
+        {!subscriptionActive && !paymentPastDue && (
           <div className="mb-6 flex items-center flex-wrap gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
             <Lock className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div className="flex-1">

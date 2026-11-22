@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Lock, CreditCard, ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ManageBillingButton } from './ManageBillingButton'
 
 interface SubscriptionGateProps {
   /** Content to show when subscription is active */
@@ -12,12 +13,18 @@ interface SubscriptionGateProps {
   isActive: boolean
   /** Feature name shown in the locked state */
   featureName?: string
+  /**
+   * Paiement en retard : le compte a un abonnement, il faut mettre à jour la
+   * carte via le portail, pas souscrire une nouvelle formule.
+   */
+  isPastDue?: boolean
 }
 
 export function SubscriptionGate({
   children,
   isActive,
   featureName = 'cette fonctionnalité',
+  isPastDue = false,
 }: SubscriptionGateProps) {
   if (isActive) {
     return <>{children}</>
@@ -38,11 +45,16 @@ export function SubscriptionGate({
               <Lock className="w-7 h-7 text-pine-teal" />
             </div>
             <h3 className="text-lg font-bold text-charcoal mb-2">
-              Abonnement requis
+              {isPastDue ? 'Paiement en retard' : 'Abonnement requis'}
             </h3>
             <p className="text-sm text-dark-grey mb-6">
-              Activez ou renouvelez votre abonnement Opti-Troc pour accéder à {featureName}.
+              {isPastDue
+                ? `Votre paiement est en retard, mettez à jour votre carte pour accéder à nouveau à ${featureName}.`
+                : `Activez ou renouvelez votre abonnement Opti-Troc pour accéder à ${featureName}.`}
             </p>
+            {isPastDue ? (
+              <ManageBillingButton className="w-full bg-pine-teal hover:bg-hunter-green text-white border-0 font-semibold" />
+            ) : (
             <Button
               asChild
               className="w-full bg-pine-teal hover:bg-hunter-green text-white border-0 font-semibold"
@@ -53,6 +65,7 @@ export function SubscriptionGate({
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
+            )}
           </CardContent>
         </Card>
       </div>

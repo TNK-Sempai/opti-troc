@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Package, Layers } from 'lucide-react'
 import { SubscriptionGate } from '@/components/subscription/SubscriptionGate'
+import { hasActiveSubscription, isPastDue } from '@/lib/subscription'
 import { ListingTypePicker } from './listing-type-picker'
 
 export default async function NewListingPage() {
@@ -29,7 +30,9 @@ export default async function NewListingPage() {
 
   const isAdmin = profile?.role === 'admin'
   const isValidated = profile?.status === 'validated'
-  const hasActiveSub = profile?.subscription_status === 'active'
+  // past_due garde l'accès au dashboard mais ne crée plus d'annonce.
+  const hasActiveSub = hasActiveSubscription(profile?.subscription_status)
+  const paymentPastDue = isPastDue(profile?.subscription_status)
 
   const canCreate = isAdmin || isValidated
   const subscriptionActive = isAdmin || hasActiveSub
@@ -71,7 +74,11 @@ export default async function NewListingPage() {
             </Link>
           </Button>
         </div>
-        <SubscriptionGate isActive={false} featureName="la création d'annonces">
+        <SubscriptionGate
+          isActive={false}
+          isPastDue={paymentPastDue}
+          featureName="la création d'annonces"
+        >
           <div className="grid md:grid-cols-2 gap-6 opacity-50 pointer-events-none select-none">
             <Card>
               <CardHeader className="text-center">

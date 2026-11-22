@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, CreditCard, Loader2, Sparkles } from 'lucide-react'
+import { hasActiveSubscription } from '@/lib/subscription'
 
 interface SubscriptionSectionProps {
   subscriptionStatus: string | null
@@ -21,6 +22,10 @@ interface SubscriptionSectionProps {
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   active: { label: 'Actif', className: 'bg-fern/10 text-hunter-green border-fern/30' },
+  trialing: {
+    label: "Période d'essai",
+    className: 'bg-gold/10 text-charcoal border-gold/30',
+  },
   past_due: {
     label: 'Paiement en retard',
     className: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -47,10 +52,12 @@ export function SubscriptionSection({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // past_due a bien un customer Stripe : c'est le portail qui permet de mettre
-  // à jour la carte, pas une nouvelle souscription.
-  const hasBillingAccount =
-    subscriptionStatus === 'active' || subscriptionStatus === 'past_due'
+  // active, trialing et past_due ont un abonnement Stripe : c'est le portail
+  // qui permet de gérer ou de mettre à jour la carte, pas une nouvelle
+  // souscription.
+  const hasBillingAccount = hasActiveSubscription(subscriptionStatus, {
+    allowPastDue: true,
+  })
 
   const status = subscriptionStatus
     ? STATUS_LABELS[subscriptionStatus] ?? {

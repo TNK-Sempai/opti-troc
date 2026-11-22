@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
+import { hasActiveSubscription, ACCESS_SUBSCRIPTION_STATUSES } from '@/lib/subscription'
 
 const PLAN_PRICES: Record<string, string | undefined> = {
   early_bird: process.env.STRIPE_PRICE_EARLY_BIRD,
@@ -105,7 +106,9 @@ export async function POST(req: NextRequest) {
     // Un abonnement existant interdit d'en créer un second : le contrôle de
     // `status` ci-dessus ne suffit pas, il reste à 'awaiting_payment' tant que
     // le webhook n'a pas basculé le compte.
-    if (profile.subscription_status === 'active') {
+    // active et trialing ici, past_due juste en dessous (message dédié) :
+    // les trois refusent un second abonnement.
+    if (hasActiveSubscription(profile.subscription_status)) {
       logRejection(400, 'abonnement_deja_actif', { userId, plan })
       return NextResponse.json(
         { error: 'Vous avez déjà un abonnement actif.' },
@@ -140,7 +143,7 @@ export async function POST(req: NextRequest) {
           .from('user_profiles')
           .select('id')
           .eq('vat_number', profile.vat_number)
-          .eq('subscription_status', 'active')
+          .in('subscription_status', [...ACCESS_SUBSCRIPTION_STATUSES])
           .neq('id', user.id)
           .limit(1)
 
