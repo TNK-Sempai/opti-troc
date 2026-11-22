@@ -5,10 +5,22 @@ import { stripe } from '@/lib/stripe'
 import { rateLimit, getClientIp, tooManyRequestsMessage } from '@/lib/rate-limit'
 import { hasActiveSubscription, ACCESS_SUBSCRIPTION_STATUSES } from '@/lib/subscription'
 
-const PLAN_PRICES: Record<string, string | undefined> = {
-  early_bird: process.env.STRIPE_PRICE_EARLY_BIRD,
-  mensuel: process.env.STRIPE_PRICE_MENSUEL,
-  annuel: process.env.STRIPE_PRICE_ANNUEL,
+/**
+ * Tarifs envoyés à Stripe par plan, dans l'ordre des line_items.
+ * Early Bird = abonnement annuel (avec essai, voir EARLY_BIRD_TRIAL_DAYS)
+ * + tarif ponctuel de 3 € payé immédiatement sur la première facture.
+ */
+const PLAN_PRICES: Record<string, (string | undefined)[]> = {
+  early_bird: [process.env.STRIPE_PRICE_ANNUEL, process.env.STRIPE_PRICE_EARLY_BIRD_FEE],
+  mensuel: [process.env.STRIPE_PRICE_MENSUEL],
+  annuel: [process.env.STRIPE_PRICE_ANNUEL],
+}
+
+/** Essai Early Bird avant le premier prélèvement annuel. */
+const EARLY_BIRD_TRIAL_DAYS = 90
+
+function isConfiguredPrice(priceId: string | undefined): priceId is string {
+  return !!priceId && !priceId.startsWith('price_REPLACE')
 }
 
 const LOG_CONTEXT = '[POST /api/stripe/create-checkout-session]'
@@ -69,8 +81,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
-    const priceId = PLAN_PRICES[plan]
-    if (!priceId || priceId.startsWith('price_REPLACE')) {
+    const priceIds = PLAN_PRICES[plan]
+    if (!priceIds.every(isConfiguredPrice)) {
       logRejection(500, 'price_id_manquant', { userId, plan })
       return NextResponse.json(
         { error: 'Configuration du plan manquante. Contactez le support.' },
@@ -178,17 +190,21 @@ export async function POST(req: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
+    const isEarlyBird = plan === 'early_bird'
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: priceIds.map((price) => ({ price, quantity: 1 })),
       mode: 'subscription',
       success_url: `${appUrl}/inscription/succes?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/inscription/annule`,
       metadata: { userId: user.id, plan },
       subscription_data: {
         metadata: { userId: user.id, plan },
+        ...(isEarlyBird ? { trial_period_days: EARLY_BIRD_TRIAL_DAYS } : {}),
       },
-      allow_promotion_codes: true,
+      // Pas de code promo sur l'Early Bird : il ramènerait les 3 € à 0.
+      allow_promotion_codes: !isEarlyBird,
     })
 
     return NextResponse.json({ url: session.url })
