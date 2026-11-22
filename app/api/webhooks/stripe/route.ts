@@ -7,6 +7,58 @@ import { notifyAdminNewUser } from '@/lib/notifications/discord'
 
 export const runtime = 'nodejs'
 
+type ProfileUpdate = {
+  subscription_status?: string | null
+  subscription_id?: string | null
+  status?: string
+}
+
+/**
+ * Écrit sur user_profiles et lève en cas d'échec : le catch global renvoie
+ * alors 500 et Stripe rejoue l'événement. Une écriture ratée et acquittée
+ * laisserait la base désynchronisée de Stripe sans aucune reprise.
+ */
+async function updateProfile(
+  match: { column: 'id' | 'subscription_id'; value: string },
+  update: ProfileUpdate,
+  context: string
+): Promise<void> {
+  const { data, error } = await supabaseAdmin
+    .from('user_profiles')
+    .update({ ...update, updated_at: new Date().toISOString() })
+    .eq(match.column, match.value)
+    .select('id')
+
+  if (error) {
+    console.error(`[stripe-webhook.${context}] Échec écriture user_profiles`, {
+      [match.column]: match.value,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
+    throw new Error(`[${context}] update user_profiles failed: ${error.message}`)
+  }
+
+  // Pas une erreur (pas de rejeu) : l'événement peut précéder l'écriture du
+  // subscription_id, ou concerner un abonnement inconnu. On le trace seulement.
+  if (!data || data.length === 0) {
+    console.error(`[stripe-webhook.${context}] Aucun profil correspondant`, {
+      [match.column]: match.value,
+    })
+  }
+}
+
+/**
+ * Depuis l'API basil (SDK 22), Invoice n'a plus de champ `subscription` :
+ * l'identifiant est sous parent.subscription_details.subscription.
+ */
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const sub = invoice.parent?.subscription_details?.subscription
+  if (!sub) return null
+  return typeof sub === 'string' ? sub : sub.id
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
@@ -39,23 +91,37 @@ export async function POST(req: NextRequest) {
         logInfo('stripe-webhook', `checkout.session.completed userId=${userId} plan=${plan}`)
 
         const subscriptionId =
-          typeof session.subscription === 'string' ? session.subscription : null
+          typeof session.subscription === 'string'
+            ? session.subscription
+            : session.subscription?.id ?? null
 
-        const { error } = await supabaseAdmin
-          .from('user_profiles')
-          .update({
-            subscription_status: 'active',
-            subscription_id: subscriptionId,
-            status: 'pending', // Passe en attente de validation admin
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userId)
+        if (subscriptionId) {
+          // Vrai statut Stripe (active, trialing, incomplete…) plutôt que
+          // 'active' en dur. Un échec de lecture lève → 500 → rejeu.
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
-        if (error) {
-          logError('stripe-webhook.updateProfile', error)
-          // Remonte au catch global → 500 → Stripe rejoue. Sans ça, un client
-          // débité resterait bloqué en 'awaiting_payment' indéfiniment.
-          throw new Error(`Failed to activate profile ${userId}: ${error.message}`)
+          await updateProfile(
+            { column: 'id', value: userId },
+            {
+              subscription_status: subscription.status,
+              subscription_id: subscriptionId,
+              status: 'pending', // Passe en attente de validation admin
+            },
+            'checkout.session.completed'
+          )
+        } else {
+          // Ne devrait pas arriver en mode 'subscription'. Le paiement est
+          // confirmé : on fait avancer le compte sans inventer de statut.
+          console.error(
+            '[stripe-webhook.checkout.session.completed] Session sans abonnement',
+            { userId, sessionId: session.id, mode: session.mode }
+          )
+
+          await updateProfile(
+            { column: 'id', value: userId },
+            { status: 'pending' },
+            'checkout.session.completed'
+          )
         }
 
         // Le compte vient de passer en 'pending' : les admins ont quelque chose
@@ -72,16 +138,15 @@ export async function POST(req: NextRequest) {
 
         if (!userId) break
 
-        const isActive = ['active', 'trialing'].includes(subscription.status)
-
-        await supabaseAdmin
-          .from('user_profiles')
-          .update({
-            subscription_status: isActive ? 'active' : 'inactive',
+        // Statut Stripe tel quel : past_due n'est plus écrasé par 'inactive'.
+        await updateProfile(
+          { column: 'id', value: userId },
+          {
+            subscription_status: subscription.status,
             subscription_id: subscription.id,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userId)
+          },
+          'customer.subscription.updated'
+        )
 
         logInfo('stripe-webhook', `subscription.updated userId=${userId} status=${subscription.status}`)
         break
@@ -92,42 +157,58 @@ export async function POST(req: NextRequest) {
         const userId = subscription.metadata?.userId
 
         if (userId) {
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({
-              subscription_status: 'inactive',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', userId)
+          await updateProfile(
+            { column: 'id', value: userId },
+            { subscription_status: 'inactive' },
+            'customer.subscription.deleted'
+          )
 
           logInfo('stripe-webhook', `subscription.deleted userId=${userId}`)
         } else {
           // Fallback: match by subscription_id
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({ subscription_status: 'inactive', updated_at: new Date().toISOString() })
-            .eq('subscription_id', subscription.id)
+          await updateProfile(
+            { column: 'subscription_id', value: subscription.id },
+            { subscription_status: 'inactive' },
+            'customer.subscription.deleted'
+          )
         }
         break
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        const subId =
-          typeof (invoice as any).subscription === 'string'
-            ? (invoice as any).subscription
-            : null
+        const subId = getInvoiceSubscriptionId(invoice)
 
         if (subId) {
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({
-              subscription_status: 'past_due',
-              updated_at: new Date().toISOString(),
-            })
-            .eq('subscription_id', subId)
+          await updateProfile(
+            { column: 'subscription_id', value: subId },
+            { subscription_status: 'past_due' },
+            'invoice.payment_failed'
+          )
 
           logInfo('stripe-webhook', `invoice.payment_failed subscriptionId=${subId}`)
+        }
+        break
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice
+        const subId = getInvoiceSubscriptionId(invoice)
+
+        if (subId) {
+          // Une relance réussie ramène l'abonnement à 'active'. On relit le
+          // statut chez Stripe plutôt que d'écrire 'active' en dur : une
+          // facture payée pendant un essai (frais ponctuels) laisse
+          // l'abonnement en 'trialing'.
+          const subscription = await stripe.subscriptions.retrieve(subId)
+
+          await updateProfile(
+            { column: 'subscription_id', value: subId },
+            { subscription_status: subscription.status },
+            'invoice.paid'
+          )
+
+          logInfo('stripe-webhook', `invoice.paid subscriptionId=${subId} status=${subscription.status}`)
         }
         break
       }
